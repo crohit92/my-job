@@ -17,14 +17,11 @@ export class CustomerController {
     }
 
     private customers(req: Request, res: Response) {
-        console.log('fetch all customers');
         
         this.db
             .collection(CUSTOMERS)
             .find().toArray()
             .then((customers: Customer[]) => {
-                console.log(customers);
-                
                 res.status(200).send(customers);
             }).catch(err => {
                 res.status(400).send(err);

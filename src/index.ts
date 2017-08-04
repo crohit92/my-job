@@ -4,12 +4,14 @@ import * as http from 'http';
 import { json, urlencoded } from 'body-parser';
 import * as mongodb from 'mongodb';
 import { MongoClient, Db } from 'mongodb';
+import * as cors from "cors";
 
 import { UsersController } from './controllers/users';
 import { CustomerController } from './controllers/customers';
 export class Index {
     public app: Express;
     private port: number = 2000;
+
     constructor() {
         this.app = express();
         this.configureMiddleware(this.app);
@@ -26,10 +28,18 @@ export class Index {
     private configureMiddleware(app: express.Express) {
         app.use(json());
         app.use(urlencoded({ extended: true }));
+        let options: cors.CorsOptions = {
+            allowedHeaders: '*',
+            methods: '*',
+            origin: '*'
+        }
+        app.use(cors())
+        //enable pre-flight
+        app.options("*", cors(options));
     }
 
     private configureRoutes(app: express.Router, db: Db) {
-        app.use(CustomerController.route,new CustomerController(db).router);
+        app.use(CustomerController.route, new CustomerController(db).router);
         app.use(UsersController.route, new UsersController(db).router);
     }
 
