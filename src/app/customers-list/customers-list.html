@@ -1,0 +1,14 @@
+
+<md-list>
+    <md-list-item *ngIf="selectedCustomer">
+        <customer [customer]="selectedCustomer"></customer>
+    </md-list-item>
+    <md-list-item *ngFor="let customer of customers" (click)="selectedCustomer = customer">
+        <i class="material-icons">person</i>
+        <h3 md-line> {{customer.name}} </h3>
+        <p md-line>
+            <span> {{customer.address}} </span>
+            <span > -- {{customer.mobile}} </span>
+        </p>
+    </md-list-item>
+</md-list>

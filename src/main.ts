@@ -7,7 +7,7 @@ import { environment } from './environments/environment';
 if (environment.production) {
   enableProdMode();
 }
-window.addEventListener('deviceready',()=>{
+//window.addEventListener('deviceready',()=>{
   platformBrowserDynamic().bootstrapModule(AppModule);
-},false);
+//},false);
 
