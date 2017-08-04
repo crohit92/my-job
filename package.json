@@ -17,6 +17,7 @@
     "agentkeepalive": "3.1.0",
     "async": "2.1.5",
     "body-parser": "^1.17.2",
+    "cors": "^2.8.4",
     "express": "^4.15.2",
     "express-ntlm": "2.1.5",
     "httpntlm": "1.7.5",
@@ -28,6 +29,7 @@
     "typescript": "^2.1.6"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.1",
     "concurrently": "^3.1.0",
     "nodemon": "^1.11.0"
   },

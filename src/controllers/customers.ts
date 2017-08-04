@@ -9,15 +9,16 @@ export class CustomerController {
     private db: Db;
     constructor(db: Db) {
         this.db = db;
-        
+
         this.router.get('/', this.customers.bind(this));
         this.router.get('/:id', this.customer.bind(this));
-        this.router.post('/',this.createCustomer.bind(this));
-        
+        this.router.post('/', this.createCustomer.bind(this));
+        this.router.put('/:id', this.updateCustomer.bind(this));
+
     }
 
     private customers(req: Request, res: Response) {
-        
+
         this.db
             .collection(CUSTOMERS)
             .find().toArray()
@@ -31,8 +32,8 @@ export class CustomerController {
     private customer(req: Request, res: Response) {
         this.db
             .collection(CUSTOMERS)
-            .find(new ObjectID(req.params.id)).toArray()
-            .then((customers: Customer[]) => {
+            .findOne({ _id: new ObjectID(req.params.id) })
+            .then((customers: Customer) => {
                 res.status(200).send(customers);
             }).catch(err => {
                 res.status(400).send(err);
@@ -47,6 +48,18 @@ export class CustomerController {
             .then((cust: InsertOneWriteOpResult) => {
                 res.send(cust.insertedId);
             }).catch(err => {
+                res.status(400).send(err);
+            })
+    }
+
+    private updateCustomer(req: Request, res: Response) {
+        delete req.body._id;
+        this.db.collection(CUSTOMERS)
+            .updateOne({ _id: new ObjectID(req.params.id) }, { $set: req.body })
+            .then((data) => {
+                res.send(data);
+            })
+            .catch((err) => {
                 res.status(400).send(err);
             })
     }
