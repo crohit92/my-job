@@ -1,12 +1,2 @@
 
- <nav md-tab-nav-bar>
-  <a md-tab-link
-     *ngFor="let menu of menus"
-     [routerLink]="menu.route"
-     routerLinkActive #rla="routerLinkActive"
-     [active]="rla.isActive">
-    {{menu.label}}
-  </a>
-</nav> 
-
 <router-outlet></router-outlet>

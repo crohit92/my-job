@@ -3,11 +3,12 @@ import { Api, Request, ApiRoutes } from './../helper/api';
 @Component({
     templateUrl: './customers-list.html',
     styleUrls: [
-        //'./customers-list.css'
+        './customers-list.css'
     ]
 })
 export class CustomersListComponent {
     customers:any[];
+    selectedCustomer:any = {};
     constructor(
         private api: Api
     ) {

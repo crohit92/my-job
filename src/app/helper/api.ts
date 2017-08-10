@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Http,RequestOptionsArgs } from '@angular/http';
-const api = 'http://localhost:2000/';
+const apiBase = 'http://localhost:2000/';
 
 export class Request{
     endpoint:string;
@@ -11,7 +11,10 @@ export class Request{
 }
 
 export const ApiRoutes = {
-    FETCH_ALL_CUSTOMERS:'customers'
+    FETCH_ALL_CUSTOMERS:'customers',
+    UPDATE_CUSTOMER:'customers',
+    CREATE_CUSTOMER:'customers',
+    DELETE_CUSTOMER:'customers',
 }
 
 @Injectable()
@@ -27,10 +30,16 @@ export class Api{
 
     private buildURL(endPoint:string,routeParams:any,queryParams:any):string{
         endPoint = this.removeTrailingSlash(endPoint);
-        let route:string = `${api}${endPoint}`;
+        let route:string = `${apiBase}${endPoint}`;
         if(routeParams)
             for (var key in routeParams) {
-            route = `${route}/${key}/${routeParams.key}` 
+                if(key == ''){
+                    route = `${route}/${routeParams['']}` 
+                }
+                else{
+                    route = `${route}/${key}/${routeParams.key}` 
+                }
+            
             }
         let paramChar = '?';
         if(queryParams)
