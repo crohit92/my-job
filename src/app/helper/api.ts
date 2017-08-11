@@ -15,6 +15,10 @@ export const ApiRoutes = {
     UPDATE_CUSTOMER:'customers',
     CREATE_CUSTOMER:'customers',
     DELETE_CUSTOMER:'customers',
+    FETCH_ALL_USERS:'users',
+    UPDATE_USER:'users',
+    CREATE_USER:'users',
+    DELETE_USER:'users',
 }
 
 @Injectable()

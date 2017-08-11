@@ -1,0 +1,24 @@
+<div class="container-fluid">
+    
+    <div class="row">
+        <h1 class="col-xs-12">Users List</h1>
+    </div>
+    
+    <div class="row">
+        <div class="col-sm-8 col-xs-12">
+            <div class="col-xs-12" 
+                *ngFor="let user of users"
+                (click)="selectedUser = user">
+                
+                <h3><i md-list-avatar class="material-icons">person</i> {{user.name}} </h3>
+                <p>
+                    <span> {{user.address}} </span>
+                    <span> -- {{user.mobile}} </span>
+                </p>
+            </div>
+        </div>
+        <div class="col-sm-4 col-xs-12">
+            <user [user]="selectedUser" (userDeleted)="fetchUsers()" (userUpdated)="fetchUsers()"></user>
+        </div>
+    </div>
+</div>

@@ -1,13 +1,18 @@
-import {Route} from '@angular/router';
+import { Route } from '@angular/router';
 import { CustomersListComponent } from './customers-list/customers-list.component';
-export const ROUTES:Route[] = [
+import { UsersListComponent } from './users-list/users-list.component';
+export const ROUTES: Route[] = [
     {
-        path: 'customers-list',
+        path: 'customers',
         component: CustomersListComponent
     },
     {
+        path: 'users',
+        component: UsersListComponent
+    },
+    {
         path: '',
-        redirectTo:'/customers-list',
-        pathMatch:'full'
+        redirectTo: '/customers',
+        pathMatch: 'full'
     }
 ]

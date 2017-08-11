@@ -1,0 +1,37 @@
+<form class="container-fluid well well-default" #userForm="ngForm" (ngSubmit)="updateUser()">
+    <div class="row">
+        <div class="col-xs-12">
+            Update User Details
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="form-group">
+                <input type="text" class="form-control" placeholder="User Name" name="name" required [(ngModel)]="user.name">
+            </div>
+        </div>
+        <div class="col-xs-12">
+            <div class="form-group">
+                <input type="text" class="form-control" placeholder="Mobile" name="mobile" required [(ngModel)]="user.mobile">
+            </div>
+        </div>
+        <div class="col-xs-12">
+            <div class="form-group">
+                <textarea type="text" class="form-control" placeholder="Address" name="address" required [(ngModel)]="user.address"></textarea>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-4  pull-right">
+            <button [disabled]="!userForm.valid" class="btn btn-primary" type="submit">
+                {{user._id?'Update':'Save'}}
+            </button>
+        </div>
+        <div class="col-xs-4 pull-right">
+            <input type="button" [disabled]="!user._id" value="Delete" class="btn btn-danger" (click)="deleteUser($event)">
+        </div>
+         <div class="col-xs-4 pull-right">
+             <input type="button" value="Reset" class="btn btn-default" (click)="user = {}">
+        </div>
+    </div>
+</form>

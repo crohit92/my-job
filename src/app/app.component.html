@@ -1,2 +1,22 @@
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-xs-12">
+            <i [ngClass]="{'material-icons':!menuVisible}" class="pull-right pointer" (click)="menuVisible=!menuVisible" [innerHtml]="menuVisible?'&nbsp;':'menu'"></i>
+        </div>
+    </div>
+    <div *ngIf="menuVisible" class="col-xs-12 pull-right menu-overlay">
+        <div class="container menu col-xs-10 col-sm-6 pull-right">
+            <div class="row" (click)="menuVisible=!menuVisible">
+                <div class="col-xs-12 pull-right  text-right"><i class="material-icons pointer">close</i></div>
+                <div class="col-xs-12 pointer">
+                    <div class="menu-item" routerLink="/customers" routerLinkActive="menu-item-active">Customers</div>
+                </div>
+                <div class="col-xs-12 pointer">
+                    <div class="menu-item" routerLink="/users" routerLinkActive="menu-item-active">Users</div>
+                </div>
 
+            </div>
+        </div>
+    </div>
+</div>
 <router-outlet></router-outlet>

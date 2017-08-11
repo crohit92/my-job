@@ -14,12 +14,16 @@ import { Api } from './helper/api';
 
 import { CustomersListComponent } from './customers-list/customers-list.component';
 import { CustomerComponent } from './customer/customer.component';
+import { UsersListComponent } from './users-list/users-list.component';
+import { UserComponent } from './user/user.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     CustomersListComponent,
-    CustomerComponent
+    CustomerComponent,
+    UsersListComponent,
+    UserComponent
   ],
   imports: [
     BrowserModule,

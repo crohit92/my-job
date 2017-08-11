@@ -1,23 +1,23 @@
 import { Component } from '@angular/core';
 import { Api, Request, ApiRoutes } from './../helper/api';
 @Component({
-    templateUrl: './customers-list.html'
+    templateUrl: './users-list.html'
 })
-export class CustomersListComponent {
-    customers:any[];
-    selectedCustomer:any = {};
+export class UsersListComponent {
+    users:any[];
+    selectedUser:any = {};
     constructor(
         private api: Api
     ) {
-       this.fetchCustomers();
+       this.fetchUsers();
     }
 
-    fetchCustomers(){
+    fetchUsers(){
          this.api.sendRequest({
-            endpoint:ApiRoutes.FETCH_ALL_CUSTOMERS,
+            endpoint:ApiRoutes.FETCH_ALL_USERS,
             method:'get'
         }).subscribe(
-            res=>{this.customers = res.json()},
+            res=>{this.users = res.json()},
             err=>{console.log(err);}
         );
     }
