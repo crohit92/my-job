@@ -12,7 +12,11 @@ export class CustomersListComponent {
     constructor(
         private api: Api
     ) {
-        api.sendRequest({
+       this.fetchCustomers();
+    }
+
+    fetchCustomers(){
+         this.api.sendRequest({
             endpoint:ApiRoutes.FETCH_ALL_CUSTOMERS,
             method:'get'
         }).subscribe(
@@ -20,4 +24,5 @@ export class CustomersListComponent {
             err=>{console.log(err);}
         );
     }
+
 }

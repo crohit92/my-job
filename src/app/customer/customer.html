@@ -7,24 +7,31 @@
     <div class="row">
         <div class="col-xs-12">
             <div class="form-group">
-                <input type="text" class="form-control" placeholder="Customer Name" name="name" [(ngModel)]="customer.name">
+                <input type="text" class="form-control" placeholder="Customer Name" name="name" required [(ngModel)]="customer.name">
             </div>
         </div>
         <div class="col-xs-12">
             <div class="form-group">
-                <input type="text" class="form-control" placeholder="Mobile" name="mobile" [(ngModel)]="customer.mobile">
+                <input type="text" class="form-control" placeholder="Mobile" name="mobile" required [(ngModel)]="customer.mobile">
             </div>
         </div>
         <div class="col-xs-12">
             <div class="form-group">
-                <input type="text" class="form-control" placeholder="Address" name="address" [(ngModel)]="customer.address">
+                <textarea type="text" class="form-control" placeholder="Address" name="address" required [(ngModel)]="customer.address"></textarea>
             </div>
         </div>
     </div>
     <div class="row">
-        <div class="col-xs-12">
-            <input vlaue="Save" class="btn btn-default pull-right" type="submit">
-            <input type="button" value="Delete" class="btn btn-error pull-right" (click)="deleteCustomer($event)">
+        <div class="col-xs-4  pull-right">
+            <button [disabled]="!customerForm.valid" class="btn btn-primary" type="submit">
+                {{customer._id?'Update':'Save'}}
+            </button>
+        </div>
+        <div class="col-xs-4 pull-right">
+            <input type="button" [disabled]="!customer._id" value="Delete" class="btn btn-danger" (click)="deleteCustomer($event)">
+        </div>
+         <div class="col-xs-4 pull-right">
+             <input type="button" value="Reset" class="btn btn-default" (click)="customer = {}">
         </div>
     </div>
 </form>

@@ -1,4 +1,4 @@
-import { Input, Component } from '@angular/core';
+import { Input, Output, Component, EventEmitter } from '@angular/core';
 import { Api, ApiRoutes, Request } from './../helper/api'
 @Component({
     templateUrl: './customer.html',
@@ -6,12 +6,13 @@ import { Api, ApiRoutes, Request } from './../helper/api'
 })
 export class CustomerComponent {
     @Input('customer') customer: any = {};
+    @Output('customerUpdated') customerUpdated = new EventEmitter<any>();
+    @Output('customerDeleted') customerDeleted = new EventEmitter<any>();
 
     constructor(
         private api: Api
     ) { }
     updateCustomer() {
-        debugger
         if (this.customer && this.customer._id) {
             this.api.sendRequest({
                 endpoint: ApiRoutes.UPDATE_CUSTOMER,
@@ -21,7 +22,10 @@ export class CustomerComponent {
                 method: 'put',
                 body: this.customer
             }).subscribe(
-                res => { this.customer = {} },
+                res => {
+                    this.customerUpdated.emit();
+                    this.customer = {}
+                },
                 err => { console.log(err); }
                 );
         }
@@ -31,7 +35,10 @@ export class CustomerComponent {
                 method: 'post',
                 body: this.customer
             }).subscribe(
-                res => { this.customer = {} },
+                res => {
+                    this.customerUpdated.emit();
+                    this.customer = {}
+                },
                 err => { console.log(err); }
                 );
         }
@@ -45,9 +52,11 @@ export class CustomerComponent {
                 '': this.customer._id
             }
         }).subscribe(
-            res => { this.customer = {} },
+            res => { 
+                this.customerDeleted.emit();
+                this.customer = {} 
+            },
             err => { console.log(err); }
             );
-        event.stopPropagation();
     }
 }
