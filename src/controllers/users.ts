@@ -14,7 +14,7 @@ export class UsersController {
         this.router.get('/:id', this.findUser.bind(this));
         this.router.post('/', this.createUser.bind(this));
         this.router.put('/:id', this.updateUser.bind(this));
-
+        this.router.delete('/:id',this.deleteUser.bind(this))
     }
 
     private findUsers(req: Request, res: Response) {
@@ -62,5 +62,11 @@ export class UsersController {
             .catch((err) => {
                 res.status(400).send(err);
             })
+    }
+
+    private deleteUser(req:Request,res:Response){
+        this.db.collection(USERS).deleteOne({_id:new ObjectID(req.params.id)})
+        .then(deleteResult=>res.send())
+        .catch(error=>res.status(400).send(error));
     }
 }

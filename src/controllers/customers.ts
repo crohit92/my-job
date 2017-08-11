@@ -14,6 +14,7 @@ export class CustomerController {
         this.router.get('/:id', this.customer.bind(this));
         this.router.post('/', this.createCustomer.bind(this));
         this.router.put('/:id', this.updateCustomer.bind(this));
+        this.router.delete('/:id',this.deleteCustomer.bind(this))
 
     }
 
@@ -62,5 +63,11 @@ export class CustomerController {
             .catch((err) => {
                 res.status(400).send(err);
             })
+    }
+
+    private deleteCustomer(req:Request,res:Response){
+        this.db.collection(CUSTOMERS).deleteOne({_id:new ObjectID(req.params.id)})
+        .then(deleteResult=>res.send())
+        .catch(error=>res.status(400).send(error));
     }
 }
