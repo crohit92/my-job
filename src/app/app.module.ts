@@ -14,8 +14,10 @@ import { Api } from './helper/api';
 
 import { CustomersListComponent } from './customers-list/customers-list.component';
 import { CustomerComponent } from './customer/customer.component';
-import { UsersListComponent } from './users-list/users-list.component';
-import { UserComponent } from './user/user.component';
+import { UsersListComponent } from './users/users-list.component';
+import { UserComponent } from './users/user.component';
+import { TasksComponent } from './tasks/tasks.component';
+import { TaskComponent } from './tasks/task.component';
 
 @NgModule({
   declarations: [
@@ -23,7 +25,9 @@ import { UserComponent } from './user/user.component';
     CustomersListComponent,
     CustomerComponent,
     UsersListComponent,
-    UserComponent
+    UserComponent,
+    TasksComponent,
+    TaskComponent
   ],
   imports: [
     BrowserModule,

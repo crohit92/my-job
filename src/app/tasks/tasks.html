@@ -1,0 +1,28 @@
+<div class="col-sm-8 col-xs-12">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Task List</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let task of tasks">
+                <td>
+                    <div>
+                        <p>{{task.description}}</p>
+                        <p>Due on:10-12-2017 - Ramesh Kaprro</p>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td>
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+<div class="col-xs-4 col-xs-12">
+    <task currentTask="currentTask"></task>
+</div>
