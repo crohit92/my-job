@@ -13,11 +13,11 @@ export class CustomerComponent {
         private api: Api
     ) { }
     updateCustomer() {
-        if (this.customer && this.customer._id) {
+        if (this.customer && this.customer.id) {
             this.api.sendRequest({
                 endpoint: ApiRoutes.UPDATE_CUSTOMER,
                 routeParams: {
-                    '': this.customer._id
+                    '': this.customer.id
                 },
                 method: 'put',
                 body: this.customer
@@ -49,7 +49,7 @@ export class CustomerComponent {
             endpoint: ApiRoutes.DELETE_CUSTOMER,
             method: 'delete',
             routeParams: {
-                '': this.customer._id
+                '': this.customer.id
             }
         }).subscribe(
             res => { 

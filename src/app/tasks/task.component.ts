@@ -1,5 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { Task } from './task.model';
+import { User } from './../users/user.model';
+import { Customer } from './../customers-list/customer.model'
 import { Api, Request, ApiRoutes } from './../helper/api';
 
 @Component({
@@ -8,12 +10,26 @@ import { Api, Request, ApiRoutes } from './../helper/api';
 
 })
 export class TaskComponent {
-    @Input("currentTask") currentTask: Task;
-
-    constructor(private api: Api) { }
+    @Input("currentTask") task: Task = new Task();
+    users:User[];
+    customer:Customer[];
+    customers:any[];
+    constructor(private api: Api) { 
+        //fetch users
+        this.api.sendRequest({
+            endpoint:ApiRoutes.FETCH_ALL_USERS,
+            method:"get"
+        }).subscribe((res=>this.users = res.json()))
+        
+        //fetch customers
+         this.api.sendRequest({
+            endpoint:ApiRoutes.FETCH_ALL_CUSTOMERS,
+            method:"get"
+        }).subscribe((res=>this.customers = res.json()))
+    }
 
     createOrUpdateTask(task: Task) {
-        if (task && task._id) {
+        if (task && task.id) {
             this.updateTask(task);
         }
         else {
@@ -28,7 +44,7 @@ export class TaskComponent {
             method: 'post'
         })
             .subscribe(
-            res => { this.currentTask = null },
+            res => { this.task = null },
             err => console.log(err)
 
             )
@@ -40,11 +56,11 @@ export class TaskComponent {
             endpoint: ApiRoutes.UPDATE_TASK,
             method: 'put',
             routeParams: {
-                '': task._id
+                '': task.id
             }
         })
             .subscribe(
-            res => { this.currentTask = null },
+            res => { this.task = null },
             err => console.log(err)
 
             )
