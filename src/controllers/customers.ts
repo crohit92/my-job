@@ -31,14 +31,19 @@ export class CustomerController {
     }
 
     private customer(req: Request, res: Response) {
-        this.db
-            .collection(CUSTOMERS)
-            .findOne({ _id: new ObjectID(req.params.id) })
-            .then((customers: Customer) => {
+       this.fetchCustomer(req.params.id)
+       .then((customers: Customer) => {
                 res.status(200).send(customers);
             }).catch(err => {
                 res.status(400).send(err);
             })
+    }
+
+    public fetchCustomer(customerId:string):Promise<Customer>{
+         return this.db
+            .collection(CUSTOMERS)
+            .findOne({ _id: new ObjectID(customerId) })
+            
     }
 
     private createCustomer(req: Request, res: Response) {

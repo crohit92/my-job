@@ -30,9 +30,7 @@ export class UsersController {
     }
 
     private findUser(req: Request, res: Response) {
-        this.db
-            .collection(USERS)
-            .findOne({ _id: new ObjectID(req.params.id) })
+        this.fetchUser(req.params.id)
             .then((user: User) => {
                 res.status(200).send(user);
             }).catch(err => {
@@ -40,6 +38,11 @@ export class UsersController {
             })
     }
 
+    public fetchUser(userId:string):Promise<User>{
+        return  this.db
+            .collection(USERS)
+            .findOne({ _id: new ObjectID(userId) });
+    }
     private createUser(req: Request, res: Response) {
         this.db
             .collection(USERS)
