@@ -9,23 +9,18 @@ export class TasksController {
     public static route: string = `/${TASKS}`;
     public router: Router = Router();
     //private db: Db;
-    constructor(private db: Db,
-        private customers: CustomerController,
-        private users: UsersController
-    ) {
-        // this.db = db;
+    constructor(private db: Db) {
         this.router.get('/', this.fetchAll.bind(this));
         this.router.get('/:id', this.findOne.bind(this));
         this.router.post('/', this.createTask.bind(this));
         this.router.put('/:id', this.updateTask.bind(this));
         this.router.delete('/:id', this.deleteTask.bind(this));
-        //
-
     }
 
     fetchAll(req: Request, res: Response) {
         let $this = this;
-        this.db.collection(TASKS).find().toArray()
+        this.db.collection(TASKS).aggregate(this.includeUserAndCustomer())
+            .toArray()
             .then((tasks: Task[]) => {
                 res.send(tasks);
             })
@@ -42,24 +37,13 @@ export class TasksController {
             [].concat(
                 {
                     $match: {
-                        _id: new ObjectID(req.params.id)
+                        id: req.params.id
                     }
-                }
+                },
+                this.includeUserAndCustomer()
             )
         ).next().then((task: Task) => {
-            this.customers.fetchCustomer(task.customerId)
-                .then((customer) => {
-                    task.customer = customer
-                    this.users.fetchUser(task.assignedToId).then((user) => {
-                        task.user = user;
-                        res.status(200).send(task);
-                    }).catch(err => {
-                        res.status(400).send(err);
-                    })
-                }).catch(err => {
-                    res.status(400).send(err);
-                })
-
+            res.status(200).send(task);
         }).catch(err => {
             res.status(400).send(err);
         })
@@ -67,11 +51,12 @@ export class TasksController {
 
     createTask(req: Request, res: Response) {
         let task: Task = req.body;
+        task.id = (new Date()).valueOf().toString();
         this.db
             .collection(TASKS)
             .insertOne(task)
             .then((response: InsertOneWriteOpResult) => {
-                res.send(response.insertedId);
+                res.send(task.id);
             }).catch(err => {
                 res.status(400).send(err);
             })
@@ -82,7 +67,7 @@ export class TasksController {
         let task: Task = req.body;
 
         this.db.collection(TASKS)
-            .updateOne({ _id: new ObjectID(req.params.id) }, { $set: task })
+            .updateOne({ id: req.params.id }, { $set: task })
             .then((data) => {
                 res.send(data);
             })
@@ -92,7 +77,7 @@ export class TasksController {
     }
 
     deleteTask(req: Request, res: Response) {
-        this.db.collection(TASKS).deleteOne({ _id: new ObjectID(req.params.id) })
+        this.db.collection(TASKS).deleteOne({ id: req.params.id })
             .then(deleteResult => res.send())
             .catch(error => res.status(400).send(error));
     }
@@ -103,15 +88,15 @@ export class TasksController {
                 $lookup: {
                     from: "users",
                     localField: "assignedToId",
-                    foreignField: "_id",
-                    as: "assignedTo"
+                    foreignField: "id",
+                    as: "user"
                 }
             },
             {
                 $lookup: {
                     from: "customers",
                     localField: "customerId",
-                    foreignField: "_id",
+                    foreignField: "id",
                     as: "customer"
                 }
             }

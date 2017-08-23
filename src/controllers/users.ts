@@ -38,17 +38,19 @@ export class UsersController {
             })
     }
 
-    public fetchUser(userId:string):Promise<User>{
+    private fetchUser(userId:number):Promise<User>{
         return  this.db
             .collection(USERS)
-            .findOne({ _id: new ObjectID(userId) });
+            .findOne({id: userId });
     }
+
     private createUser(req: Request, res: Response) {
+        req.body.id = (new Date()).valueOf().toString();
         this.db
             .collection(USERS)
             .insertOne(req.body)
             .then((response: InsertOneWriteOpResult) => {
-                res.send(response.insertedId);
+                res.send(req.body.id);
             }).catch(err => {
                 res.status(400).send(err);
             })
@@ -57,7 +59,7 @@ export class UsersController {
     private updateUser(req: Request, res: Response) {
         delete req.body._id;
         this.db.collection(USERS)
-            .updateOne({ _id: new ObjectID(req.params.id) }, { $set: req.body })
+            .updateOne({ id: req.params.id }, { $set: req.body })
             .then((data) => {
                 res.send(data);
             })
@@ -67,7 +69,7 @@ export class UsersController {
     }
 
     private deleteUser(req:Request,res:Response){
-        this.db.collection(USERS).deleteOne({_id:new ObjectID(req.params.id)})
+        this.db.collection(USERS).deleteOne({id:req.params.id})
         .then(deleteResult=>res.send())
         .catch(error=>res.status(400).send(error));
     }

@@ -42,7 +42,7 @@ export class Index {
     private configureRoutes(app: express.Router, db: Db) {
         app.use(CustomerController.route, new CustomerController(db).router);
         app.use(UsersController.route, new UsersController(db).router);
-        app.use(TasksController.route, new TasksController(db,new CustomerController(db),new UsersController(db)).router);
+        app.use(TasksController.route, new TasksController(db).router);
     }
 
 }

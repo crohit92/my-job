@@ -32,27 +32,27 @@ export class CustomerController {
 
     private customer(req: Request, res: Response) {
        this.fetchCustomer(req.params.id)
-       .then((customers: Customer) => {
-                res.status(200).send(customers);
+       .then((customer: Customer) => {
+                res.status(200).send(customer);
             }).catch(err => {
                 res.status(400).send(err);
             })
     }
 
-    public fetchCustomer(customerId:string):Promise<Customer>{
+    private fetchCustomer(customerId:number):Promise<Customer>{
          return this.db
             .collection(CUSTOMERS)
-            .findOne({ _id: new ObjectID(customerId) })
+            .findOne({ id: customerId })
             
     }
 
     private createCustomer(req: Request, res: Response) {
+        req.body.id=(new Date()).valueOf().toString();
         this.db
             .collection(CUSTOMERS)
-            //.find(new ObjectID(req.params.id)).toArray()
             .insertOne(req.body)
             .then((cust: InsertOneWriteOpResult) => {
-                res.send(cust.insertedId);
+                res.send( req.body.id);
             }).catch(err => {
                 res.status(400).send(err);
             })
@@ -61,7 +61,7 @@ export class CustomerController {
     private updateCustomer(req: Request, res: Response) {
         delete req.body._id;
         this.db.collection(CUSTOMERS)
-            .updateOne({ _id: new ObjectID(req.params.id) }, { $set: req.body })
+            .updateOne({ id: req.params.id }, { $set: req.body })
             .then((data) => {
                 res.send(data);
             })
@@ -71,7 +71,7 @@ export class CustomerController {
     }
 
     private deleteCustomer(req:Request,res:Response){
-        this.db.collection(CUSTOMERS).deleteOne({_id:new ObjectID(req.params.id)})
+        this.db.collection(CUSTOMERS).deleteOne({id:req.params.id})
         .then(deleteResult=>res.send())
         .catch(error=>res.status(400).send(error));
     }

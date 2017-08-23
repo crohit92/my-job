@@ -1,5 +1,5 @@
 export class Customer{
-    _id:string;
+    id:string;
     name:string;
     address:string;
     mobile:string;

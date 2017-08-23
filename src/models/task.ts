@@ -5,19 +5,19 @@ import { Customer } from './customer'
 import { User } from './user';
 
 export class Task {
-    _id: string;
+    id:string;
     title: string;
     description: string;
     startsOn: Date;
     dueOn: Date;
     endsOn: Date;
-    assignedToId: string;
+    assignedToId: number;
     completed: boolean;
     payable: boolean;
     paid: boolean;
     type: TaskType;
     price: number;
-    customerId: string;
+    customerId: number;
     customer?: Customer;
     user?: User;
 }
