@@ -8,6 +8,7 @@ import * as cors from "cors";
 
 import { UsersController } from './controllers/users';
 import { CustomerController } from './controllers/customers';
+import { TasksController } from './controllers/tasks';
 export class Index {
     public app: Express;
     private port: number = 2000;
@@ -41,6 +42,7 @@ export class Index {
     private configureRoutes(app: express.Router, db: Db) {
         app.use(CustomerController.route, new CustomerController(db).router);
         app.use(UsersController.route, new UsersController(db).router);
+        app.use(TasksController.route, new TasksController(db).router);
     }
 
 }

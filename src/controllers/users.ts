@@ -43,7 +43,6 @@ export class UsersController {
     private createUser(req: Request, res: Response) {
         this.db
             .collection(USERS)
-            //.find(new ObjectID(req.params.id)).toArray()
             .insertOne(req.body)
             .then((response: InsertOneWriteOpResult) => {
                 res.send(response.insertedId);
