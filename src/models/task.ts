@@ -11,13 +11,12 @@ export class Task {
     startsOn: Date;
     dueOn: Date;
     endsOn: Date;
-    assignedToId: number;
+    assignedToId: string;
     completed: boolean;
     payable: boolean;
     paid: boolean;
     type: TaskType;
     price: number;
-    customerId: number;
-    customer?: Customer;
-    user?: User;
+    customerId: string;
+    
 }
