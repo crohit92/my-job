@@ -6,13 +6,15 @@
             </tr>
         </thead>
         <tbody>
-            <tr *ngFor="let task of tasks" (click)="currentTask = task">
+            <tr *ngFor="let task of tasks" (click)="setCurrentTask(task)">
                 <td>
                     <div>
-                        <p>{{task.description}}</p>
-                        <p>Started: {{task.startsOn}}</p>
-                        <p>Due on: {{task.dueOn}} - {{task.user[0].name}}</p>
-                        <p>Customer: {{task.customer[0].name}}</p>
+                        <p><strong>{{task.title}}</strong></p>
+                        <p><strong class="text-muted">{{task.description}}</strong></p>
+                        <p><i class="text-muted">Starts On: {{task.startsOn}}</i></p>
+                        <p><i class="text-muted">Repeats Every: {{getFrequencyTypeText(task.frequency)}}</i></p>
+                        <p><i class="text-muted">Assigned To: {{task.user?task.user.name:"**Not Assigned**"}}</i></p>
+                        <p><i class="text-muted">Customer: {{task.customer? task.customer.name:"**Not Assigned**"}}</i></p>
                     </div>
                 </td>
             </tr>
@@ -26,5 +28,5 @@
     </table>
 </div>
 <div class="col-xs-4 col-xs-12">
-    <task task="currentTask"></task>
+    <task [task]="currentTask" (taskCreated)="onTaskCreated($event)" (taskUpdated)="onTaskUpdated($event)"></task>
 </div>

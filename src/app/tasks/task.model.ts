@@ -1,13 +1,13 @@
-import { User } from './../users/user.model'
+import { User } from './../users/user.model';
+import { Customer } from './../customers-list/customer.model';
 import { TaskType } from './task-type.model';
 
 export class Task {
-    id?: number;
+    id?: string;
     title?: string;
     description?: string;
     startsOn?: Date;
-    dueOn?: Date;
-    endsOn?: Date;
+    frequency?: number;
     assignedToId?: string;
     completed?: boolean;
     payable?: boolean;
@@ -15,4 +15,6 @@ export class Task {
     type?: TaskType;
     price?: number;
     customerId?: string;
+    user?: User;
+    customer?: Customer
 }
