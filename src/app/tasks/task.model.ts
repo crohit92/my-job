@@ -17,4 +17,6 @@ export class Task {
     customerId?: string;
     user?: User;
     customer?: Customer
+    //used for computational purpose only
+    nextDueDate?: any
 }

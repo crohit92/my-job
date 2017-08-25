@@ -11,7 +11,8 @@
                     <div>
                         <p><strong>{{task.title}}</strong></p>
                         <p><strong class="text-muted">{{task.description}}</strong></p>
-                        <p><i class="text-muted">Starts On: {{task.startsOn}}</i></p>
+                        <p><i class="text-muted">Starts On: {{moment(task.startsOn).format("DD-MMMM-YYYY")}}</i></p>
+                        <p><i class="text-muted">Next Due Date: {{task.nextDueDate.format("DD-MMMM-YYYY")}}</i></p>
                         <p><i class="text-muted">Repeats Every: {{getFrequencyTypeText(task.frequency)}}</i></p>
                         <p><i class="text-muted">Assigned To: {{task.user?task.user.name:"**Not Assigned**"}}</i></p>
                         <p><i class="text-muted">Customer: {{task.customer? task.customer.name:"**Not Assigned**"}}</i></p>
