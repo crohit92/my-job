@@ -11,7 +11,7 @@ import { CustomerController } from './controllers/customers';
 import { TasksController } from './controllers/tasks';
 export class Index {
     public app: Express;
-    private port: number = 2000;
+    private port: number = 8080;
 
     constructor() {
         this.app = express();
@@ -21,7 +21,7 @@ export class Index {
     run(db: Db) {
         let $this = this;
         this.configureRoutes(this.app, db);
-        this.app.listen(this.port, function () {
+        this.app.listen(process.env.PORT || this.port , function () {
             console.log('Node app is running on port', $this.port);
         });
     }
