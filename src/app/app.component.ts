@@ -11,6 +11,7 @@ export class Menu {
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
+  menuVisible:boolean = false;
   menus:Menu[];
   constructor(){
     this.menus = [

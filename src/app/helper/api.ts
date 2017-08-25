@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Http, RequestOptionsArgs } from '@angular/http';
-const apiBase = 'http://localhost:2000/';
+const apiBase = 'https://glacial-bayou-25223.herokuapp.com/';
 
 export class Request {
     endpoint: string;
