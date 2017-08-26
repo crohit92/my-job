@@ -68,7 +68,7 @@ export class TaskComponent {
         })
             .subscribe(
             res => {
-            
+            this.task.id = ""+res.json(); 
             this.taskCreated.emit(this.task);
             this.task = {};
             },

@@ -12,7 +12,7 @@
     </div>
     <div class="form-group">
         <label>Repeats Every 
-            <select class="form-control" [(ngModel)]="task.frequency" name="frequency" >
+            <select class="form-control" required [(ngModel)]="task.frequency" name="frequency" >
                 <option value="undefined" disabled>Frequency</option> 
                 <option [ngValue]="freq.value" *ngFor="let freq of frequencies">{{freq.text}}</option> 
             </select>
@@ -23,10 +23,10 @@
         <label>Payable <input type="checkbox" name="payable" [(ngModel)]="task.payable"></label>
     </div>
     <div class="form-group" *ngIf="task.payable">
-        <input type="number" class="form-control" name="amount" [(ngModel)]="task.amount" placeholder="Charges for the task">
+        <input type="number" class="form-control" [required]="task.payable" name="amount" [(ngModel)]="task.amount" placeholder="Charges for the task">
     </div>
     <div class="form-group">
-        <select class="form-control" name="taskType" [(ngModel)]="task.type">
+        <select class="form-control" name="taskType" required [(ngModel)]="task.type">
             <option value="undefined" disabled >Select Task Type</option>
             <option [ngValue]="type.value" *ngFor="let type of taskTypes">{{type.text}}</option>
         </select>
