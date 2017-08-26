@@ -45,8 +45,8 @@
         </select>
     </div>
     <div class="form-group">
-        <button [disabled]="!task.id" (click)="reset()" class="btn btn-default">Reset</button>
-        <button [disabled]="!task.id" class="btn btn-danger">Delete</button>
+        <button (click)="reset()" class="btn btn-default">Reset</button>
+        <button [disabled]="!task.id" (click)="deleteTask(task)" class="btn btn-danger">Delete</button>
         <button [disabled]="!taskForm.valid" (click)="createOrUpdateTask(task)" class="btn btn-primary">
                 {{task.id?'Update':'Save'}}
         </button>

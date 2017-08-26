@@ -13,6 +13,7 @@ export class TaskComponent {
     @Input("task") task: Task = new Task();
     @Output("taskCreated") taskCreated: EventEmitter<Task> = new EventEmitter<Task>();
     @Output("taskUpdated") taskUpdated: EventEmitter<Task> = new EventEmitter<Task>();
+    @Output("taskDeleted") taskDeleted: EventEmitter<Task> = new EventEmitter<Task>();
 
     users: User[];
     customer: Customer[];
@@ -97,9 +98,21 @@ export class TaskComponent {
             )
     }
 
+    deleteTask(task:Task){
+        this.api.sendRequest({
+            endpoint: ApiRoutes.DELETE_TASK,
+            method: 'delete',
+            routeParams: {
+                '': this.task.id
+            }
+        }).subscribe(()=>{
+            this.taskDeleted.emit(task);
+            this.task = {}
+        })
+    }
+
     reset(){
         this.task =  {};
-        this.taskUpdated.emit(this.task);
     }
     matchById(obj1,obj2){
        return obj1 && obj2 ? obj1.id === obj2.id : obj1 === obj2;

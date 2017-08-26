@@ -130,4 +130,9 @@ export class TasksComponent {
         }
         this.currentTask = {};
     }
+
+    onTaskDeleted(task: Task) {
+        let taskIndex = this.tasks.findIndex((t) => { return t.id == task.id });
+        this.tasks.splice(taskIndex, 1);
+    }
 }

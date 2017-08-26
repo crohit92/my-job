@@ -16,12 +16,13 @@ export const ApiRoutes = {
     CREATE_CUSTOMER: 'customers',
     CREATE_TASK: 'tasks',
     DELETE_CUSTOMER: 'customers',
+    DELETE_TASK: 'tasks',
+    DELETE_USER: 'users',
     FETCH_ALL_USERS: 'users',
     FETCH_ALL_TASKS: 'tasks',
     UPDATE_USER: 'users',
     UPDATE_TASK:'tasks',
     CREATE_USER: 'users',
-    DELETE_USER: 'users',
 }
 
 @Injectable()

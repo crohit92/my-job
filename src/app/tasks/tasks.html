@@ -29,5 +29,7 @@
     </table>
 </div>
 <div class="col-sm-4 col-xs-12">
-    <task [task]="currentTask" (taskCreated)="onTaskCreated($event)" (taskUpdated)="onTaskUpdated($event)"></task>
+    <task [task]="currentTask" (taskCreated)="onTaskCreated($event)" 
+    (taskUpdated)="onTaskUpdated($event)"
+    (taskDeleted)="onTaskDeleted($event)"></task>
 </div>
