@@ -1,7 +1,6 @@
 import { TaskType } from './task-type'
 
 import { ObjectID } from 'mongodb';
-import { Customer } from './customer'
 import { User } from './user';
 
 export class Task {

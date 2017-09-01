@@ -1,7 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { Db, ObjectID, InsertOneWriteOpResult } from 'mongodb';
 import { Task } from '../models/task';
-import { CustomerController } from './customers';
 import { UsersController } from './users';
 
 const TASKS = "tasks";
