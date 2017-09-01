@@ -12,7 +12,7 @@ export class Request {
 }
 
 export const ApiRoutes = {
-    FETCH_ALL_GROUPS: 'accounts/groups',
+    FETCH_ALL_GROUPS: 'groups',
     FETCH_ALL_ACCOUNTS: 'accounts',
     UPDATE_ACCOUNT: 'accounts',
     CREATE_ACCOUNT: 'accounts',

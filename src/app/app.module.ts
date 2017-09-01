@@ -6,6 +6,7 @@ import { MaterialExportModule } from './material-export.module';
 import { RouterModule } from '@angular/router';
 import { HttpModule } from '@angular/http';
 import { AppComponent } from './app.component';
+import { TypeaheadModule } from 'ngx-bootstrap';
 import 'hammerjs';
 
 import { ROUTES } from './app.routes';
@@ -37,7 +38,8 @@ import { HomeComponent } from './home/home.component'
     HttpModule,
     FormsModule,
     RouterModule.forRoot(ROUTES),
-    MaterialExportModule
+    MaterialExportModule,
+    TypeaheadModule.forRoot()
   ],
   providers: [Api],
   bootstrap: [AppComponent]

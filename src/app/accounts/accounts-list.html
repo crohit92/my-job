@@ -1,4 +1,4 @@
-
+<input [(ngModel)]="selected" typeaheadOptionField="name" [typeahead]="accounts" class="form-control">
 <table class="table table-striped">
     <thead>
         <tr>
@@ -11,7 +11,7 @@
         <tr *ngFor="let account of accounts">
             <td>{{account.name}}</td>
             <td>{{account.balance}}</td>
-            <td><input type="button" value="edit" class="btn btn-danger">&nbsp;<input type="button" value="delete" class="btn btn-danger"></td>
+            <td><input type="button" value="edit" class="btn btn-default">&nbsp;<input type="button" value="delete" class="btn btn-danger"></td>
         </tr>
     </tbody>
 </table>
