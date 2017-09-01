@@ -12,22 +12,24 @@ import { ROUTES } from './app.routes';
 
 import { Api } from './helper/api';
 
-import { CustomersListComponent } from './customers-list/customers-list.component';
-import { CustomerComponent } from './customer/customer.component';
+import { AccountsListComponent } from './accounts/accounts-list.component';
+import { AccountComponent } from './accounts/account.component';
 import { UsersListComponent } from './users/users-list.component';
 import { UserComponent } from './users/user.component';
 import { TasksComponent } from './tasks/tasks.component';
 import { TaskComponent } from './tasks/task.component';
+import { HomeComponent } from './home/home.component'
 
 @NgModule({
   declarations: [
     AppComponent,
-    CustomersListComponent,
-    CustomerComponent,
+    AccountsListComponent,
+    AccountComponent,
     UsersListComponent,
     UserComponent,
     TasksComponent,
-    TaskComponent
+    TaskComponent,
+    HomeComponent
   ],
   imports: [
     BrowserModule,

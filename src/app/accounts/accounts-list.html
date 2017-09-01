@@ -1,0 +1,17 @@
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Account</th>
+            <th>Balance</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let account of accounts">
+            <td>{{account.name}}</td>
+            <td>{{account.balance}}</td>
+            <td><input type="button" value="edit" class="btn btn-danger">&nbsp;<input type="button" value="delete" class="btn btn-danger"></td>
+        </tr>
+    </tbody>
+</table>

@@ -1,23 +1,29 @@
 import { Route } from '@angular/router';
-import { CustomersListComponent } from './customers-list/customers-list.component';
+import { AccountsListComponent } from './accounts/accounts-list.component';
+import { AccountComponent } from './accounts/account.component';
 import { UsersListComponent } from './users/users-list.component';
 import { TasksComponent } from './tasks/tasks.component';
+import { HomeComponent } from './home/home.component';
 export const ROUTES: Route[] = [
     {
-        path: 'customers',
-        component: CustomersListComponent
+        path: 'accounts',
+        component: AccountsListComponent
     },
     {
         path: 'users',
         component: UsersListComponent
     },
     {
-        path:'tasks',
-        component:TasksComponent
+        path: 'tasks',
+        component: TasksComponent
+    },
+    {
+        path: 'home',
+        component: HomeComponent
     },
     {
         path: '',
-        redirectTo: '/customers',
+        redirectTo: '/home',
         pathMatch: 'full'
     }
 ]

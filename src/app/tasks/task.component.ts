@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { Task } from './task.model';
 import { User } from './../users/user.model';
-import { Customer } from './../customers-list/customer.model'
+import { Account } from './../accounts/account.model'
 import { Api, Request, ApiRoutes } from './../helper/api';
 import { TASK_FREQUENCY_TYPES, TASK_TYPES} from './constants';
 @Component({
@@ -16,7 +16,7 @@ export class TaskComponent {
     @Output("taskDeleted") taskDeleted: EventEmitter<Task> = new EventEmitter<Task>();
 
     users: User[];
-    customer: Customer[];
+    customer: Account[];
     customers: any[];
     frequencies: any[];
     taskTypes: any[];
@@ -30,7 +30,7 @@ export class TaskComponent {
 
         //fetch customers
         this.api.sendRequest({
-            endpoint: ApiRoutes.FETCH_ALL_CUSTOMERS,
+            endpoint: ApiRoutes.FETCH_ALL_ACCOUNTS,
             method: "get"
         }).subscribe((res => this.customers = res.json()))
 

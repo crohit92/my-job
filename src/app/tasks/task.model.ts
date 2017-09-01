@@ -1,5 +1,5 @@
 import { User } from './../users/user.model';
-import { Customer } from './../customers-list/customer.model';
+import { Account } from './../accounts/account.model';
 import { TaskType } from './task-type.model';
 
 export class Task {
@@ -16,7 +16,7 @@ export class Task {
     price?: number;
     customerId?: string;
     user?: User;
-    customer?: Customer
+    customer?: Account
     //used for computational purpose only
     nextDueDate?: any
 }

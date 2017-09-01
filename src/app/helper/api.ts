@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Http, RequestOptionsArgs } from '@angular/http';
-const apiBase = 'https://glacial-bayou-25223.herokuapp.com/';
+//const apiBase = 'https://glacial-bayou-25223.herokuapp.com/';
+const apiBase = 'http://localhost:8080/';
 
 export class Request {
     endpoint: string;
@@ -11,11 +12,12 @@ export class Request {
 }
 
 export const ApiRoutes = {
-    FETCH_ALL_CUSTOMERS: 'customers',
-    UPDATE_CUSTOMER: 'customers',
-    CREATE_CUSTOMER: 'customers',
+    FETCH_ALL_GROUPS: 'accounts/groups',
+    FETCH_ALL_ACCOUNTS: 'accounts',
+    UPDATE_ACCOUNT: 'accounts',
+    CREATE_ACCOUNT: 'accounts',
     CREATE_TASK: 'tasks',
-    DELETE_CUSTOMER: 'customers',
+    DELETE_ACCOUNT: 'accounts',
     DELETE_TASK: 'tasks',
     DELETE_USER: 'users',
     FETCH_ALL_USERS: 'users',
