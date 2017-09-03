@@ -1,62 +1,31 @@
-import { Input, Output, Component, EventEmitter } from '@angular/core';
-import { Api, ApiRoutes, Request } from './../helper/api'
+import { Input, Output, Component, EventEmitter, TemplateRef, ViewChild } from '@angular/core';
+import { Api, ApiRoutes, Request } from './../helper/api';
+import { ModalDirective } from 'ngx-bootstrap';
+import { ActivatedRoute,Router } from '@angular/router';
+import { BsModalRef } from 'ngx-bootstrap/modal/modal-options.class';
+import { Account } from '../models/account.model';
 @Component({
     templateUrl: './account.html',
     selector: 'account'
 })
 export class AccountComponent {
-    @Input('customer') customer: any = {};
-    @Output('customerUpdated') customerUpdated = new EventEmitter<any>();
-    @Output('customerDeleted') customerDeleted = new EventEmitter<any>();
+    @ViewChild('accountModal') public accountModal:ModalDirective;
+    public isModalVisible:boolean = false;
 
+    account:Account;
     constructor(
-        private api: Api
-    ) { }
-    // updateCustomer() {
-    //     if (this.customer && this.customer.id) {
-    //         this.api.sendRequest({
-    //             endpoint: ApiRoutes.UPDATE_CUSTOMER,
-    //             routeParams: {
-    //                 '': this.customer.id
-    //             },
-    //             method: 'put',
-    //             body: this.customer
-    //         }).subscribe(
-    //             res => {
-    //                 this.customerUpdated.emit();
-    //                 this.customer = {}
-    //             },
-    //             err => { console.log(err); }
-    //             );
-    //     }
-    //     else {
-    //         this.api.sendRequest({
-    //             endpoint: ApiRoutes.CREATE_CUSTOMER,
-    //             method: 'post',
-    //             body: this.customer
-    //         }).subscribe(
-    //             res => {
-    //                 this.customerUpdated.emit();
-    //                 this.customer = {}
-    //             },
-    //             err => { console.log(err); }
-    //             );
-    //     }
-    // }
+        private api: Api,
+        private router:Router,
+        private route: ActivatedRoute
+    ) {
+        this.route.params.subscribe(
+            (params) => { this.account = JSON.parse(params.account) });
+    }
 
-    // deleteCustomer(event) {
-    //     this.api.sendRequest({
-    //         endpoint: ApiRoutes.DELETE_CUSTOMER,
-    //         method: 'delete',
-    //         routeParams: {
-    //             '': this.customer.id
-    //         }
-    //     }).subscribe(
-    //         res => { 
-    //             this.customerDeleted.emit();
-    //             this.customer = {} 
-    //         },
-    //         err => { console.log(err); }
-    //         );
-    // }
+    onModalHiding() {
+
+        this.router.navigate(["/accounts"]);
+
+    }
+
 }

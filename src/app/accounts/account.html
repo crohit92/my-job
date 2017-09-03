@@ -1,38 +1,18 @@
-<form class="container-fluid well well-default" #customerForm="ngForm" (ngSubmit)="updateCustomer()">
-    
-    <div class="row">
-        <div class="col-xs-12">
-            Update Customer Details
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-xs-12">
-            <div class="form-group">
-                <input type="text" class="form-control" placeholder="Customer Name" name="name" required [(ngModel)]="customer.name">
+<div [config]="{ show: true }" bsModal #accountModal="bs-modal" (onHidden)="onModalHiding()" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title pull-left">Auto shown modal</h4>
+                <button type="button" class="close pull-right" aria-label="Close" (click)="accountModal.hide()">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
             </div>
-        </div>
-        <div class="col-xs-12">
-            <div class="form-group">
-                <input type="text" class="form-control" placeholder="Mobile" name="mobile" required [(ngModel)]="customer.mobile">
-            </div>
-        </div>
-        <div class="col-xs-12">
-            <div class="form-group">
-                <textarea type="text" class="form-control" placeholder="Address" name="address" required [(ngModel)]="customer.address"></textarea>
+            <div class="modal-body">
+                <p>I am a modal that is shown right after initialization!</p>
+                <p>I wasn't present in DOM until you clicked the button</p>
+                <p>When you close me, I'll be removed from the DOM</p>
             </div>
         </div>
     </div>
-    <div class="row">
-        <div class="col-xs-4  pull-right">
-            <button [disabled]="!customerForm.valid" class="btn btn-primary" type="submit">
-                {{customer._id?'Update':'Save'}}
-            </button>
-        </div>
-        <div class="col-xs-4 pull-right">
-            <input type="button" [disabled]="!customer._id" value="Delete" class="btn btn-danger" (click)="deleteCustomer($event)">
-        </div>
-         <div class="col-xs-4 pull-right">
-             <input type="button" value="Reset" class="btn btn-default" (click)="customer = {}">
-        </div>
-    </div>
-</form>
+
+</div>

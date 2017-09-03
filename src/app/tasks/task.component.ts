@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { Task } from './task.model';
-import { User } from './../users/user.model';
-import { Account } from './../accounts/account.model'
+import { Task } from '../models/task.model';
+import { User } from '../models/user.model';
+import { Account } from '../models/account.model'
 import { Api, Request, ApiRoutes } from './../helper/api';
 import { TASK_FREQUENCY_TYPES, TASK_TYPES} from './constants';
 @Component({

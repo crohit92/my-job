@@ -1,4 +1,4 @@
-<input [(ngModel)]="selected" typeaheadOptionField="name" [typeahead]="accounts" class="form-control">
+<input [(ngModel)]="selected" (typeaheadOnSelect)="editAccount($event.item)" typeaheadOptionField="name" [typeahead]="accounts" class="form-control">
 <table class="table table-striped">
     <thead>
         <tr>
@@ -8,10 +8,10 @@
         </tr>
     </thead>
     <tbody>
-        <tr *ngFor="let account of accounts">
+        <tr *ngFor="let account of accounts | async">
             <td>{{account.name}}</td>
             <td>{{account.balance}}</td>
-            <td><input type="button" value="edit" class="btn btn-default">&nbsp;<input type="button" value="delete" class="btn btn-danger"></td>
+            <td><input type="button" value="edit" (click)="editAccount(account)" class="btn btn-default"></td>
         </tr>
     </tbody>
 </table>

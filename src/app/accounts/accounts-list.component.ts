@@ -1,29 +1,23 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 import { Api, Request, ApiRoutes } from './../helper/api';
-import { Account } from './account.model';
+import { Account } from '../models/account.model';
+import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs/Observable';
+import { INSERT, INSERT_MULTIPLE } from './../reducers/generic.reducer';
+import { AppState } from './../app.state';
 @Component({
     templateUrl: './accounts-list.html'
 })
 export class AccountsListComponent {
 
-    accounts:Account[];
-    public selected:string;
-    public states:string[] = ['Alabama', 'Alaska', 'Arizona', 'Arkansas',
-      'California', 'Colorado',
-      'Connecticut', 'Delaware', 'Florida', 'Georgia', 'Hawaii', 'Idaho',
-      'Illinois', 'Indiana', 'Iowa',
-      'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland', 'Massachusetts',
-      'Michigan', 'Minnesota',
-      'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire',
-      'New Jersey', 'New Mexico',
-      'New York', 'North Dakota', 'North Carolina', 'Ohio', 'Oklahoma', 'Oregon',
-      'Pennsylvania', 'Rhode Island',
-      'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont',
-      'Virginia', 'Washington',
-      'West Virginia', 'Wisconsin', 'Wyoming'];
+    accounts: Observable<Account[]>;
     constructor(
-        private api: Api
+        private api: Api,
+        private router: Router,
+        private store: Store<AppState>
     ) {
+        this.accounts = this.store.select(state=>state.accounts);
         this.fetchAccounts();
     }
 
@@ -32,9 +26,13 @@ export class AccountsListComponent {
             endpoint: ApiRoutes.FETCH_ALL_GROUPS,
             method: 'get'
         }).subscribe(
-            res => { this.accounts = res.json() },
+            res => { this.store.dispatch({type:INSERT_MULTIPLE,payload:res.json()}) },
             err => { console.log(err); }
             );
+    }
+
+    editAccount(account) {
+        this.router.navigate(["/account", { account: JSON.stringify(account) }])
     }
 
 }

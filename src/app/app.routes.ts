@@ -10,6 +10,10 @@ export const ROUTES: Route[] = [
         component: AccountsListComponent
     },
     {
+        path: 'account',
+        component: AccountComponent
+    },
+    {
         path: 'users',
         component: UsersListComponent
     },

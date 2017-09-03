@@ -1,12 +1,14 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { FormsModule } from '@angular/forms'
+import { FormsModule } from '@angular/forms';
+import { StoreModule } from '@ngrx/store';
+import { reducer } from './reducers/generic.reducer';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MaterialExportModule } from './material-export.module';
 import { RouterModule } from '@angular/router';
 import { HttpModule } from '@angular/http';
 import { AppComponent } from './app.component';
-import { TypeaheadModule } from 'ngx-bootstrap';
+import { TypeaheadModule, ModalModule } from 'ngx-bootstrap';
 import 'hammerjs';
 
 import { ROUTES } from './app.routes';
@@ -39,7 +41,9 @@ import { HomeComponent } from './home/home.component'
     FormsModule,
     RouterModule.forRoot(ROUTES),
     MaterialExportModule,
-    TypeaheadModule.forRoot()
+    TypeaheadModule.forRoot(),
+    ModalModule.forRoot(),
+    StoreModule.forRoot({ accounts: reducer })
   ],
   providers: [Api],
   bootstrap: [AppComponent]

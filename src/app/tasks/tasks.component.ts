@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Api, ApiRoutes, Request } from './../helper/api';
-import { Task } from './task.model';
+import { Task } from '../models/task.model';
 import { TASK_FREQUENCY_TYPES, TASK_TYPES } from './constants';
 import * as moment from 'moment';
 const DATE_FORMAT = "DD-MMMM-YYYY";
