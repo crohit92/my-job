@@ -2,6 +2,8 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { StoreModule } from '@ngrx/store';
+import { EffectsModule } from '@ngrx/effects';
+import { GenericEffects } from './effects/generic.effects';
 import { reducer } from './reducers/generic.reducer';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MaterialExportModule } from './material-export.module';
@@ -43,7 +45,8 @@ import { HomeComponent } from './home/home.component'
     MaterialExportModule,
     TypeaheadModule.forRoot(),
     ModalModule.forRoot(),
-    StoreModule.forRoot({ accounts: reducer })
+    StoreModule.forRoot({ accounts: reducer }),
+    EffectsModule.forRoot([GenericEffects])
   ],
   providers: [Api],
   bootstrap: [AppComponent]

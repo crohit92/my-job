@@ -16,6 +16,7 @@ export const ApiRoutes = {
     FETCH_ALL_ACCOUNTS: 'accounts',
     UPDATE_ACCOUNT: 'accounts',
     CREATE_ACCOUNT: 'accounts',
+    CREATE_GROUP: 'groups',
     CREATE_TASK: 'tasks',
     DELETE_ACCOUNT: 'accounts',
     DELETE_TASK: 'tasks',

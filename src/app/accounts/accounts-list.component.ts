@@ -32,7 +32,11 @@ export class AccountsListComponent {
     }
 
     editAccount(account) {
-        this.router.navigate(["/account", { account: JSON.stringify(account) }])
+        //this.router.navigate(["/account", { account: JSON.stringify(account) }])
+        this.store.dispatch({
+            type:INSERT,
+            payload:{"name":"Bank Accounts","accountTypeId":"1"}
+        })
     }
 
 }
