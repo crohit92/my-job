@@ -9,6 +9,7 @@ import { AccountsController } from './controllers/accounts';
 import { TasksController } from './controllers/tasks';
 import { GroupsController } from './controllers/groups';
 import { AccountTypesController } from './controllers/account-types';
+import { TransactionsController } from "./controllers/transactions";
 
 export class Index {
     public app: Express;
@@ -50,9 +51,13 @@ export class Index {
         app.use(TasksController.route, new TasksController(db).router);
         app.use(GroupsController.route, new GroupsController(db).router);
         app.use(AccountTypesController.route, new AccountTypesController(db).router);
+        app.use(TransactionsController.route, new TransactionsController(db).router);
     }
 }
-MongoClient.connect('mongodb://crohit92:Mohit_4085@ds129023.mlab.com:29023/heroku_5qdxqckm',
+
+MongoClient.connect('mongodb://127.0.0.1:27017/myJob'/*'mongodb://crohit92:Mohit_4085@ds129023.mlab.com:29023/heroku_5qdxqckm'*/,
     (err, db) => {
+        //console.log(db);
+        
         new Index().run(db);
     });

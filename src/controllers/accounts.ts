@@ -21,9 +21,11 @@ export class AccountsController {
     }
 
     private get(req: Request, res: Response) {
+        
+        let filter = req.query.hasOwnProperty('groupId')? { groupId:req.query.groupId }: {};
         this.db
             .collection(ACCOUNTS)
-            .find().toArray()
+            .find(filter).toArray()
             .then((accounts: Account[]) => {
                 res.status(200).send(accounts);
             }).catch(err => {

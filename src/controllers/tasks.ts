@@ -93,7 +93,7 @@ export class TasksController {
             },
             {
                 $lookup: {
-                    from: "customers",
+                    from: "accounts",
                     localField: "customerId",
                     foreignField: "id",
                     as: "customer"

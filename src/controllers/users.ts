@@ -6,9 +6,7 @@ const USERS = "users";
 export class UsersController {
     public static route: string = `/${USERS}`;
     public router: Router = Router();
-    private db: Db;
-    constructor(db: Db) {
-        this.db = db;
+    constructor(private db: Db) {
 
         this.router.get('/', this.findUsers.bind(this));
         this.router.get('/:id', this.findUser.bind(this));
@@ -18,7 +16,7 @@ export class UsersController {
     }
 
     private findUsers(req: Request, res: Response) {
-
+        
         this.db
             .collection(USERS)
             .find().toArray()
