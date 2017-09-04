@@ -5,4 +5,4 @@ export class Account{
     openingBalance: number;
     obNature: string;
     description: string;
-}
+}  

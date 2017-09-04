@@ -14,18 +14,26 @@ export class Request {
 export const ApiRoutes = {
     FETCH_ALL_GROUPS: 'groups',
     FETCH_ALL_ACCOUNTS: 'accounts',
+    FETCH_ALL_USERS: 'users',
+    FETCH_ALL_TASKS: 'tasks',
+    FETCH_ALL_CUSTOMERS:'accounts?groupId=16',
+    FETCH_ALL_TRANSACTIONS:'transactions',
+
     UPDATE_ACCOUNT: 'accounts',
+    UPDATE_USER: 'users',
+    UPDATE_TASK:'tasks',
+
+    CREATE_USER: 'users',
     CREATE_ACCOUNT: 'accounts',
     CREATE_GROUP: 'groups',
     CREATE_TASK: 'tasks',
+    CREATE_TRANSACTION: 'transactions',
+
     DELETE_ACCOUNT: 'accounts',
     DELETE_TASK: 'tasks',
     DELETE_USER: 'users',
-    FETCH_ALL_USERS: 'users',
-    FETCH_ALL_TASKS: 'tasks',
-    UPDATE_USER: 'users',
-    UPDATE_TASK:'tasks',
-    CREATE_USER: 'users',
+    
+    
 }
 
 @Injectable()
@@ -62,7 +70,6 @@ export class Api {
     }
 
     sendRequest(request: Request) {
-
         return this.http.request(
             this.buildURL(request.endpoint, request.routeParams, request.queryParams),
             {

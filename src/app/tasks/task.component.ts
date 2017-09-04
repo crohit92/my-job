@@ -30,7 +30,7 @@ export class TaskComponent {
 
         //fetch customers
         this.api.sendRequest({
-            endpoint: ApiRoutes.FETCH_ALL_ACCOUNTS,
+            endpoint: ApiRoutes.FETCH_ALL_CUSTOMERS,
             method: "get"
         }).subscribe((res => this.customers = res.json()))
 

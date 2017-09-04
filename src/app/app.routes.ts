@@ -1,17 +1,13 @@
 import { Route } from '@angular/router';
 import { AccountsListComponent } from './accounts/accounts-list.component';
-import { AccountComponent } from './accounts/account.component';
 import { UsersListComponent } from './users/users-list.component';
 import { TasksComponent } from './tasks/tasks.component';
 import { HomeComponent } from './home/home.component';
+import { TransationsListComponent } from './transactions/transactions-list.component';
 export const ROUTES: Route[] = [
     {
         path: 'accounts',
         component: AccountsListComponent
-    },
-    {
-        path: 'account',
-        component: AccountComponent
     },
     {
         path: 'users',
@@ -24,6 +20,10 @@ export const ROUTES: Route[] = [
     {
         path: 'home',
         component: HomeComponent
+    },
+    {
+        path: 'transactions',
+        component: TransationsListComponent
     },
     {
         path: '',

@@ -1,0 +1,53 @@
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-xs-4">Dr</div>
+        <div class="col-xs-4">Cr</div>
+        <div class="col-xs-4">Amount</div>
+        <div class="col-xs-8"><input class="form-control"></div>
+        <div class="col-xs-4"><button class="btn btn-primary" (click)="showBlankModal()">Add Transaction</button></div>
+    </div>
+    <div class="row" *ngFor="let transaction of transactions | async">
+        <div class="col-xs-4">{{transaction.debit.name}}</div>
+        <div class="col-xs-4">{{transaction.credit.name}}</div>
+        <div class="col-xs-4">{{transaction.amount}}</div>
+        <div class="col-xs-8">{{transaction?.narration}}</div>
+        <div class="col-xs-4">User 1</div>
+    </div>
+</div>
+
+<template #template>
+    <div class="modal-header">
+        <h4 class="modal-title pull-left">Transaction</h4>
+        <button type="button" class="close pull-right" aria-label="Close" (click)="modalRef.hide()">
+                <span aria-hidden="true">&times;</span>
+              </button>
+    </div>
+    <div class="modal-body">
+        <form class="container-fluid">
+            <div class="row">
+                <div class="col-xs-12">
+                    <label>Debit Account
+                        <select class="form-control" [(ngModel)]="currentTransaction.debitAccountId" name="debit">
+                            <option [ngValue]="undefined">Debit Account</option>
+                            <option *ngFor="let account of accounts | async" [ngValue]="account.id">{{account.name}}</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="col-xs-12">
+                    <label>Credit Account
+                        <select class="form-control" [(ngModel)]="currentTransaction.creditAccountId" name="credit">
+                            <option [ngValue]="undefined">Credit Account</option>
+                            <option *ngFor="let account of accounts | async" [ngValue]="account.id">{{account.name}}</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="col-xs-12">
+                    <label>Amount<input type="number" class="form-control" name="amount" [(ngModel)]="currentTransaction.amount"></label>
+                </div>
+                <div class="col-xs-12">
+                    <button (click)="saveTransaction()" class="btn btn-primary">Add</button> <button (click)="modalRef.hide()" class="btn btn-secondary">Close</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</template>
