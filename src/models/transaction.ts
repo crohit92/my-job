@@ -4,6 +4,7 @@ export class Transaction{
     creditAccountId:string;
     amount:number;
     date:Date;
+    dateUpdated:Date;
     narration:string;
     userId:string;
 }

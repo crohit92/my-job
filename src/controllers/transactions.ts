@@ -12,6 +12,7 @@ export class TransactionsController {
 
         this.router.get('/', this.get.bind(this));
         this.router.post('/', this.post.bind(this));
+        this.router.put('/:id', this.put.bind(this));
     }
 
     get(req: Request, res: Response) {
@@ -49,9 +50,20 @@ export class TransactionsController {
     }
 
     post(req: Request, res: Response) {
+        delete req.body.debit
+        delete req.body.credit
         let trans: Transaction = req.body;
         trans.id = (new Date()).valueOf().toString();
         trans.date = new Date();
         this.db.collection(TRANSACTIONS).insertOne(trans).then(() => res.send(trans)).catch(err => res.status(500).send(err));
+    }
+
+    put(req: Request, res: Response) {
+        delete req.body._id;
+        delete req.body.debit
+        delete req.body.credit
+        let trans: Transaction = req.body;
+        trans.dateUpdated = new Date();
+        this.db.collection(TRANSACTIONS).updateOne({id:req.params.id},{$set:trans}).then(() => res.send(trans)).catch(err => res.status(500).send(err));
     }
 }

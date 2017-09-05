@@ -21,11 +21,95 @@ export class AccountsController {
     }
 
     private get(req: Request, res: Response) {
-        
-        let filter = req.query.hasOwnProperty('groupId')? { groupId:req.query.groupId }: {};
+
+        let filter = req.query.hasOwnProperty('groupId') ? { groupId: req.query.groupId } : {};
         this.db
             .collection(ACCOUNTS)
-            .find(filter).toArray()
+            .aggregate([
+                {
+                    $match: filter
+                },
+                {
+                    $lookup: {
+                        from: 'groups',
+                        localField: 'groupId',
+                        foreignField: 'id',
+                        as: 'group'
+                    }
+                },
+                {
+                    $lookup: {
+                        from: 'transactions',
+                        localField: 'id',
+                        foreignField: 'debitAccountId',
+                        as: 'debits'
+                    }
+                },
+                {
+                    $lookup: {
+                        from: 'transactions',
+                        localField: 'id',
+                        foreignField: 'creditAccountId',
+                        as: 'credits'
+                    }
+                },
+                {
+                    $unwind: { path: '$debits', preserveNullAndEmptyArrays: true }
+                },
+                {
+                    $unwind: { path: '$credits', preserveNullAndEmptyArrays: true }
+                },
+                {
+                    $project: {
+                        id: '$id',
+                        openingBalance: '$openingBalance',
+                        name: '$name',
+                        groupId: '$groupId',
+                        group: {
+                            $arrayElemAt: ['$group', 0]
+                        },
+                        debits: '$debits',
+                        credits: '$credits',
+                    }
+                },
+                {
+                    $group: {
+                        _id: '$id',
+                        id: { $first: '$id' },
+                        name: { $first: '$name' },
+                        group: { $first: '$group' },
+                        openingBalance: { $first: '$openingBalance' },
+                        groupId: { $first: '$groupId' },
+                        debit: {
+                            $sum: '$debits.amount'
+                        },
+                        credit: {
+                            $sum: '$credits.amount'
+                        }
+                    }
+                },
+                {
+                    $lookup: {
+                        from: 'accountTypes',
+                        localField: 'group.accountTypeId',
+                        foreignField: 'id',
+                        as: 'accountType'
+                    }
+                },
+                {
+                    $project: {
+                        id: '$id',
+                        openingBalance: '$openingBalance',
+                        name: '$name',
+                        groupId: '$groupId',
+                        debit: '$debit',
+                        credit: '$credit',
+                        accountType: {
+                            $arrayElemAt: ['$accountType', 0]
+                        }
+                    }
+                }
+            ]).toArray()
             .then((accounts: Account[]) => {
                 res.status(200).send(accounts);
             }).catch(err => {
@@ -55,7 +139,7 @@ export class AccountsController {
                 res.status(400).send(err);
             })
     }
-    
+
 
 
     private put(req: Request, res: Response) {
