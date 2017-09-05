@@ -17,7 +17,7 @@
     <tbody>
         <tr *ngFor="let account of ((accounts | async) | filter: 'name' : filterAccounts)">
             <td>{{account.name}}</td>
-            <td>{{account.balance}}</td>
+            <td>{{account?.accountType?.nature == 'dr'?(account.openingBalance+account.debit-account.credit):(account.openingBalance+account.credit-account.debit)}}</td>
             <td><input type="button" value="edit" (click)="editAccount(account)" class="btn btn-default"></td>
         </tr>
     </tbody>
@@ -44,6 +44,11 @@
                             <option [ngValue]="undefined">Select Group</option>
                             <option *ngFor="let group of groups | async" [ngValue]="group?.id">{{group.name}}</option>
                         </select>
+                    </label>
+                </div>
+                <div class="col-xs-12">
+                    <label>Nature of account
+                        <select [(ngModel)]="selectedAccount"></select>
                     </label>
                 </div>
                 <div class="col-xs-12">

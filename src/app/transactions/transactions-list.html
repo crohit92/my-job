@@ -1,17 +1,18 @@
 <div class="container-fluid">
-    <div class="row">
-        <div class="col-xs-4">Dr</div>
-        <div class="col-xs-4">Cr</div>
-        <div class="col-xs-4">Amount</div>
-        <div class="col-xs-8"><input class="form-control"></div>
+    <div class="row transaction">
+        <div class="col-xs-4 bg-info">Dr</div>
+        <div class="col-xs-4 bg-warning">Cr</div>
+        <div class="col-xs-4 bg-success">Amount</div>
+        <div class="col-xs-8 bg-primary"><input placeholder="Filter Transactions" [(ngModel)]="filterText" class="form-control"></div>
         <div class="col-xs-4"><button class="btn btn-primary" (click)="showBlankModal()">Add Transaction</button></div>
     </div>
-    <div class="row" *ngFor="let transaction of transactions | async">
-        <div class="col-xs-4">{{transaction.debit.name}}</div>
-        <div class="col-xs-4">{{transaction.credit.name}}</div>
-        <div class="col-xs-4">{{transaction.amount}}</div>
-        <div class="col-xs-8">{{transaction?.narration}}</div>
+    <div class="row transaction" (click)="editTransaction(transaction)" *ngFor="let transaction of transactions | async | filterTransactions:  filterText">
+        <div class="col-xs-4 bg-info">{{transaction.debit.name}}</div>
+        <div class="col-xs-4 bg-warning">{{transaction.credit.name}}</div>
+        <div class="col-xs-4 bg-success">{{transaction.amount}}</div>
+        <div class="col-xs-8 bg-primary">{{transaction?.narration}}</div>
         <div class="col-xs-4">User 1</div>
+        <hr  style="width:100%;border-top: 1px solid #3f3939">
     </div>
 </div>
 
@@ -23,11 +24,11 @@
               </button>
     </div>
     <div class="modal-body">
-        <form class="container-fluid">
+        <form #transactionForm="ngForm" class="container-fluid">
             <div class="row">
                 <div class="col-xs-12">
                     <label>Debit Account
-                        <select class="form-control" [(ngModel)]="currentTransaction.debitAccountId" name="debit">
+                        <select class="form-control" required [(ngModel)]="currentTransaction.debitAccountId" name="debit">
                             <option [ngValue]="undefined">Debit Account</option>
                             <option *ngFor="let account of accounts | async" [ngValue]="account.id">{{account.name}}</option>
                         </select>
@@ -35,17 +36,20 @@
                 </div>
                 <div class="col-xs-12">
                     <label>Credit Account
-                        <select class="form-control" [(ngModel)]="currentTransaction.creditAccountId" name="credit">
+                        <select class="form-control" required [(ngModel)]="currentTransaction.creditAccountId" name="credit">
                             <option [ngValue]="undefined">Credit Account</option>
                             <option *ngFor="let account of accounts | async" [ngValue]="account.id">{{account.name}}</option>
                         </select>
                     </label>
                 </div>
                 <div class="col-xs-12">
-                    <label>Amount<input type="number" class="form-control" name="amount" [(ngModel)]="currentTransaction.amount"></label>
+                    <label>Amount<input required type="number" class="form-control" name="amount" [(ngModel)]="currentTransaction.amount"></label>
                 </div>
                 <div class="col-xs-12">
-                    <button (click)="saveTransaction()" class="btn btn-primary">Add</button> <button (click)="modalRef.hide()" class="btn btn-secondary">Close</button>
+                    <label>Narration<textarea required type="text" class="form-control" name="narration" [(ngModel)]="currentTransaction.narration"></textarea></label>
+                </div>
+                <div class="col-xs-12">
+                    <button [disabled]="!transactionForm.valid" (click)="saveTransaction()" class="btn btn-primary">{{currentTransaction.id?'Update':'Add'}}</button> <button (click)="modalRef.hide()" class="btn btn-secondary">Close</button>
                 </div>
             </div>
         </form>

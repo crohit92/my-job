@@ -10,28 +10,46 @@ import { Account } from '../../app/models/account.model';
 import { Transaction } from '../../app/models/transaction.model';
 
 @Component({
-    templateUrl: './transactions-list.html'
+    templateUrl: './transactions-list.html',
+    styles: [`
+        .transaction{
+            margin-top: 0.5rem;
+        }
+
+        .transaction div{
+            padding: 1rem;
+        }
+    `]
 })
 export class TransationsListComponent {
     accounts: Observable<Account[]>;
-    transactions:Observable<Transaction[]>;
-    currentTransaction:Transaction;
-
+    transactions: Observable<Transaction[]>;
+    currentTransaction: Transaction;
+    config = {
+        animated: false,
+        keyboard: true,
+        backdrop: true,
+        ignoreBackdropClick: true
+    };
     @ViewChild("template") template: TemplateRef<any>;
     public modalRef: BsModalRef;
     constructor(
         private api: Api,
         private router: Router,
         private modalService: BsModalService
-    ) { 
-        
+    ) {
+
         this.fetchAccounts();
         this.fetchTransactions();
     }
 
     showBlankModal() {
         this.currentTransaction = new Transaction();
-        this.modalRef = this.modalService.show(this.template);
+        this.modalRef = this.modalService.show(this.template,this.config);
+    }
+    editTransaction(transaction: Transaction) {
+        this.currentTransaction = { ...transaction };
+        this.modalRef = this.modalService.show(this.template,this.config);
     }
 
     fetchAccounts() {
@@ -52,14 +70,30 @@ export class TransationsListComponent {
 
 
 
-    saveTransaction(){
-        this.api.sendRequest({
-            endpoint: ApiRoutes.CREATE_TRANSACTION,
-            method: 'post',
-            body:this.currentTransaction
-        }).subscribe(()=>{
-            this.modalRef.hide();
-            this.fetchTransactions();
-        });
+    saveTransaction() {
+        if (this.currentTransaction.id) {
+            this.api.sendRequest({
+                endpoint: ApiRoutes.UPDATE_TRANSACTION,
+                method: 'put',
+                routeParams: {
+                    '': this.currentTransaction.id
+                },
+                body: this.currentTransaction
+            }).subscribe(() => {
+                this.modalRef.hide();
+                this.fetchTransactions();
+            });
+        }
+        else {
+            this.api.sendRequest({
+                endpoint: ApiRoutes.CREATE_TRANSACTION,
+                method: 'post',
+                body: this.currentTransaction
+            }).subscribe(() => {
+                this.modalRef.hide();
+                this.fetchTransactions();
+            });
+        }
+
     }
 }

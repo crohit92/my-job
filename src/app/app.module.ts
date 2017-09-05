@@ -20,7 +20,7 @@ import { TasksComponent } from './tasks/tasks.component';
 import { TaskComponent } from './tasks/task.component';
 import { HomeComponent } from './home/home.component';
 import { TransationsListComponent } from './transactions/transactions-list.component';
-import { Filter } from './loop-filter.pipe';
+import { Filter, FilterTransactions } from './loop-filter.pipe';
 
 @NgModule({
   declarations: [
@@ -32,7 +32,8 @@ import { Filter } from './loop-filter.pipe';
     TaskComponent,
     HomeComponent,
     TransationsListComponent,
-    Filter
+    Filter,
+    FilterTransactions
   ],
   imports: [
     BrowserModule,

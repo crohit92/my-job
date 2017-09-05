@@ -22,6 +22,7 @@ export const ApiRoutes = {
     UPDATE_ACCOUNT: 'accounts',
     UPDATE_USER: 'users',
     UPDATE_TASK:'tasks',
+    UPDATE_TRANSACTION:'transactions',
 
     CREATE_USER: 'users',
     CREATE_ACCOUNT: 'accounts',
