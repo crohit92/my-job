@@ -49,7 +49,7 @@ class Index {
     }
 }
 exports.Index = Index;
-mongodb_1.MongoClient.connect('mongodb://crohit92:Mohit_4085@ds129023.mlab.com:29023/heroku_5qdxqckm' /*'mongodb://127.0.0.1:27017/myJob'*/, (err, db) => {
+mongodb_1.MongoClient.connect('mongodb://heroku_04x92679:6fr8b9cda7phq058m5vlk5ecnj@ds123534.mlab.com:23534/heroku_04x92679' /*'mongodb://127.0.0.1:27017/myJob'*/, (err, db) => {
     //console.log(db);
     new Index().run(db);
 });
