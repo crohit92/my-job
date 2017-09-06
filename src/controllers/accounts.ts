@@ -63,6 +63,7 @@ export class AccountsController {
                     $project: {
                         id: '$id',
                         openingBalance: '$openingBalance',
+                        natureOfOB: '$natureOfOB',
                         name: '$name',
                         groupId: '$groupId',
                         group: {
@@ -79,6 +80,7 @@ export class AccountsController {
                         name: { $first: '$name' },
                         group: { $first: '$group' },
                         openingBalance: { $first: '$openingBalance' },
+                        natureOfOB:{$first:'$natureOfOB'},
                         groupId: { $first: '$groupId' },
                         debit: {
                             $sum: '$debits.amount'
@@ -100,6 +102,7 @@ export class AccountsController {
                     $project: {
                         id: '$id',
                         openingBalance: '$openingBalance',
+                        natureOfOB: '$natureOfOB',
                         name: '$name',
                         groupId: '$groupId',
                         debit: '$debit',

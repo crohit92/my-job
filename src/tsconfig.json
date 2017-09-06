@@ -4,14 +4,21 @@
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
         "lib": ["es6", "dom"],
-        "mapRoot": "../build/server",
+        //"mapRoot": "../",
         "module": "commonjs",
         "moduleResolution": "node",
-        "outDir": "../build/server",
-        "sourceMap": true,
+        "outDir": "../",
+        "sourceMap": false,
         "target": "es6",
         "typeRoots": [
             "../node_modules/@types"
         ]
-    }
+    },
+    "include": [
+        "**/*.ts"
+    ],
+    "exclude": [
+        "../node_modules",
+        "../*.js"
+    ]
 }

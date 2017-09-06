@@ -43,7 +43,7 @@ export class Index {
         app.use(cors())
         //enable pre-flight
         app.options("*", cors(options));
-    }
+    } 
 
     private configureRoutes(app: express.Router, db: Db) {
         app.use(AccountsController.route, new AccountsController(db).router);
@@ -52,10 +52,10 @@ export class Index {
         app.use(GroupsController.route, new GroupsController(db).router);
         app.use(AccountTypesController.route, new AccountTypesController(db).router);
         app.use(TransactionsController.route, new TransactionsController(db).router);
-    }
+    } 
 }
 
-MongoClient.connect('mongodb://127.0.0.1:27017/myJob'/*'mongodb://crohit92:Mohit_4085@ds129023.mlab.com:29023/heroku_5qdxqckm'*/,
+MongoClient.connect('mongodb://crohit92:Mohit_4085@ds129023.mlab.com:29023/heroku_5qdxqckm'/*'mongodb://127.0.0.1:27017/myJob'*/,
     (err, db) => {
         //console.log(db);
         
