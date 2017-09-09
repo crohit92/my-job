@@ -15,11 +15,31 @@ class AccountsController {
     }
     get(req, res) {
         let filter = req.query.hasOwnProperty('groupId') ? { groupId: req.query.groupId } : {};
+        let pagination = [];
+        if (req.query.hasOwnProperty('skip') && req.query.hasOwnProperty('limit')) {
+            pagination.push({ $skip: (+req.query.skip) });
+            pagination.push({ $limit: (+req.query.limit) });
+        }
+        this.db
+            .collection(ACCOUNTS)
+            .aggregate([
+            { $match: filter },
+            ...pagination
+        ]).toArray()
+            .then((accounts) => {
+            res.status(200).send(accounts);
+        }).catch(err => {
+            res.status(400).send(err);
+        });
+    }
+    getById(req, res) {
         this.db
             .collection(ACCOUNTS)
             .aggregate([
             {
-                $match: filter
+                $match: {
+                    id: req.params.id
+                }
             },
             {
                 $lookup: {
@@ -104,18 +124,7 @@ class AccountsController {
                     }
                 }
             }
-        ]).toArray()
-            .then((accounts) => {
-            res.status(200).send(accounts);
-        }).catch(err => {
-            res.status(400).send(err);
-        });
-    }
-    getById(req, res) {
-        this.db
-            .collection(ACCOUNTS)
-            .findOne({ id: req.params.id })
-            .then((account) => {
+        ]).next().then((account) => {
             res.status(200).send(account);
         }).catch(err => {
             res.status(400).send(err);

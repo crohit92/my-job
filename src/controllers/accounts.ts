@@ -23,11 +23,34 @@ export class AccountsController {
     private get(req: Request, res: Response) {
 
         let filter = req.query.hasOwnProperty('groupId') ? { groupId: req.query.groupId } : {};
+        let pagination = [];
+        if (req.query.hasOwnProperty('skip')  && req.query.hasOwnProperty('limit')) {
+            pagination.push({ $skip: (+req.query.skip)})
+            pagination.push({ $limit: (+req.query.limit) })
+        }
+
+
+        this.db
+            .collection(ACCOUNTS)
+            .aggregate([
+                { $match: filter },
+                ...pagination
+            ]).toArray()
+            .then((accounts: Account[]) => {
+                res.status(200).send(accounts);
+            }).catch(err => {
+                res.status(400).send(err);
+            })
+    }
+
+    private getById(req: Request, res: Response) {
         this.db
             .collection(ACCOUNTS)
             .aggregate([
                 {
-                    $match: filter
+                    $match: {
+                        id: req.params.id
+                    }
                 },
                 {
                     $lookup: {
@@ -80,7 +103,7 @@ export class AccountsController {
                         name: { $first: '$name' },
                         group: { $first: '$group' },
                         openingBalance: { $first: '$openingBalance' },
-                        natureOfOB:{$first:'$natureOfOB'},
+                        natureOfOB: { $first: '$natureOfOB' },
                         groupId: { $first: '$groupId' },
                         debit: {
                             $sum: '$debits.amount'
@@ -112,19 +135,7 @@ export class AccountsController {
                         }
                     }
                 }
-            ]).toArray()
-            .then((accounts: Account[]) => {
-                res.status(200).send(accounts);
-            }).catch(err => {
-                res.status(400).send(err);
-            })
-    }
-
-    private getById(req: Request, res: Response) {
-        this.db
-            .collection(ACCOUNTS)
-            .findOne({ id: req.params.id })
-            .then((account: Account) => {
+            ]).next().then((account: Account) => {
                 res.status(200).send(account);
             }).catch(err => {
                 res.status(400).send(err);
