@@ -13,11 +13,12 @@ import { Group } from '../models/group.model';
     templateUrl: './accounts-list.html'
 })
 export class AccountsListComponent {
-
-    accounts: Observable<Account[]>;
-    groups:Observable<Group[]>;
-    selectedAccount:Account;
-
+    filterAccounts: string;
+    accounts: Account[] = new Array<Account>();
+    groups: Observable<Group[]>;
+    selectedAccount: Account;
+    limit = 8;
+    pageNumber = 1;
     @ViewChild("template") template: TemplateRef<any>;
     public modalRef: BsModalRef;
     constructor(
@@ -25,66 +26,88 @@ export class AccountsListComponent {
         private router: Router,
         private modalService: BsModalService
     ) {
-       
+
         this.fetchAccounts();
         this.fetchGroups();
     }
 
     fetchAccounts() {
-        this.accounts = this.api.sendRequest({
+        this.api.sendRequest({
             endpoint: ApiRoutes.FETCH_ALL_ACCOUNTS,
-            method: 'get'
-        })
-        .map((res)=>res.json());
+            method: 'get',
+            queryParams: {
+                page: this.pageNumber,
+                limit: this.limit,
+                skip: (this.pageNumber - 1) * this.limit
+            }
+        }).subscribe((res) => {
+            let response = res.json() as Account[];
+            if (response.length) {
+                this.accounts = [...this.accounts, ...response];
+                this.pageNumber += 1;
+            }
+        });
     }
 
-    fetchGroups(){
-        this.groups = this.api.sendRequest({
+    fetchGroups() {
+        this.api.sendRequest({
             endpoint: ApiRoutes.FETCH_ALL_GROUPS,
             method: 'get'
-        })
-        .map((res)=>res.json());
+        }).subscribe((res) => this.groups = res.json());
     }
 
     editAccount(account) {
-        this.selectedAccount = {...account};
+        this.selectedAccount = { ...account };
         this.modalRef = this.modalService.show(this.template);
     }
 
-    showBlankModal(){
+    showBlankModal() {
         this.selectedAccount = new Account();
         this.modalRef = this.modalService.show(this.template);
     }
 
-    createUpdateAccount(){
-        if(this.selectedAccount.id){
+    onAccountUpdated(id, account) {
+        let updatedAccountIndex = this.accounts.findIndex(ac => ac.id == id);
+        if (updatedAccountIndex != -1) {
+            this.accounts[updatedAccountIndex] = { ...account };
+        }
+    }
+
+    createUpdateAccount() {
+        if (this.selectedAccount.id) {
             this.api.sendRequest({
                 endpoint: ApiRoutes.UPDATE_ACCOUNT,
                 method: 'put',
-                body:this.selectedAccount,
-                routeParams:{
-                    '':this.selectedAccount.id
+                body: this.selectedAccount,
+                routeParams: {
+                    '': this.selectedAccount.id
                 }
-            }).subscribe(()=>{
+            }).subscribe(() => {
                 this.modalRef.hide();
-                this.fetchAccounts();
+                this.onAccountUpdated(this.selectedAccount.id, this.selectedAccount);
             })
         }
-        else{
+        else {
             this.api.sendRequest({
                 endpoint: ApiRoutes.CREATE_ACCOUNT,
                 method: 'post',
-                body:this.selectedAccount
-            }).subscribe(()=>{
+                body: this.selectedAccount
+            }).subscribe((response) => {
                 this.modalRef.hide();
-                this.fetchAccounts();
+                this.selectedAccount.id = response.json();
+                this.accounts.push(this.selectedAccount);
             })
         }
-        
+
     }
 
-    compareItems(item1,item2){
-        return item1 && item2 ? item1 == item2:false;
+    compareItems(item1, item2) {
+        return item1 && item2 ? item1 == item2 : false;
     }
 
+    
+
+    isBalanceNegative(account) {
+        return account.balance < 0;
+    }
 }

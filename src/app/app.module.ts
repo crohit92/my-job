@@ -6,7 +6,7 @@ import { MaterialExportModule } from './material-export.module';
 import { RouterModule } from '@angular/router';
 import { HttpModule } from '@angular/http';
 import { AppComponent } from './app.component';
-import { TypeaheadModule, ModalModule } from 'ngx-bootstrap';
+import { TypeaheadModule, ModalModule, PopoverModule } from 'ngx-bootstrap';
 import 'hammerjs';
 
 import { ROUTES } from './app.routes';
@@ -43,6 +43,7 @@ import { Filter, FilterTransactions } from './loop-filter.pipe';
     RouterModule.forRoot(ROUTES),
     MaterialExportModule,
     TypeaheadModule.forRoot(),
+    PopoverModule.forRoot(),
     ModalModule.forRoot()
   ],
   providers: [Api],

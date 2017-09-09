@@ -22,9 +22,14 @@ import { Transaction } from '../../app/models/transaction.model';
     `]
 })
 export class TransationsListComponent {
-    accounts: Observable<Account[]>;
-    transactions: Observable<Transaction[]>;
+
+    accounts: Account[];
+    accountInfo: any;
+    filter: any = {};
+    transactions: Transaction[] = new Array<Transaction>();
     currentTransaction: Transaction;
+    filterByDate: boolean;
+    filterType: number;
     config = {
         animated: false,
         keyboard: true,
@@ -33,6 +38,7 @@ export class TransationsListComponent {
     };
     @ViewChild("template") template: TemplateRef<any>;
     public modalRef: BsModalRef;
+    filterText: string;
     constructor(
         private api: Api,
         private router: Router,
@@ -40,37 +46,44 @@ export class TransationsListComponent {
     ) {
 
         this.fetchAccounts();
-        this.fetchTransactions();
     }
 
     showBlankModal() {
         this.currentTransaction = new Transaction();
-        this.modalRef = this.modalService.show(this.template,this.config);
+        this.modalRef = this.modalService.show(this.template, this.config);
     }
     editTransaction(transaction: Transaction) {
         this.currentTransaction = { ...transaction };
-        this.modalRef = this.modalService.show(this.template,this.config);
+        this.modalRef = this.modalService.show(this.template, this.config);
     }
 
     fetchAccounts() {
-        this.accounts = this.api.sendRequest({
+        this.api.sendRequest({
             endpoint: ApiRoutes.FETCH_ALL_ACCOUNTS,
             method: 'get'
-        })
-            .map((res) => res.json());
+        }).subscribe((res) => this.accounts = res.json());
     }
 
-    fetchTransactions() {
-        this.transactions = this.api.sendRequest({
+    fetchTransactions(params) {
+        this.api.sendRequest({
             endpoint: ApiRoutes.FETCH_ALL_TRANSACTIONS,
-            method: 'get'
-        })
-            .map((res) => res.json());
+            method: 'get',
+            queryParams: params
+        }).subscribe((res) => {
+            this.transactions = res.json() as Transaction[];
+        });
     }
 
-
+    onTransactionUpdated(id: string, transaction: Transaction) {
+        let updatedTransactionIndex = this.transactions.findIndex(tr => tr.id == id);
+        if (updatedTransactionIndex != -1) {
+            this.transactions[updatedTransactionIndex] = { ...transaction };
+        }
+    }
 
     saveTransaction() {
+        this.currentTransaction.debitAccountId = this.currentTransaction.debit.id;
+        this.currentTransaction.creditAccountId = this.currentTransaction.credit.id
         if (this.currentTransaction.id) {
             this.api.sendRequest({
                 endpoint: ApiRoutes.UPDATE_TRANSACTION,
@@ -80,8 +93,8 @@ export class TransationsListComponent {
                 },
                 body: this.currentTransaction
             }).subscribe(() => {
+                this.filterTransactions(this.filterType,this.filterByDate,this.filter);
                 this.modalRef.hide();
-                this.fetchTransactions();
             });
         }
         else {
@@ -89,11 +102,101 @@ export class TransationsListComponent {
                 endpoint: ApiRoutes.CREATE_TRANSACTION,
                 method: 'post',
                 body: this.currentTransaction
-            }).subscribe(() => {
+            }).subscribe((response) => {
+                this.currentTransaction.id = response.json().id;
+                this.filterTransactions(this.filterType,this.filterByDate,this.filter);
                 this.modalRef.hide();
-                this.fetchTransactions();
+
             });
         }
+
+    }
+
+    compareItems(item1, item2) {
+        return item1 && item2 ? item1.id == item2.id : false;
+    }
+
+    filterTransactions(filterType, filterByDate, filter) {
+
+        let queryParams = filterByDate || filterType == 1 ? { from: this.filter.fromDate, to: this.filter.toDate } : {};
+        if (filterType == 1) {
+            queryParams = { ...queryParams, type: 1 };
+        }
+        else if (filterType == 2) {
+            this.fetchAccountBalance(this.filter.accountId);
+            queryParams = {
+                ...queryParams, ...{
+                    type: 2,
+                    accountId: filter.accountId
+                }
+            }
+
+        }
+        else if (filterType == 3) {
+            queryParams = {
+                ...queryParams,
+                ...{
+                    type: 3,
+                    text: filter.text
+                }
+            }
+        }
+        this.fetchTransactions(queryParams);
+    }
+    canFilter(filterType: number, filterByDate: boolean) {
+        let filterByDateExp = filterByDate ? this.filter.fromDate && this.filter.toDate : true;
+        if (filterType == 1) {
+            return this.filter.fromDate && this.filter.toDate;
+        }
+        else if (filterType == 2) {
+            return filterByDateExp && this.filter.accountId
+        }
+        else if (filterType == 3) {
+            return filterByDateExp && this.filter.text
+        }
+    }
+
+    fetchAccountBalance(accountId: string): any {
+        this.api.sendRequest({
+            endpoint: ApiRoutes.FETCH_ALL_ACCOUNTS,
+            method: 'get',
+            routeParams: {
+                '': accountId
+            }
+        }).subscribe((response) => {
+            let accountInfo = response.json();
+            this.calculateBalance(accountInfo);
+            this.accountInfo = accountInfo;
+        })
+    }
+    calculateBalance(account) {
+        let accountBalance = 0;
+        if (account.accountType.nature == 'dr') {
+            accountBalance += (account.debit - account.credit);
+            if (account.natureOfOB == 'dr') {
+                accountBalance += account.openingBalance;
+            }
+            else {
+                accountBalance -= account.openingBalance;
+            }
+        }
+        else {
+            accountBalance += (account.credit - account.debit);
+            if (account.natureOfOB == 'dr') {
+                accountBalance -= account.openingBalance;
+            }
+            else {
+                accountBalance += account.openingBalance;
+            }
+        }
+        if(account.accountType.nature == 'dr'){
+            account.balanceType = accountBalance<0?'cr':'dr';
+        }
+        else{
+            account.balanceType = accountBalance<0?'dr':'cr';
+        }
+        account.balance = Math.abs(accountBalance);
+        return accountBalance;
 
     }
 }

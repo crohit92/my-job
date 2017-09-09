@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Http, RequestOptionsArgs } from '@angular/http';
-//const apiBase = 'https://glacial-bayou-25223.herokuapp.com/';
+//const apiBase = 'https://pacific-coast-70867.herokuapp.com/';
 const apiBase = 'http://localhost:8080/';
 
 export class Request {
@@ -57,14 +57,14 @@ export class Api {
                     route = `${route}/${routeParams['']}`
                 }
                 else {
-                    route = `${route}/${key}/${routeParams.key}`
+                    route = `${route}/${key}/${routeParams[key]}`
                 }
 
-            }
+            } 
         let paramChar = '?';
         if (queryParams)
             for (var key in queryParams) {
-                route = `${route}${paramChar}${key}=${queryParams.key}`;
+                route = `${route}${paramChar}${key}=${queryParams[key]}`;
                 paramChar = '&';
             }
         return route;

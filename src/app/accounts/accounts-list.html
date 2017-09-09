@@ -2,7 +2,8 @@
     <thead>
         <tr>
             <th>Account</th>
-            <th>Balance</th>
+            <th>Opening Balance(OB)</th>
+            <th>Nature of OB</th>
             <th>Action</th>
         </tr>
         <tr>
@@ -15,10 +16,14 @@
         </tr>
     </thead>
     <tbody>
-        <tr *ngFor="let account of ((accounts | async) | filter: 'name' : filterAccounts)">
+        <tr *ngFor="let account of ((accounts) | filter: 'name' : filterAccounts)">
             <td>{{account.name}}</td>
-            <td>{{account?.accountType?.nature == 'dr'?(account.openingBalance+account.debit-account.credit):(account.openingBalance+account.credit-account.debit)}}</td>
+            <td>{{account.openingBalance}}</td><!--[ngClass]="{'bg-danger':calculateBalance(account)<0}">{{calculateBalance(account)}}-->
+            <td>{{account.natureOfOB == 'dr'?'Debit':'Credit'}}</td>
             <td><input type="button" value="edit" (click)="editAccount(account)" class="btn btn-default"></td>
+        </tr>
+        <tr>
+            <td colspan="4" class="text-center"><button (click)="fetchAccounts()" class="btn btn-default">Load More</button></td>
         </tr>
     </tbody>
 </table>
@@ -31,28 +36,37 @@
           </button>
     </div>
     <div class="modal-body">
-        <form class="container-fluid">
+        <form #accountForm="ngForm" class="container-fluid">
             <div class="row">
                 <div class="col-xs-12">
                     <label>Account Name
-                        <input class="form-control" placeholder="Account Name" name="accountName" [(ngModel)]="selectedAccount.name">
+                        <input class="form-control" required placeholder="Account Name" name="accountName" [(ngModel)]="selectedAccount.name">
                     </label>
                 </div>
                 <div class="col-xs-12">
                     <label>Group
-                        <select class="form-control" name="group" [(ngModel)]="selectedAccount.groupId" [compareWith]="compareItems">
+                        <select class="form-control" name="group" required [(ngModel)]="selectedAccount.groupId" [compareWith]="compareItems">
                             <option [ngValue]="undefined">Select Group</option>
-                            <option *ngFor="let group of groups | async" [ngValue]="group?.id">{{group.name}}</option>
+                            <option *ngFor="let group of groups" [ngValue]="group.id">{{group.name}}</option>
                         </select>
                     </label>
                 </div>
                 <div class="col-xs-12">
-                    <label>Nature of account
-                        <select [(ngModel)]="selectedAccount"></select>
+                    <label>Opening Balance
+                        <input class="form-control" name="openingBalance" placeholder="Opening Balance" required min="0" type="number" [(ngModel)]="selectedAccount.openingBalance">
                     </label>
                 </div>
                 <div class="col-xs-12">
-                    <button class="btn btn-primary" (click)="createUpdateAccount()">{{selectedAccount.id?'Update':'Create'}}</button>
+                    <label>Nature of Opening Balance
+                        <select class="form-control" name="nature" required [(ngModel)]="selectedAccount.natureOfOB">
+                            <option [ngValue]="undefined">Select One</option>
+                            <option value="dr">Debit</option>
+                            <option value="cr">Credit</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="col-xs-12">
+                    <button class="btn btn-primary" [disabled]="!accountForm.valid" (click)="createUpdateAccount()">{{selectedAccount.id?'Update':'Create'}}</button>
                     <button class="btn btn-secondary" (click)="modalRef.hide()">Close</button>
                 </div>
             </div>

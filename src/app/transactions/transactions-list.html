@@ -1,20 +1,125 @@
 <div class="container-fluid">
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="form-group">
+                <label>Filter transactions by: 
+                <select [(ngModel)]="filterType" class="form-control">
+                    <option [ngValue]="undefined" [disabled]>Filter transactions by</option>
+                    <option [ngValue]="1">Date Range</option> 
+                    <option [ngValue]="2">Account</option>
+                    <option [ngValue]="3">Text Search</option>
+                </select>
+            </label>
+            </div>
+        </div>
+
+    </div>
+
+
+    <div class="row" *ngIf="filterType == 2">
+        <div class="col-xs-12">
+            <label>Select Account 
+                <select class="form-control" (change)="accountInfo=undefined" [(ngModel)]="filter.accountId" name="account">
+                    <option [ngValue]="undefined">Select Account</option>
+                    <option *ngFor="let account of accounts" [ngValue]="account.id">{{account.name}}</option>
+                </select>
+            </label>
+        </div>
+    </div>
+    <div class="row" *ngIf="filterType == 3">
+        <div class="col-xs-12">
+            <label>Narration to search 
+                <input class="form-control" type="text" placeholder="Narration to search" name="text" [(ngModel)]="filter.text">
+            </label>
+        </div>
+
+
+    </div>
+    <div class="row" *ngIf="filterType && filterType!=1">
+        <div class="col-xs-12">
+            <label>Filter by Date <input type="checkbox" [(ngModel)]="filterByDate"></label>
+        </div>
+    </div>
+    <div class="row" *ngIf="filterByDate || filterType==1">
+        <div class="col-xs-6">
+            <label>From Date 
+                <input type="date" class="form-control" [(ngModel)]="filter.fromDate">
+                </label>
+        </div>
+        <div class="col-xs-6">
+            <label>To Date 
+                <input type="date" class="form-control" [(ngModel)]="filter.toDate">
+                </label>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12">
+            <input type="button" [disabled]="!canFilter(filterType,filterByDate)" class="btn btn-default" value="Search" (click)="filterTransactions(filterType,filterByDate,filter)">
+            <button class="btn btn-sm btn-primary" (click)="showBlankModal()">Add Transaction</button>
+        </div>
+    </div>
+</div>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Debit</th>
+            <th>Credit</th>
+            <th>Amount</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let transaction of transactions">
+            <td>{{transaction.date | date}}</td>
+            <td>{{transaction.debit.name}}</td>
+            <td>{{transaction.credit.name}}</td>
+            <td>{{transaction.amount}}</td>
+            <td><button class="btn btn-default glyphicon glyphicon-tag" popover="{{transaction.narration}}" popoverTitle="Narration"
+                    placement="left" triggers="focus"></button> <button class="btn btn-default" (click)="editTransaction(transaction)">Edit</button></td>
+        </tr>
+    </tbody>
+    <tfoot class="jumbotron" *ngIf="filterType==2 && accountInfo">
+        <tr>
+            <td colspan="5" class="text-center"><strong>Account Balance Till Date</strong></td>
+        </tr>
+        <tr>
+            <td colspan="3">Opening Balance</td>
+            <td colspan="2" class="text-right">({{accountInfo.natureOfOB}}) {{accountInfo.openingBalance}}</td>
+        </tr>
+        <tr>
+            <td colspan="3">Total Debits</td>
+            <td colspan="2" class="text-right">{{accountInfo.debit}}</td>
+        </tr>
+        <tr>
+            <td colspan="3">Total Credits</td>
+            <td colspan="2" class="text-right">{{accountInfo.credit}}</td>
+        </tr>
+        <tr>
+            <td colspan="3">Net Balance</td>
+            <td colspan="2" class="text-right">({{accountInfo.balanceType}}) {{accountInfo.balance}}</td>
+        </tr>
+    </tfoot>
+</table>
+
+<!-- <div class="container-fluid">
     <div class="row transaction">
         <div class="col-xs-4 bg-info">Dr</div>
         <div class="col-xs-4 bg-warning">Cr</div>
         <div class="col-xs-4 bg-success">Amount</div>
-        <div class="col-xs-8 bg-primary"><input placeholder="Filter Transactions" [(ngModel)]="filterText" class="form-control"></div>
-        <div class="col-xs-4"><button class="btn btn-primary" (click)="showBlankModal()">Add Transaction</button></div>
+        <div class="col-xs-4"></div>
     </div>
-    <div class="row transaction" (click)="editTransaction(transaction)" *ngFor="let transaction of transactions | async | filterTransactions:  filterText">
+    <div class="row transaction" (click)="editTransaction(transaction)"  | filterTransactions:  filterText">
         <div class="col-xs-4 bg-info">{{transaction.debit.name}}</div>
         <div class="col-xs-4 bg-warning">{{transaction.credit.name}}</div>
         <div class="col-xs-4 bg-success">{{transaction.amount}}</div>
         <div class="col-xs-8 bg-primary">{{transaction?.narration}}</div>
         <div class="col-xs-4">User 1</div>
-        <hr  style="width:100%;border-top: 1px solid #3f3939">
+        <hr style="width:100%;border-top: 1px solid #3f3939">
     </div>
-</div>
+
+</div> -->
 
 <template #template>
     <div class="modal-header">
@@ -27,18 +132,23 @@
         <form #transactionForm="ngForm" class="container-fluid">
             <div class="row">
                 <div class="col-xs-12">
+                    <label>Transaction Date
+                            <input type="date" name="date" class="form-control" [(ngModel)]="currentTransaction.date">
+                        </label>
+                </div>
+                <div class="col-xs-12">
                     <label>Debit Account
-                        <select class="form-control" required [(ngModel)]="currentTransaction.debitAccountId" name="debit">
+                        <select class="form-control" required [compareWith]="compareItems" [(ngModel)]="currentTransaction.debit" name="debit">
                             <option [ngValue]="undefined">Debit Account</option>
-                            <option *ngFor="let account of accounts | async" [ngValue]="account.id">{{account.name}}</option>
+                            <option *ngFor="let account of accounts" [ngValue]="account">{{account.name}}</option>
                         </select>
                     </label>
                 </div>
                 <div class="col-xs-12">
                     <label>Credit Account
-                        <select class="form-control" required [(ngModel)]="currentTransaction.creditAccountId" name="credit">
+                        <select class="form-control" required [compareWith]="compareItems" [(ngModel)]="currentTransaction.credit" name="credit">
                             <option [ngValue]="undefined">Credit Account</option>
-                            <option *ngFor="let account of accounts | async" [ngValue]="account.id">{{account.name}}</option>
+                            <option *ngFor="let account of accounts " [ngValue]="account">{{account.name}}</option>
                         </select>
                     </label>
                 </div>
@@ -49,7 +159,7 @@
                     <label>Narration<textarea required type="text" class="form-control" name="narration" [(ngModel)]="currentTransaction.narration"></textarea></label>
                 </div>
                 <div class="col-xs-12">
-                    <button [disabled]="!transactionForm.valid" (click)="saveTransaction()" class="btn btn-primary">{{currentTransaction.id?'Update':'Add'}}</button> <button (click)="modalRef.hide()" class="btn btn-secondary">Close</button>
+                    <button [disabled]="!transactionForm.valid" (click)="saveTransaction()" class="btn btn-primary">{{currentTransaction.id?'Update':'Add'}}</button>                    <button (click)="modalRef.hide()" class="btn btn-secondary">Close</button>
                 </div>
             </div>
         </form>
