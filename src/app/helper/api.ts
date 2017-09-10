@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Http, RequestOptionsArgs } from '@angular/http';
+import { NgProgressService } from 'ngx-progressbar';
 //const apiBase = 'https://pacific-coast-70867.herokuapp.com/';
 const apiBase = 'http://localhost:8080/';
 
@@ -16,13 +17,13 @@ export const ApiRoutes = {
     FETCH_ALL_ACCOUNTS: 'accounts',
     FETCH_ALL_USERS: 'users',
     FETCH_ALL_TASKS: 'tasks',
-    FETCH_ALL_CUSTOMERS:'accounts?groupId=16',
-    FETCH_ALL_TRANSACTIONS:'transactions',
+    FETCH_ALL_CUSTOMERS: 'accounts?groupId=16',
+    FETCH_ALL_TRANSACTIONS: 'transactions',
 
     UPDATE_ACCOUNT: 'accounts',
     UPDATE_USER: 'users',
-    UPDATE_TASK:'tasks',
-    UPDATE_TRANSACTION:'transactions',
+    UPDATE_TASK: 'tasks',
+    UPDATE_TRANSACTION: 'transactions',
 
     CREATE_USER: 'users',
     CREATE_ACCOUNT: 'accounts',
@@ -33,13 +34,14 @@ export const ApiRoutes = {
     DELETE_ACCOUNT: 'accounts',
     DELETE_TASK: 'tasks',
     DELETE_USER: 'users',
-    
-    
+
+
 }
 
 @Injectable()
 export class Api {
-    constructor(private http: Http) { }
+    constructor(private http: Http,
+        public progressService: NgProgressService) { }
 
     private removeTrailingSlash(endpoint: string) {
         if (endpoint.endsWith('/')) {
@@ -60,7 +62,7 @@ export class Api {
                     route = `${route}/${key}/${routeParams[key]}`
                 }
 
-            } 
+            }
         let paramChar = '?';
         if (queryParams)
             for (var key in queryParams) {
@@ -71,12 +73,13 @@ export class Api {
     }
 
     sendRequest(request: Request) {
+        this.progressService.start();
         return this.http.request(
             this.buildURL(request.endpoint, request.routeParams, request.queryParams),
             {
                 body: request.body,
                 method: request.method
-            });
+            }).map(response => { this.progressService.done(); return response });
     }
 
 

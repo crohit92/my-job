@@ -2,11 +2,11 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { MaterialExportModule } from './material-export.module';
 import { RouterModule } from '@angular/router';
 import { HttpModule } from '@angular/http';
 import { AppComponent } from './app.component';
-import { TypeaheadModule, ModalModule, PopoverModule } from 'ngx-bootstrap';
+import { TypeaheadModule, ModalModule, PopoverModule  } from 'ngx-bootstrap';
+import { NgProgressModule } from 'ngx-progressbar';
 import 'hammerjs';
 
 import { ROUTES } from './app.routes';
@@ -41,10 +41,10 @@ import { Filter, FilterTransactions } from './loop-filter.pipe';
     HttpModule,
     FormsModule,
     RouterModule.forRoot(ROUTES),
-    MaterialExportModule,
+    NgProgressModule,
     TypeaheadModule.forRoot(),
     PopoverModule.forRoot(),
-    ModalModule.forRoot()
+    ModalModule.forRoot(),
   ],
   providers: [Api],
   bootstrap: [AppComponent]
