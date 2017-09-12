@@ -11,12 +11,13 @@ export class UsersController {
         this.router.get('/', this.findUsers.bind(this));
         this.router.get('/:id', this.findUser.bind(this));
         this.router.post('/', this.createUser.bind(this));
+        this.router.post('/login', this.login.bind(this));
         this.router.put('/:id', this.updateUser.bind(this));
-        this.router.delete('/:id',this.deleteUser.bind(this))
+        this.router.delete('/:id', this.deleteUser.bind(this))
     }
 
     private findUsers(req: Request, res: Response) {
-        
+
         this.db
             .collection(USERS)
             .find().toArray()
@@ -36,10 +37,10 @@ export class UsersController {
             })
     }
 
-    private fetchUser(userId:number):Promise<User>{
-        return  this.db
+    private fetchUser(userId: number): Promise<User> {
+        return this.db
             .collection(USERS)
-            .findOne({id: userId });
+            .findOne({ id: userId });
     }
 
     private createUser(req: Request, res: Response) {
@@ -66,9 +67,32 @@ export class UsersController {
             })
     }
 
-    private deleteUser(req:Request,res:Response){
-        this.db.collection(USERS).deleteOne({id:req.params.id})
-        .then(deleteResult=>res.send())
-        .catch(error=>res.status(400).send(error));
+    private deleteUser(req: Request, res: Response) {
+        this.db.collection(USERS).deleteOne({ id: req.params.id })
+            .then(deleteResult => res.send())
+            .catch(error => res.status(400).send(error));
+    }
+
+    private login(req: Request, res: Response) {
+        this.db.collection(USERS).findOne({
+            $and: [{
+                $or: [{
+                    email:
+                    { $eq: req.body.email.toLowerCase() }
+                }]
+            },
+            {
+                password:{$eq:req.body.password}
+            }
+        ]
+        }).then(user => {
+            if(user){
+                res.send(user)
+            }
+            else{
+                res.status(403).send();
+            }
+        })
+            .catch(err => res.status(500).send(err));
     }
 }

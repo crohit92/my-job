@@ -9,6 +9,7 @@ class UsersController {
         this.router.get('/', this.findUsers.bind(this));
         this.router.get('/:id', this.findUser.bind(this));
         this.router.post('/', this.createUser.bind(this));
+        this.router.post('/login', this.login.bind(this));
         this.router.put('/:id', this.updateUser.bind(this));
         this.router.delete('/:id', this.deleteUser.bind(this));
     }
@@ -61,6 +62,27 @@ class UsersController {
         this.db.collection(USERS).deleteOne({ id: req.params.id })
             .then(deleteResult => res.send())
             .catch(error => res.status(400).send(error));
+    }
+    login(req, res) {
+        this.db.collection(USERS).findOne({
+            $and: [{
+                    $or: [{
+                            email: { $eq: req.body.email.toLowerCase() }
+                        }]
+                },
+                {
+                    password: { $eq: req.body.password }
+                }
+            ]
+        }).then(user => {
+            if (user) {
+                res.send(user);
+            }
+            else {
+                res.status(403).send();
+            }
+        })
+            .catch(err => res.status(500).send(err));
     }
 }
 UsersController.route = `/${USERS}`;
