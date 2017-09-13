@@ -26,13 +26,13 @@ export class TaskComponent {
         this.api.sendRequest({
             endpoint: ApiRoutes.FETCH_ALL_USERS,
             method: "get"
-        }).subscribe((res => this.users = res.json()))
+        }).subscribe((res => this.users = res as User[]))
 
         //fetch customers
         this.api.sendRequest({
             endpoint: ApiRoutes.FETCH_ALL_CUSTOMERS,
             method: "get"
-        }).subscribe((res => this.customers = res.json()))
+        }).subscribe((res => this.customers = res as any[]))
 
         this.frequencies = TASK_FREQUENCY_TYPES;
 
@@ -69,7 +69,7 @@ export class TaskComponent {
         })
             .subscribe(
             res => {
-            this.task.id = ""+res.json(); 
+            this.task.id = ""+res ; 
             this.taskCreated.emit(this.task);
             this.task = {};
             },

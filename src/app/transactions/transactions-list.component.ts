@@ -61,7 +61,7 @@ export class TransationsListComponent {
         this.api.sendRequest({
             endpoint: ApiRoutes.FETCH_ALL_ACCOUNTS,
             method: 'get'
-        }).subscribe((res) => this.accounts = res.json());
+        }).subscribe((res) => this.accounts = res as Account[]);
     }
 
     fetchTransactions(params) {
@@ -70,7 +70,7 @@ export class TransationsListComponent {
             method: 'get',
             queryParams: params
         }).subscribe((res) => {
-            this.transactions = res.json() as Transaction[];
+            this.transactions = res  as Transaction[];
         });
     }
 
@@ -103,7 +103,7 @@ export class TransationsListComponent {
                 method: 'post',
                 body: this.currentTransaction
             }).subscribe((response) => {
-                this.currentTransaction.id = response.json().id;
+                this.currentTransaction.id = (response as any).id;
                 this.filterTransactions(this.filterType,this.filterByDate,this.filter);
                 this.modalRef.hide();
 
@@ -164,7 +164,7 @@ export class TransationsListComponent {
                 '': accountId
             }
         }).subscribe((response) => {
-            let accountInfo = response.json();
+            let accountInfo = response ;
             this.calculateBalance(accountInfo);
             this.accountInfo = accountInfo;
         })

@@ -1,17 +1,17 @@
 <form #loginForm="ngForm" name="loginForm" class="contanier-fluid">
   <div class="row">
-    <div class="col-xs-12">
+    <div class="col-xs-12 text-center">
       <label>Mobile Number
-        </input class="form-control" [(ngModel)]="credentials.mobile" placeholder="Enter Mobile Number">
+        <input class="form-control" name="mobile" [(ngModel)]="credentials.mobile" placeholder="Enter Mobile Number">
       </label>
     </div>
-    <div class="col-xs-12">
+    <div class="col-xs-12 text-center">
         <label>Password
-          </input class="form-control" [(ngModel)]="credentials.password" placeholder="Enter Password">
+          <input class="form-control" name="password" [(ngModel)]="credentials.password" placeholder="Enter Password">
         </label>
       </div>
   </div>
-  <div class="col-xs-12">
+  <div class="col-xs-12 text-center">
     <button class="btn btn-primary" [disabled]="!loginForm.valid" (click)="login()">Login</button>
   </div>
 </form>

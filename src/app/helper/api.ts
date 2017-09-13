@@ -1,6 +1,11 @@
 import { Injectable } from '@angular/core';
-import { Http, RequestOptionsArgs } from '@angular/http';
+import { HttpClient } from '@angular/common/http';
 import { NgProgressService } from 'ngx-progressbar';
+import { HttpRequest } from "@angular/common/http";
+import { HttpResponse } from "@angular/common/http";
+import { HttpEvent } from "@angular/common/http";
+import { HttpErrorResponse } from "@angular/common/http";
+import { Observable } from "rxjs/Observable";
 //const apiBase = 'https://pacific-coast-70867.herokuapp.com/';
 const apiBase = 'http://localhost:8080/';
 
@@ -30,8 +35,8 @@ export const ApiRoutes = {
     CREATE_GROUP: 'groups',
     CREATE_TASK: 'tasks',
     CREATE_TRANSACTION: 'transactions',
-    LOGIN:'users/login',
-    
+    LOGIN: 'users/login',
+
     DELETE_ACCOUNT: 'accounts',
     DELETE_TASK: 'tasks',
     DELETE_USER: 'users',
@@ -41,7 +46,7 @@ export const ApiRoutes = {
 
 @Injectable()
 export class Api {
-    constructor(private http: Http,
+    constructor(private http: HttpClient,
         public progressService: NgProgressService) { }
 
     private removeTrailingSlash(endpoint: string) {
@@ -75,12 +80,13 @@ export class Api {
 
     sendRequest(request: Request) {
         this.progressService.start();
+
         return this.http.request(
+            request.method,
             this.buildURL(request.endpoint, request.routeParams, request.queryParams),
             {
-                body: request.body,
-                method: request.method
-            }).map(response => { this.progressService.done(); return response });
+                body: request.body
+            });
     }
 
 

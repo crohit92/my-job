@@ -23,7 +23,7 @@ export class TasksComponent {
     fetchTasks() {
         this.api.sendRequest({ endpoint: ApiRoutes.FETCH_ALL_TASKS, method: 'get' })
             .subscribe(res => {
-                let tasks = res.json();
+                let tasks = res as Task[];
                 (tasks as Task[]).forEach(t => {
                     t.customer = t.customer[0];
                     t.user = t.user[0];

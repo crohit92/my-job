@@ -17,7 +17,7 @@ export class UsersListComponent {
             endpoint:ApiRoutes.FETCH_ALL_USERS,
             method:'get'
         }).subscribe(
-            res=>{this.users = res.json()},
+            res=>{this.users = res as any[]},
             err=>{console.log(err);}
         );
     }

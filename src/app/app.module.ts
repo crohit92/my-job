@@ -1,9 +1,10 @@
 import { BrowserModule } from '@angular/platform-browser';
+import {HTTP_INTERCEPTORS} from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
-import { HttpModule } from '@angular/http';
+import { HttpClientModule } from '@angular/common/http';
 import { AppComponent } from './app.component';
 import { TypeaheadModule, ModalModule, PopoverModule } from 'ngx-bootstrap';
 import { NgProgressModule } from 'ngx-progressbar';
@@ -24,6 +25,7 @@ import { TransationsListComponent } from './transactions/transactions-list.compo
 import { Filter, FilterTransactions } from './loop-filter.pipe';
 import { LoginComponent } from './login/login.component';
 import { StorageService } from './helper/storage.service';
+import { NoopInterceptor } from "./helper/http-intercepter";
 
 @NgModule({
   declarations: [
@@ -42,17 +44,21 @@ import { StorageService } from './helper/storage.service';
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
-    ToastrModule,
-    HttpModule,
+    ToastrModule.forRoot(),
+    HttpClientModule,
     FormsModule,
-    StorageService,
     RouterModule.forRoot(ROUTES),
     NgProgressModule,
     TypeaheadModule.forRoot(),
     PopoverModule.forRoot(),
     ModalModule.forRoot(),
   ],
-  providers: [Api],
+  providers: [Api,
+    StorageService,{
+      provide: HTTP_INTERCEPTORS,
+      useClass: NoopInterceptor,
+      multi: true,
+    }],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

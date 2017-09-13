@@ -15,7 +15,7 @@ import { Group } from '../models/group.model';
 export class AccountsListComponent {
     filterAccounts: string;
     accounts: Account[] = new Array<Account>();
-    groups: Observable<Group[]>;
+    groups: Group[];
     selectedAccount: Account;
     limit = 8;
     pageNumber = 1;
@@ -41,7 +41,7 @@ export class AccountsListComponent {
                 skip: (this.pageNumber - 1) * this.limit
             }
         }).subscribe((res) => {
-            let response = res.json() as Account[];
+            let response = res as Account[];
             if (response.length) {
                 this.accounts = [...this.accounts, ...response];
                 this.pageNumber += 1;
@@ -53,7 +53,7 @@ export class AccountsListComponent {
         this.api.sendRequest({
             endpoint: ApiRoutes.FETCH_ALL_GROUPS,
             method: 'get'
-        }).subscribe((res) => this.groups = res.json());
+        }).subscribe((res) => this.groups = res as Group[]);
     }
 
     editAccount(account) {
@@ -94,7 +94,7 @@ export class AccountsListComponent {
                 body: this.selectedAccount
             }).subscribe((response) => {
                 this.modalRef.hide();
-                this.selectedAccount.id = response.json();
+                this.selectedAccount.id = response as string;
                 this.accounts.push(this.selectedAccount);
             })
         }
