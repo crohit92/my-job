@@ -4,7 +4,17 @@ import { UsersListComponent } from './users/users-list.component';
 import { TasksComponent } from './tasks/tasks.component';
 import { HomeComponent } from './home/home.component';
 import { TransationsListComponent } from './transactions/transactions-list.component';
+import { LoginComponent } from "./login/login.component";
 export const ROUTES: Route[] = [
+    
+    {
+        path: 'login',
+        component: LoginComponent
+    },
+    {
+        path: 'home',
+        component: HomeComponent
+    },
     {
         path: 'accounts',
         component: AccountsListComponent
@@ -18,16 +28,12 @@ export const ROUTES: Route[] = [
         component: TasksComponent
     },
     {
-        path: 'home',
-        component: HomeComponent
-    },
-    {
         path: 'transactions',
         component: TransationsListComponent
     },
     {
         path: '',
-        redirectTo: '/home',
+        redirectTo: '/login',
         pathMatch: 'full'
     }
 ]

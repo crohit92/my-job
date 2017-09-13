@@ -1,12 +1,12 @@
 <table class="table table-striped">
     <tr>
-        <td routerLink="/accounts">Accounts</td>
+        <td routerLink="/accounts" [hidden]="!user.admin">Accounts</td>
     </tr>
     <tr>
         <td routerLink="/transactions">Day Book</td>
     </tr>
     <tr>
-        <td routerLink="/users">Users</td>
+        <td routerLink="/users" [hidden]="!user.admin">Users</td>
     </tr>
     <tr>
         <td routerLink="/tasks">Tasks</td>

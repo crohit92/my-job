@@ -5,8 +5,9 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
 import { HttpModule } from '@angular/http';
 import { AppComponent } from './app.component';
-import { TypeaheadModule, ModalModule, PopoverModule  } from 'ngx-bootstrap';
+import { TypeaheadModule, ModalModule, PopoverModule } from 'ngx-bootstrap';
 import { NgProgressModule } from 'ngx-progressbar';
+import { ToastrModule } from 'ngx-toastr';
 import 'hammerjs';
 
 import { ROUTES } from './app.routes';
@@ -21,6 +22,8 @@ import { TaskComponent } from './tasks/task.component';
 import { HomeComponent } from './home/home.component';
 import { TransationsListComponent } from './transactions/transactions-list.component';
 import { Filter, FilterTransactions } from './loop-filter.pipe';
+import { LoginComponent } from './login/login.component';
+import { StorageService } from './helper/storage.service';
 
 @NgModule({
   declarations: [
@@ -33,13 +36,16 @@ import { Filter, FilterTransactions } from './loop-filter.pipe';
     HomeComponent,
     TransationsListComponent,
     Filter,
-    FilterTransactions
+    FilterTransactions,
+    LoginComponent
   ],
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
+    ToastrModule,
     HttpModule,
     FormsModule,
+    StorageService,
     RouterModule.forRoot(ROUTES),
     NgProgressModule,
     TypeaheadModule.forRoot(),
