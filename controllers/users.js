@@ -37,12 +37,23 @@ class UsersController {
             .findOne({ id: userId });
     }
     createUser(req, res) {
-        req.body.id = (new Date()).valueOf().toString();
-        this.db
-            .collection(USERS)
-            .insertOne(req.body)
-            .then((response) => {
-            res.send(req.body.id);
+        this.db.collection(USERS).findOne({
+            mobile: req.body.mobile
+        }).then(matchedUser => {
+            if (matchedUser) {
+                res.status(403).send({ message: "User Already exists with this mobile number" });
+            }
+            else {
+                req.body.id = (new Date()).valueOf().toString();
+                this.db
+                    .collection(USERS)
+                    .insertOne(req.body)
+                    .then((response) => {
+                    res.send(req.body.id);
+                }).catch(err => {
+                    res.status(400).send(err);
+                });
+            }
         }).catch(err => {
             res.status(400).send(err);
         });

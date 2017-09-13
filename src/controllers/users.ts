@@ -44,15 +44,28 @@ export class UsersController {
     }
 
     private createUser(req: Request, res: Response) {
-        req.body.id = (new Date()).valueOf().toString();
-        this.db
-            .collection(USERS)
-            .insertOne(req.body)
-            .then((response: InsertOneWriteOpResult) => {
-                res.send(req.body.id);
-            }).catch(err => {
-                res.status(400).send(err);
-            })
+        this.db.collection(USERS).findOne({
+            mobile: req.body.mobile
+        }).then(matchedUser => {
+            if (matchedUser) {
+                res.status(403).send({ message: "User Already exists with this mobile number" });
+            }
+            else {
+                req.body.id = (new Date()).valueOf().toString();
+
+                this.db
+                    .collection(USERS)
+                    .insertOne(req.body)
+                    .then((response: InsertOneWriteOpResult) => {
+                        res.send(req.body.id);
+                    }).catch(err => {
+                        res.status(400).send(err);
+                    })
+            }
+        }).catch(err => {
+            res.status(400).send(err);
+        })
+
     }
 
     private updateUser(req: Request, res: Response) {
@@ -82,14 +95,14 @@ export class UsersController {
                 }]
             },
             {
-                password:{$eq:req.body.password}
+                password: { $eq: req.body.password }
             }
-        ]
+            ]
         }).then(user => {
-            if(user){
+            if (user) {
                 res.send(user)
             }
-            else{
+            else {
                 res.status(403).send();
             }
         })
