@@ -67,7 +67,7 @@ class UsersController {
         this.db.collection(USERS).findOne({
             $and: [{
                     $or: [{
-                            email: { $eq: req.body.email.toLowerCase() }
+                            mobile: { $eq: req.body.mobile.toLowerCase() }
                         }]
                 },
                 {
