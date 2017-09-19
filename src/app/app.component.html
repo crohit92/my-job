@@ -1,33 +1,42 @@
-
 <div class="container-fluid">
-<div class="row">
-    <div class="col-xs-12">
-        <ng-progress></ng-progress>
-    </div>
-</div>
     <div class="row">
         <div class="col-xs-12">
-            <i [ngClass]="{'material-icons':!menuVisible}" class="pull-right pointer" (click)="menuVisible=!menuVisible" [innerHtml]="menuVisible?'&nbsp;':'menu'"></i>
+            <ng-progress></ng-progress>
         </div>
     </div>
-    <div *ngIf="menuVisible" class="col-xs-12 pull-right menu-overlay">
-        <div class="container menu col-xs-10 col-sm-6 pull-right">
-            <div class="row" (click)="menuVisible=!menuVisible">
-                <div class="col-xs-12 pull-right  text-right"><i class="material-icons pointer">close</i></div>
-                <div class="col-xs-12 pointer">
-                    <div class="menu-item" routerLink="/accounts" routerLinkActive="menu-item-active">Accounts</div>
+    <div class="row" (window:load)="onLoad($event)" (window:resize)="onResize($event)">
+        <div class="col-xs-12">
+            <nav class="navbar navbar-default">
+                <div class="container-fluid">
+                    <!-- Brand and toggle get grouped for better mobile display -->
+                    <div class="navbar-header">
+                        <button type="button" (click)="toggleMenu()" class="navbar-toggle collapsed">
+                            <span class="sr-only">Toggle navigation</span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+                        <a class="navbar-brand">My Job</a>
+                    </div>
+
+                    <!-- Collect the nav links, forms, and other content for toggling -->
+                    <div *ngIf="menuVisible" class="navbar-collapse">
+                        <ul class="nav navbar-nav" (click)="toggleMenu()">
+                            <li routerLink="/accounts" routerLinkActive="active"><a>Accounts</a></li>
+                            <li routerLink="/transactions" routerLinkActive="active"><a>Day Book</a></li>
+                            <li routerLink="/users" routerLinkActive="active"><a>Users</a></li>
+                            <li routerLink="/tasks" routerLinkActive="active"><a>Tasks</a></li>
+                        </ul>
+                    </div>
+                    <!-- /.navbar-collapse -->
                 </div>
-                <div class="col-xs-12 pointer">
-                    <div class="menu-item" routerLink="/transactions" routerLinkActive="menu-item-active">Day Book</div>
-                </div>
-                <div class="col-xs-12 pointer">
-                    <div class="menu-item" routerLink="/users" routerLinkActive="menu-item-active">Users</div>
-                </div>
-                <div class="col-xs-12 pointer">
-                    <div class="menu-item" routerLink="/tasks" routerLinkActive="menu-item-active">Tasks</div>
-                </div>
-            </div>
+                <!-- /.container-fluid -->
+            </nav>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12">
+            <router-outlet></router-outlet>
         </div>
     </div>
 </div>
-<router-outlet></router-outlet>

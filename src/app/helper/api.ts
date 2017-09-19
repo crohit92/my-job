@@ -40,8 +40,6 @@ export const ApiRoutes = {
     DELETE_ACCOUNT: 'accounts',
     DELETE_TASK: 'tasks',
     DELETE_USER: 'users',
-
-
 }
 
 @Injectable()
