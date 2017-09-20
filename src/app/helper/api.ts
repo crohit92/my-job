@@ -20,7 +20,7 @@ export class Request {
 export const ApiRoutes = {
     FETCH_ALL_GROUPS: 'groups',
     FETCH_ALL_ACCOUNTS: 'accounts',
-    FETCH_ALL_USERS: 'users',
+    FETCH_ALL_USERS: 'accounts?groupId=17',
     FETCH_ALL_TASKS: 'tasks',
     FETCH_ALL_CUSTOMERS: 'accounts?groupId=16',
     FETCH_ALL_TRANSACTIONS: 'transactions',
@@ -35,7 +35,7 @@ export const ApiRoutes = {
     CREATE_GROUP: 'groups',
     CREATE_TASK: 'tasks',
     CREATE_TRANSACTION: 'transactions',
-    LOGIN: 'users/login',
+    LOGIN: 'accounts/login',
 
     DELETE_ACCOUNT: 'accounts',
     DELETE_TASK: 'tasks',
@@ -57,7 +57,7 @@ export class Api {
     private buildURL(endPoint: string, routeParams: any, queryParams: any): string {
         endPoint = this.removeTrailingSlash(endPoint);
         let route: string = `${apiBase}${endPoint}`;
-        if (routeParams)
+        if (routeParams){
             for (var key in routeParams) {
                 if (key == '') {
                     route = `${route}/${routeParams['']}`
@@ -65,8 +65,8 @@ export class Api {
                 else {
                     route = `${route}/${key}/${routeParams[key]}`
                 }
-
             }
+        }
         let paramChar = '?';
         if (queryParams)
             for (var key in queryParams) {

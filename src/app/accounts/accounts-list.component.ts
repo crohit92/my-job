@@ -8,6 +8,7 @@ import { BsModalRef } from 'ngx-bootstrap/modal/modal-options.class';
 
 import { Account } from '../models/account.model';
 import { Group } from '../models/group.model';
+import { ToastrService } from "ngx-toastr";
 
 @Component({
     templateUrl: './accounts-list.html'
@@ -17,12 +18,16 @@ export class AccountsListComponent {
     accounts: Account[] = new Array<Account>();
     groups: Group[];
     selectedAccount: Account;
-    limit = 8;
+    limit = 40;
     pageNumber = 1;
     @ViewChild("template") template: TemplateRef<any>;
+
+    debtors_cretitors_users = ['15', '16', '17']
+    users = ['17']
     public modalRef: BsModalRef;
     constructor(
         private api: Api,
+        private alert: ToastrService,
         private router: Router,
         private modalService: BsModalService
     ) {
@@ -70,6 +75,8 @@ export class AccountsListComponent {
         let updatedAccountIndex = this.accounts.findIndex(ac => ac.id == id);
         if (updatedAccountIndex != -1) {
             this.accounts[updatedAccountIndex] = { ...account };
+            this.filterAccounts = "";
+
         }
     }
 
@@ -84,6 +91,7 @@ export class AccountsListComponent {
                 }
             }).subscribe(() => {
                 this.modalRef.hide();
+                this.selectedAccount.group = [this.groups.find(g=>g.id == this.selectedAccount.groupId)];
                 this.onAccountUpdated(this.selectedAccount.id, this.selectedAccount);
             })
         }
@@ -94,18 +102,35 @@ export class AccountsListComponent {
                 body: this.selectedAccount
             }).subscribe((response) => {
                 this.modalRef.hide();
-                this.selectedAccount.id = response as string;
+                this.selectedAccount = response as Account;
+                this.selectedAccount.group = [this.groups.find(g=>g.id == this.selectedAccount.groupId)];
                 this.accounts.push(this.selectedAccount);
-            })
+            },
+                (res) => {
+                    this.alert.error(res.error.message || "An Error Occured", "Error");
+                })
         }
 
+    }
+
+    deleteAccount() {
+        this.api.sendRequest({
+            endpoint: ApiRoutes.DELETE_ACCOUNT,
+            method: 'delete',
+            routeParams: {
+                "": this.selectedAccount.id
+            }
+        }).subscribe((response) => {
+            this.modalRef.hide();
+            this.accounts = this.accounts.filter(a => a.id != this.selectedAccount.id);
+        },(res) => {
+            this.alert.error(res.error.message || "An Error Occured", "Error");
+        })
     }
 
     compareItems(item1, item2) {
         return item1 && item2 ? item1 == item2 : false;
     }
-
-    
 
     isBalanceNegative(account) {
         return account.balance < 0;

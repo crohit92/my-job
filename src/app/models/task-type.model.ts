@@ -1,5 +1,6 @@
-export enum TaskType{
+export enum CallType{
     COMPLAINT,
     QUERY,
-    REGULARTASK
+    Payment,
+    Project
 }
