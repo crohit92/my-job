@@ -52,7 +52,6 @@ export class UsersController {
             }
             else {
                 req.body.id = (new Date()).valueOf().toString();
-
                 this.db
                     .collection(USERS)
                     .insertOne(req.body)

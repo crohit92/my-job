@@ -15,6 +15,7 @@ export class AccountsController {
 
         this.router.get('/', this.get.bind(this));
         this.router.get('/:id', this.getById.bind(this));
+        this.router.post('/login', this.login.bind(this));
         this.router.post('/', this.post.bind(this));
         this.router.put('/:id', this.put.bind(this));
         this.router.delete('/:id', this.delete.bind(this))
@@ -24,8 +25,8 @@ export class AccountsController {
 
         let filter = req.query.hasOwnProperty('groupId') ? { groupId: req.query.groupId } : {};
         let pagination = [];
-        if (req.query.hasOwnProperty('skip')  && req.query.hasOwnProperty('limit')) {
-            pagination.push({ $skip: (+req.query.skip)})
+        if (req.query.hasOwnProperty('skip') && req.query.hasOwnProperty('limit')) {
+            pagination.push({ $skip: (+req.query.skip) })
             pagination.push({ $limit: (+req.query.limit) })
         }
 
@@ -34,6 +35,14 @@ export class AccountsController {
             .collection(ACCOUNTS)
             .aggregate([
                 { $match: filter },
+                {
+                    $lookup: {
+                        from: 'groups',
+                        localField: 'groupId',
+                        foreignField: 'id',
+                        as: 'group'
+                    }
+                },
                 ...pagination
             ]).toArray()
             .then((accounts: Account[]) => {
@@ -144,17 +153,51 @@ export class AccountsController {
 
     private post(req: Request, res: Response) {
         req.body.id = (new Date()).valueOf().toString();
+        let account = req.body;
+        //check if account is a user account
+        if (account.groupId == '17') {
+            this.db.collection(ACCOUNTS).findOne({
+                groupId: '17',
+                mobile: account.mobile
+            }).then(account => {
+                if (account) {
+                    res.status(403).send({ message: "User with this mobile number already exists" });
+                    return;
+                }
+            })
+        }
+
         this.db
             .collection(ACCOUNTS)
             .insertOne(req.body)
             .then((accnt: InsertOneWriteOpResult) => {
-                res.send(req.body.id);
+                res.send(account);
             }).catch(err => {
                 res.status(400).send(err);
             })
     }
 
-
+    private login(req: Request, res: Response) {
+        this.db.collection(ACCOUNTS).findOne({
+            $and: [{
+                $or: [{
+                    mobile:
+                    { $eq: req.body.mobile.toLowerCase() }
+                }]
+            },
+            {
+                password: { $eq: req.body.password }
+            }
+            ]
+        }).then(user => {
+            if (user) {
+                res.send(user)
+            }
+            else {
+                res.status(403).send();
+            }
+        }).catch(err => res.status(500).send(err));
+    }
 
     private put(req: Request, res: Response) {
         delete req.body._id;

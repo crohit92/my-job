@@ -55,7 +55,7 @@ export class TasksController {
             .collection(TASKS)
             .insertOne(task)
             .then((response: InsertOneWriteOpResult) => {
-                res.send(task.id);
+                res.send(task);
             }).catch(err => {
                 res.status(400).send(err);
             })
@@ -68,7 +68,7 @@ export class TasksController {
         this.db.collection(TASKS)
             .updateOne({ id: req.params.id }, { $set: task })
             .then((data) => {
-                res.send(data);
+                res.send(task);
             })
             .catch((err) => {
                 res.status(400).send(err);
