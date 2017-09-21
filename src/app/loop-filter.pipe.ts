@@ -1,6 +1,7 @@
 import { Injectable, Pipe, PipeTransform } from '@angular/core';
 import { Transaction } from "./models/transaction.model";
 import { Account } from './models/account.model';
+import { Task } from "./models/task.model";
 
 @Pipe({
   name: 'filter'
@@ -58,5 +59,22 @@ export class FilterAccounts implements PipeTransform {
         a.openingBalance.toString().indexOf(value) >= 0 ||
         a.natureOfOB.indexOf(value.toLowerCase()) >= 0
     });
+  }
+}
+
+@Pipe({
+  name: 'filterTasks'
+})
+@Injectable()
+export class FilterTasks implements PipeTransform {
+  transform(tasks: Task[], value: string): any[] {
+    if (!tasks) return [];
+    if (!value) return tasks;
+    return tasks.filter(a => {
+      return (a.description.toLowerCase().indexOf(value.toLowerCase()) >= 0 ||
+        a.customer.name.toLowerCase().indexOf(value.toLowerCase()) >= 0 ||
+        a.user.name.toLowerCase().indexOf(value.toLowerCase()) >= 0
+      );
+    })
   }
 }

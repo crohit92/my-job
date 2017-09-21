@@ -1,8 +1,8 @@
 <table class="table table-striped">
-    <tr>
+    <tr *ngIf="userType == 2">
         <td routerLink="/accounts" [hidden]="!user.admin">Accounts</td>
     </tr>
-    <tr>
+    <tr *ngIf="userType > 0">
         <td routerLink="/transactions">Day Book</td>
     </tr>
     <tr>

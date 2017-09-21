@@ -19,10 +19,11 @@ import { AccountsListComponent } from './accounts/accounts-list.component';
 import { TasksComponent } from './tasks/tasks.component';
 import { HomeComponent } from './home/home.component';
 import { TransationsListComponent } from './transactions/transactions-list.component';
-import { Filter, FilterTransactions, FilterAccounts } from './loop-filter.pipe';
+import { Filter, FilterTransactions, FilterAccounts, FilterTasks } from './loop-filter.pipe';
 import { LoginComponent } from './login/login.component';
 import { StorageService } from './helper/storage.service';
 import { NoopInterceptor } from "./helper/http-intercepter";
+import { Utils } from "./helper/utils";
 
 @NgModule({
   declarations: [
@@ -34,6 +35,7 @@ import { NoopInterceptor } from "./helper/http-intercepter";
     Filter,
     FilterTransactions,
     FilterAccounts,
+    FilterTasks,
     LoginComponent
   ],
   imports: [
@@ -49,6 +51,7 @@ import { NoopInterceptor } from "./helper/http-intercepter";
     ModalModule.forRoot(),
   ],
   providers: [Api,
+    Utils,
     StorageService,{
       provide: HTTP_INTERCEPTORS,
       useClass: NoopInterceptor,

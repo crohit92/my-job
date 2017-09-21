@@ -8,6 +8,7 @@ import { BsModalRef } from 'ngx-bootstrap/modal/modal-options.class';
 
 import { Account } from '../../app/models/account.model';
 import { Transaction } from '../../app/models/transaction.model';
+import { Utils } from "../helper/utils";
 
 @Component({
     templateUrl: './transactions-list.html',
@@ -42,9 +43,10 @@ export class TransationsListComponent {
     constructor(
         private api: Api,
         private router: Router,
-        private modalService: BsModalService
+        private modalService: BsModalService,
+        private utils:Utils
     ) {
-
+        this.utils.showMenu(true);
         this.fetchAccounts();
     }
 

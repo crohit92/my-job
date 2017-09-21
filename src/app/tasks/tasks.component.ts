@@ -7,6 +7,7 @@ import { BsModalRef, BsModalService } from "ngx-bootstrap";
 import { User } from "../models/user.model";
 import { Account } from "../models/account.model";
 import { ToastrService } from "ngx-toastr";
+import { Utils } from "../helper/utils";
 const DATE_FORMAT = "DD-MMMM-YYYY";
 
 @Component({
@@ -18,7 +19,7 @@ export class TasksComponent {
 
     users: Account[];
     customers: Account[];
-
+    filterTask:string;
     taskTypes = TASK_TYPES;
     moment = moment;
     public modalRef: BsModalRef;
@@ -27,8 +28,10 @@ export class TasksComponent {
     constructor(
         private api: Api,
         private modalService: BsModalService,
-        private alert: ToastrService
+        private alert: ToastrService,
+        private utils:Utils
     ) {
+        this.utils.showMenu(true);
         this.fetchTasks();
 
         this.api.sendRequest({
@@ -67,11 +70,7 @@ export class TasksComponent {
 
     sortTasksByNextDueDate() {
         let $this = this;
-        this.tasks.forEach(t => {
-            t.nextDueDate = (moment(t.nextDueDate) as moment.Moment);
-        })
-
-        this.tasks.sort((a, b) => { return (a.nextDueDate as moment.Moment).diff((b.nextDueDate as moment.Moment)) });
+        this.tasks.sort((a, b) => { return (moment(a.nextDueDate) as moment.Moment).diff((moment(b.nextDueDate) as moment.Moment)) });
     }
 
     matchById(obj1, obj2) {
@@ -81,12 +80,12 @@ export class TasksComponent {
     createOrUpdateTask(task: Task) {
 
         if (task.user)
-            task.assignedToId = task.user[0].id;
+            task.assignedToId = task.user.id;
         else {
             task.assignedToId = null;
         }
         if (task.customer)
-            task.customerId = task.customer[0].id;
+            task.customerId = task.customer.id;
         else {
             task.customerId = null;
         }
@@ -108,6 +107,7 @@ export class TasksComponent {
             res => {
                 this.modalRef.hide();
                 this.tasks.push(res)
+                this.sortTasksByNextDueDate();
             },
             err =>
                 this.alert.error("An Error Occured", "Error")
@@ -129,11 +129,24 @@ export class TasksComponent {
                 let taskIndex = this.tasks.findIndex(t => t.id == task.id);
                 if (taskIndex != -1) {
                     this.tasks[taskIndex] = { ...res } as Task;
+                    this.sortTasksByNextDueDate();
                 }
             },
             err => this.alert.error("An Error Occured", "Error"))
     }
 
+    deleteTask(task: Task) {
+        this.api.sendRequest({
+            endpoint: ApiRoutes.DELETE_TASK,
+            method: 'delete',
+            routeParams: {
+                '': task.id
+            }
+        }).subscribe(() => {
+           this.tasks = this.tasks.filter(t=>t.id!=task.id);
+           this.modalRef.hide();
+        })
+    }
     // setCurrentTask(task: Task) {
     //     this.currentTask = task
     // }

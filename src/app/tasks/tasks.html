@@ -2,18 +2,26 @@
     <table class="table table-hover">
         <thead>
             <tr>
-                <th colspan="2">Task List</th>
-                <th><button class="btn btn-primary" (click)="openModal()">Add Task</button></th>
+                <th colspan="1">Task</th>
+                <th>Assigned To</th>
+                <th colspan="1">Customer</th>
+                <th>Due On</th>
             </tr>
         </thead>
         <tbody>
-            <tr *ngFor="let task of tasks" (click)="openModal(task)">
+            <tr>
+                <td colspan="1">
+                    <button class="btn btn-primary" (click)="openModal()">Add Task</button>
+                </td>
+                <td colspan="2">
+                    <input class="form-control" [(ngModel)]="filterTask">
+                </td>
+            </tr>
+            <tr *ngFor="let task of tasks | filterTasks:filterTask" (click)="openModal(task)">
                 <td><strong class="text-muted">{{(""+task.description).substring(0,30)}}</strong></td>
-                <!-- <p><i class="text-muted">Starts On: {{moment(task.startsOn).format("DD-MMMM-YYYY")}}</i></p> -->
-                <!-- <td><i class="text-muted">Next Due Date: {{task.nextDueDate.format("DD-MMMM-YYYY")}}</i></p> -->
-                <!-- <td><i class="text-muted">Repeats Every: {{getFrequencyTypeText(task.frequency)}}</i></p> -->
-                <td><i class="text-muted">Assigned To: {{task.user && task.user.length>0?task.user[0].name:"**Not Assigned**"}}</i></td>
-                <td><i class="text-muted">Customer: {{task.customer && task.customer.length>0? task.customer[0].name:"**Not Assigned**"}}</i></td>
+                <td><i class="text-muted">{{task.user?task.user.name:"**Not Assigned**"}}</i></td>
+                <td><i class="text-muted">{{(task.customer)? task.customer.name:"**Not Assigned**"}}</i></td>
+                <td><i class="text-muted">{{moment(task.nextDueDate).format("DD-MMMM-YYYY") }}</i></td>
             </tr>
         </tbody>
         <tfoot>
@@ -39,7 +47,7 @@
             </div>
 
             <div class="form-group">
-                <label>Starts On <input type="date" class="form-control" name="startDate" required [(ngModel)]="currentTask.startsOn" placeholder="Task Starts On"></label>
+                <label>Due On <input type="date" class="form-control" name="dueDate" required [(ngModel)]="currentTask.nextDueDate" placeholder="Task Due On"></label>
             </div>
 
             <div class="form-group">
@@ -50,7 +58,8 @@
             </div>
             <label>Select User
             <input name="user"
-            (typeaheadOnSelect)="currentTask.user = [$event.item]"
+            required
+            (typeaheadOnSelect)="currentTask.user = $event.item"
             [(ngModel)]="currentTask.userName"
             placeholder="Assign Task To"
             typeaheadOptionField="name"
@@ -60,7 +69,8 @@
 
             <label>Select Customer
             <input name="customer" 
-            (typeaheadOnSelect)="currentTask.customer = [$event.item]"
+            required
+            (typeaheadOnSelect)="currentTask.customer = $event.item"
             [(ngModel)]="currentTask.customerName"
             placeholder="Select Customer"
             [typeahead]="customers"
@@ -74,7 +84,7 @@
                     {{currentTask.id?'Update':'Save'}}
                 </button>
                 <button [disabled]="!currentTask.id" (click)="deleteTask(currentTask)" class="btn btn-danger">Delete</button>
-                <button (click)="reset()" class="btn btn-default">Reset</button>
+                <button (click)="modalRef.hide()" class="btn btn-default">Close</button>
 
 
 

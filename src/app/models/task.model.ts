@@ -15,5 +15,5 @@ export class Task {
     userName?:string;
     customer?: Account;
     customerName?:string;
-    nextDueDate?: Date|Moment;
+    nextDueDate?: Date;
 }

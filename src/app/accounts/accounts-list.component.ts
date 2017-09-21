@@ -9,6 +9,7 @@ import { BsModalRef } from 'ngx-bootstrap/modal/modal-options.class';
 import { Account } from '../models/account.model';
 import { Group } from '../models/group.model';
 import { ToastrService } from "ngx-toastr";
+import { Utils } from "../helper/utils";
 
 @Component({
     templateUrl: './accounts-list.html'
@@ -29,9 +30,10 @@ export class AccountsListComponent {
         private api: Api,
         private alert: ToastrService,
         private router: Router,
-        private modalService: BsModalService
+        private modalService: BsModalService,
+        private utils:Utils
     ) {
-
+        this.utils.showMenu(true);
         this.fetchAccounts();
         this.fetchGroups();
     }
@@ -93,7 +95,8 @@ export class AccountsListComponent {
                 this.modalRef.hide();
                 this.selectedAccount.group = [this.groups.find(g=>g.id == this.selectedAccount.groupId)];
                 this.onAccountUpdated(this.selectedAccount.id, this.selectedAccount);
-            })
+            },
+        (err)=>this.alert.error(err.error.message,"Error"));
         }
         else {
             this.api.sendRequest({
