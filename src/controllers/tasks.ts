@@ -85,7 +85,7 @@ export class TasksController {
         return [
             {
                 $lookup: {
-                    from: "users",
+                    from: "accounts",
                     localField: "assignedToId",
                     foreignField: "id",
                     as: "user"

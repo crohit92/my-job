@@ -201,6 +201,17 @@ export class AccountsController {
 
     private put(req: Request, res: Response) {
         delete req.body._id;
+        if(req.body.groupId == '17' && req.body.admin != 2) {
+            this.db.collection(ACCOUNTS).find({
+                groupId:'17',
+                admin:2
+            }).toArray().then((accounts:Account[]) => {
+                if(accounts.length == 1 && accounts[0].id == req.body.id){
+                    res.status(403).send({ message: "Cannot delete all super admins" });
+                    return;
+                } 
+            })
+        }
         this.db.collection(ACCOUNTS)
             .updateOne({ id: req.params.id }, { $set: req.body })
             .then((data) => {
