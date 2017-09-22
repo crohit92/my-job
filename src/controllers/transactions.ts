@@ -46,6 +46,7 @@ export class TransactionsController {
                 $project: {
                     "id": 1,
                     date: 1,
+                    dateString: 1,
                     amount: 1,
                     creditAccountId: 1,
                     debitAccountId: 1,

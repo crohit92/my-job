@@ -170,6 +170,7 @@ export class TasksController {
             else {
                 transaction.creditAccountId = account.id;
                 transaction.date = new Date();
+                transaction.dateString = `${transaction.date.getFullYear()}-${padStart((transaction.date.getMonth() + 1).toString(),2,"0")}-${padStart((transaction.date.getDate()).toString(),2,"0")}`
                 transaction.debitAccountId = completion.task.customerId
                 transaction.narration = this.getNarration(task, completion.completionInfo);
 
@@ -222,13 +223,52 @@ export class TasksController {
         if (extra.amc) {
             narration += ` Visit was covered under AMC`
         }
-        if(task.type == 3 && extra.completed){
-            narration+= ` Project is complete`;
+        if (task.type == 3 && extra.completed) {
+            narration += ` Project is complete`;
         }
-        else if(task.type == 3){
+        else if (task.type == 3) {
             narration += ` Next visit Due on "${task.nextDueDate}"`;
         }
-        
+
         return narration;
     }
 }
+
+const padStart = (string, maxLength, fillString) => {
+    
+      if (string == null || maxLength == null) {
+        return string;
+      }
+    
+      var result    = String(string);
+      var targetLen = typeof maxLength === 'number'
+        ? maxLength
+        : parseInt(maxLength, 10);
+    
+      if (isNaN(targetLen) || !isFinite(targetLen)) {
+        return result;
+      }
+    
+    
+      var length = result.length;
+      if (length >= targetLen) {
+        return result;
+      }
+    
+    
+      var fill = fillString == null ? '' : String(fillString);
+      if (fill === '') {
+        fill = ' ';
+      }
+    
+    
+      var fillLen = targetLen - length;
+    
+      while (fill.length < fillLen) {
+        fill += fill;
+      }
+    
+      var truncated = fill.length > fillLen ? fill.substr(0, fillLen) : fill;
+    
+      return truncated + result;
+    };
