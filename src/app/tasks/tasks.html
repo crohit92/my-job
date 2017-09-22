@@ -109,20 +109,12 @@
     </div>
     <form #completionForm="ngForm" class="modal-body">
         <accordion closeOthers="true">
-            <accordion-group heading="Task Type" isDisabled="true" [isOpen]="openPaneIndex==0">
-                <label>Select Task Type
-                    <select class="form-control" #taskType="ngModel" name="taskType" required [(ngModel)]="completionInfo.taskType">
-                        <option disabled [value]="undefined">Task Type</option>
-                        <option [ngValue]="1">AMC</option>
-                        <option [ngValue]="2">Non Payable</option>
-                        <option [ngValue]="3">Payable</option>
-                    </select>
-                </label>
+            <accordion-group heading="Payment Info" isDisabled="true" [isOpen]="openPaneIndex==0">
                 <div>
-                    <button [disabled]="!taskType.valid" class="pull-right btn btn-default" (click)="openPaneIndex = completionInfo.taskType == 3?1:2">Next</button>
+                    <label>Was under AMC ?
+                        <input type="checkbox" name="amc" #amc="ngModel" [(ngModel)]="completionInfo.amc" class="form-control">
+                    </label>
                 </div>
-            </accordion-group>
-            <accordion-group *ngIf="completionInfo.taskType == 3" heading="Payment Info" isDisabled="true" [isOpen]="openPaneIndex==1">
                 <div>
                     <label>Amount Payable
                         <input type="number" name="amount" #amount="ngModel" required min="0" [(ngModel)]="completionInfo.amount" class="form-control">
@@ -134,11 +126,10 @@
                     </label>
                 </div>
                 <div>
-                    <button class="btn btn-default pull-right" [disabled]="!amount.valid" (click)="openPaneIndex = 2">Next</button>
-                    <button class="btn btn-default pull-right" (click)="openPaneIndex = 0">Previous</button>
+                    <button class="btn btn-default pull-right" [disabled]="!amount.valid" (click)="openPaneIndex = 1">Next</button>
                 </div>
             </accordion-group>
-            <accordion-group heading="Final Step" isDisabled="true" [isOpen]="openPaneIndex==2">
+            <accordion-group heading="Final Step" isDisabled="true" [isOpen]="openPaneIndex==1">
                 <h5 class="well well-default">Verify Details</h5>
                 <h4>Description: <strong>{{currentTask.description}}</strong></h4>
 
@@ -148,8 +139,8 @@
                     </div>
                 </h4>
                 <h4>
-                    {{completionInfo.taskType ==1?'Payment Covered under AMC': (completionInfo.taskType ==2?'Task Was Non Payable':('Payment
-                    due for the task was :₹' + completionInfo.amount + ' and was '+(completionInfo.paid?'paid':'non paid')))}}
+                    {{('Payment
+                    due for the task was :₹' + completionInfo.amount + ' and was '+(completionInfo.paid?'paid':'non paid'))}}
                 </h4>
                 <!-- if task was a project, then ask if it is complete or not?
                 if not when is the next visit required? -->
