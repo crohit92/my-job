@@ -9,4 +9,5 @@ export class Transaction{
     date:Date;
     narration:string;
     userId:string;
+    [key:string]:any;
 }

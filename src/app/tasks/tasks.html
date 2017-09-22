@@ -15,7 +15,7 @@
                     <button class="btn btn-primary" *ngIf="user.admin>0" (click)="openModal()">Add Task</button>
                 </td>
                 <td colspan="2">
-                    <input class="form-control" [(ngModel)]="filterTask">
+                    <input autocomplete="off" class="form-control" [(ngModel)]="filterTask">
                 </td>
             </tr>
             <tr *ngFor="let task of tasks | filterTasks:filterTask">
@@ -61,7 +61,7 @@
                 </select>
             </div>
             <label>Select User
-            <input name="user"
+            <input  autocomplete="off" name="user"
             required
             (typeaheadOnSelect)="currentTask.user = $event.item"
             [(ngModel)]="currentTask.userName"
@@ -72,7 +72,7 @@
             </label>
 
             <label>Select Customer
-            <input name="customer" 
+            <input  autocomplete="off" name="customer" 
             required
             (typeaheadOnSelect)="currentTask.customer = $event.item"
             [(ngModel)]="currentTask.customerName"
@@ -109,7 +109,22 @@
     </div>
     <form #completionForm="ngForm" class="modal-body">
         <accordion closeOthers="true">
-            <accordion-group heading="Payment Info" isDisabled="true" [isOpen]="openPaneIndex==0">
+            <accordion-group heading="Step 1" isDisabled="true" [isOpen]="openPaneIndex==0">
+                <div class="well well-default">
+                    <h5>Description: <i class="text-muted">{{currentTask.description}}</i></h5>
+                    <h5>Customer Details:
+                        <h5>
+                            <strong>Name</strong>: <i class="text-muted">{{currentTask.customer.name}}</i>
+                        </h5>
+                        <h5>
+                            <strong>Mobile</strong>: <i class="text-muted">{{currentTask.customer.mobile}}</i>
+                        </h5>
+                        <h5>
+                            <strong>Address</strong>: <i class="text-muted">{{currentTask.customer.address}}</i>
+                        </h5>
+                    </h5>
+                </div>
+                <hr>
                 <div *ngIf="currentTask.type == 0 || currentTask.type == 3">
                     <label>Was the task covered under under AMC ?
                         <input type="checkbox" name="amc" #amc="ngModel" [(ngModel)]="completionInfo.amc">
@@ -117,7 +132,7 @@
                 </div>
                 <div>
                     <label>Amount Payable
-                        <input type="number" name="amount" #amount="ngModel" required min="0" [(ngModel)]="completionInfo.amount" class="form-control">
+                        <input  autocomplete="off" type="number" name="amount" #amount="ngModel" required min="0" [(ngModel)]="completionInfo.amount" class="form-control">
                     </label>
                 </div>
                 <div>
@@ -129,7 +144,7 @@
                     <button class="btn btn-default pull-right" [disabled]="!amount.valid" (click)="openPaneIndex = 1">Next</button>
                 </div>
             </accordion-group>
-            <accordion-group heading="Final Step" isDisabled="true" [isOpen]="openPaneIndex==1">
+            <accordion-group heading="Step 2" isDisabled="true" [isOpen]="openPaneIndex==1">
                 <h5 class="well well-default">Verify Details</h5>
                 <h4>Description: <strong>{{currentTask.description}}</strong></h4>
 
@@ -139,8 +154,7 @@
                     </div>
                 </h4>
                 <h4>
-                    {{('Payment
-                    due for the task was :₹' + completionInfo.amount + ' and was '+(completionInfo.paid?'paid':'non paid'))}}
+                    {{('Payment due for the task was :₹' + completionInfo.amount + ' and was '+(completionInfo.paid?'paid':'non paid'))}}
                 </h4>
                 <!-- if task was a project, then ask if it is complete or not?
                 if not when is the next visit required? -->

@@ -177,7 +177,8 @@ export class TasksComponent {
                 completionInfo:completionInfo
             }
         }).subscribe(taskCompleted=>{
-            
+            this.modalRef.hide();
+            this.fetchTasks();
         })
     }
     // setCurrentTask(task: Task) {

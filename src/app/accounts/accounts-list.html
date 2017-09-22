@@ -8,7 +8,7 @@
         </tr>
         <tr>
             <th colspan="2">
-                <input [(ngModel)]="filterAccounts" placeholder="Filter Accounts" class="form-control">
+                <input autocomplete="off" [(ngModel)]="filterAccounts" placeholder="Filter Accounts" class="form-control">
             </th>
             <th>
                 <button class="btn btn-primary" (click)="showBlankModal()">Add Account</button>
@@ -41,7 +41,7 @@
             <div class="row">
                 <div class="col-xs-12">
                     <label>Account Name
-                        <input class="form-control" required placeholder="Account Name" name="accountName" [(ngModel)]="selectedAccount.name">
+                        <input  autocomplete="off" class="form-control" required placeholder="Account Name" name="accountName" [(ngModel)]="selectedAccount.name">
                     </label>
                 </div>
                 <div class="col-xs-12">
@@ -54,7 +54,7 @@
                 </div>
                 <div class="col-xs-12">
                     <label>Opening Balance
-                        <input class="form-control" name="openingBalance" placeholder="Opening Balance" required min="0" type="number" [(ngModel)]="selectedAccount.openingBalance">
+                        <input  autocomplete="off" class="form-control" name="openingBalance" placeholder="Opening Balance" required min="0" type="number" [(ngModel)]="selectedAccount.openingBalance">
                     </label>
                 </div>
                 <div class="col-xs-12">
@@ -68,7 +68,7 @@
                 </div>
                 <!-- Allowed only for users, debtors and creditors -->
                 <div *ngIf="debtors_cretitors_users.indexOf(selectedAccount.groupId)>=0" class="col-xs-12">
-                    <label>Mobile<input required type="tel" class="form-control" name="mobile" [(ngModel)]="selectedAccount.mobile"></label>
+                    <label>Mobile<input  autocomplete="off"  required type="tel" class="form-control" name="mobile" [(ngModel)]="selectedAccount.mobile"></label>
                 </div>
                 <div *ngIf="debtors_cretitors_users.indexOf(selectedAccount.groupId)>=0" class="col-xs-12">
                     <label>Address<textarea required class="form-control" name="address" [(ngModel)]="selectedAccount.address"></textarea></label>
@@ -80,7 +80,7 @@
                 </div>
                 <!-- Allowed Only for users group-->
                 <div *ngIf="users.indexOf(selectedAccount.groupId)>=0" class="col-xs-12">
-                    <label>Password<input type="text" required class="form-control" name="password" [(ngModel)]="selectedAccount.password"></label>
+                    <label>Password<input  autocomplete="off"  type="text" required class="form-control" name="password" [(ngModel)]="selectedAccount.password"></label>
                 </div>
 
                 <div class="col-xs-12">
