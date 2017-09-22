@@ -110,9 +110,9 @@
     <form #completionForm="ngForm" class="modal-body">
         <accordion closeOthers="true">
             <accordion-group heading="Payment Info" isDisabled="true" [isOpen]="openPaneIndex==0">
-                <div>
-                    <label>Was under AMC ?
-                        <input type="checkbox" name="amc" #amc="ngModel" [(ngModel)]="completionInfo.amc" class="form-control">
+                <div *ngIf="currentTask.type == 0 || currentTask.type == 3">
+                    <label>Was the task covered under under AMC ?
+                        <input type="checkbox" name="amc" #amc="ngModel" [(ngModel)]="completionInfo.amc">
                     </label>
                 </div>
                 <div>
@@ -122,7 +122,7 @@
                 </div>
                 <div>
                     <label>Paid ?
-                        <input type="checkbox" name="amountPaid" #amountPaid="ngModel" [(ngModel)]="completionInfo.paid" class="form-control">
+                        <input type="checkbox" name="amountPaid" #amountPaid="ngModel" [(ngModel)]="completionInfo.paid">
                     </label>
                 </div>
                 <div>
