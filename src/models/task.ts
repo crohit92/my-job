@@ -1,21 +1,21 @@
-import { TaskType } from './task-type'
+import { CallType } from './call-type'
 
 import { ObjectID } from 'mongodb';
 import { User } from './user';
 
 export class Task {
-    id:string;
-    title: string;
-    description: string;
-    startsOn: Date;
-    dueOn: Date;
-    endsOn: Date;
-    assignedToId: string;
-    completed: boolean;
-    payable: boolean;
-    paid: boolean;
-    type: TaskType;
-    price: number;
-    customerId: string;
-    
+    id?: string;
+    description?: string;
+    startsOn?: Date;
+    assignedToId?: string;
+    completed?: boolean;
+    payable?:boolean;
+    amount?:number;
+    type?: CallType;
+    customerId?: string;
+    user?: Account;
+    userName?:string;
+    customer?: Account;
+    customerName?:string;
+    nextDueDate?: Date;
 }

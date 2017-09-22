@@ -150,16 +150,20 @@ export class TransactionsController {
 
     }
 
-    post(req: Request, res: Response) {
+    private post(req: Request, res: Response) {
         delete req.body.debit
         delete req.body.credit
         let trans: Transaction = req.body;
-        trans.id = (new Date()).valueOf().toString();
-        trans.date = new Date(trans.date);
-        this.db.collection(TRANSACTIONS).insertOne(trans).then(() => res.send(trans)).catch(err => res.status(500).send(err));
+        this.addTransaction(trans).then(() => res.send(trans)).catch(err => res.status(500).send(err));
     }
 
-    put(req: Request, res: Response) {
+    addTransaction(trans:Transaction){
+        trans.id = (new Date()).valueOf().toString();
+        trans.date = new Date(trans.date);
+        return this.db.collection(TRANSACTIONS).insertOne(trans);
+    }
+
+    private put(req: Request, res: Response) {
         delete req.body._id;
         delete req.body.debit
         delete req.body.credit

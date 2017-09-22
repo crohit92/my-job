@@ -2,8 +2,36 @@ import { Router, Request, Response } from 'express';
 import { Db, ObjectID, InsertOneWriteOpResult } from 'mongodb';
 import { Task } from '../models/task';
 import { UsersController } from './users';
+import { TransactionsController } from "./transactions";
+import { Transaction } from "../models/transaction";
 
 const TASKS = "tasks";
+class Completion {
+    task: Task;
+    completionInfo: { amc: boolean, amount: number, paid: boolean, completed?: boolean }
+};
+
+const tempPayload = {
+    "task": {
+        "_id": "59c496393c63680b970d2d83",
+        "description": "Payment request",
+        "nextDueDate": "2017-09-22",
+        "type": 2,
+        "userName": "Vivek",
+        "user": { "_id": "59c495c93c63680b970d2d82", "admin": 0, "name": "Vivek", "groupId": "17", "openingBalance": 0, "natureOfOB": "dr", "mobile": "9217690006", "address": "622 Basant Avenue", "password": "1234", "id": "1506055625398" },
+        "customerName": "Rohit undefined",
+        "customer": { "_id": "59b042420f8b720004219f1b", "name": "Rohit", "groupId": "16", "openingBalance": 10000, "natureOfOB": "dr", "id": "1504723522679", "debit": 0, "credit": 6000, "accountType": { "_id": "59a9431f6bf43b1d18122a68", "id": "1", "name": "Assets", "nature": "dr" }, "balance": 4000 },
+        "assignedToId": "1506055625398",
+        "customerId": "1504723522679",
+        "id": "1506055737359"
+    },
+    "completionInfo": {
+        "amc": true,
+        "amount": 500,
+        "paid": true,
+        completed: true
+    }
+}
 export class TasksController {
     public static route: string = `/${TASKS}`;
     public router: Router = Router();
@@ -18,10 +46,10 @@ export class TasksController {
 
     fetchAll(req: Request, res: Response) {
         let $this = this;
-        let filterByUser = req.query.userId?[{$match:{assignedToId:req.query.userId}}]:[];
-        
+        let filterByUser = req.query.userId ? [{ $match: { assignedToId: req.query.userId } }] : [];
+
         this.db.collection(TASKS).aggregate(
-            [].concat(this.includeUserAndCustomer(),...filterByUser)
+            [].concat(this.includeUserAndCustomer(), ...filterByUser)
         )
             .toArray()
             .then((tasks: Task[]) => {
@@ -104,5 +132,64 @@ export class TasksController {
                 }
             }
         ]
+    }
+
+    completeTask(req: Request, res: Response) {
+        let completion = req.body as Completion;
+        /*
+        1. All tasks need to be entered into the journal since we want to keep track of all activities
+        2. For all tasks completed 
+        2.1. Customer   dr. to Services cr.
+        2.2. If amount > 0 and paid == true then User    dr. to Customer  cr.
+        3 If task.type !== 3 ie project then 3.1 else 3.2
+        3.1. Update task set completed to true
+        3.2. If completionInfo.taskType == 3
+        3.2.1 Update task-> set nextDueDate and completed
+        */
+        let transactionsController = new TransactionsController(this.db);
+        let transaction: Transaction = new Transaction();
+        let task = completion.task;
+        let extra = completion.completionInfo;
+        transaction.amount = completion.completionInfo.amount || 0;
+        transaction.creditAccountId = "";
+        transaction.date = new Date();
+        transaction.debitAccountId = completion.task.customerId
+        transaction.narration = this.getNarration(task, completion.completionInfo);
+
+        transactionsController.addTransaction(transaction).then(()=>{
+            //first transaction has been made
+            if(extra.amount>0 && extra.paid){
+                transaction.date= new Date();
+                transaction.debitAccountId = task.user.id;
+                transaction.creditAccountId = task.customer.id
+                transactionsController.addTransaction(transaction).then(()=>{
+                    
+                })
+            }
+
+        }).catch((err)=>{
+            res.status(500).send(err);
+        })
+    }
+
+    getNarration(task: Task, extra: { amc: boolean, paid: boolean, amount: number, completed?: boolean }) {
+        extra.amount = extra.amount == undefined ? 0 : extra.amount;
+        let narration = "Being ";
+        switch (task.type) {
+            case 1://Complaint
+                narration += ` Complaint by ${task.customer.name} resolved by ${task.user.name} ` + extra.amount ? ` for which ${extra.amount} rs were ${extra.paid ? 'paid ' : 'not paid '} ` : `No money was paid`;
+                break;
+            case 2://Query
+                narration += ` Query by ${task.customer.name} resolved by ${task.user.name} ` + extra.amount ? ` for which ${extra.amount} rs were ${extra.paid ? 'paid ' : 'not paid '} ` : `No money was paid`;
+                break;
+            case 3://Payment
+                narration += ` Payment of rs ${extra.amount} was due from ${task.customer.name} and was ${extra.paid ? 'recived' + `by ${task.user.name}`  : 'not recived'}  `
+                break;
+            case 4://Project
+                narration += ` Project visit done by ${task.user.name} `+(extra.amount?` for which ${extra.amount} rs were  ${extra.paid ? 'paid ' : 'not paid '}`:``)+
+                `${extra.completed ? 'Project is now Complete' : ('Next Visit is due on' + task.nextDueDate)}`
+        }
+        narration += extra.amc ? " It was an AMC" : "";
+        return narration;
     }
 }
