@@ -6,22 +6,26 @@
                 <th>Assigned To</th>
                 <th colspan="1">Customer</th>
                 <th>Due On</th>
+                <th>Action</th>
             </tr>
         </thead>
         <tbody>
             <tr>
                 <td colspan="1">
-                    <button class="btn btn-primary" (click)="openModal()">Add Task</button>
+                    <button class="btn btn-primary" *ngIf="userType>0" (click)="openModal()">Add Task</button>
                 </td>
                 <td colspan="2">
                     <input class="form-control" [(ngModel)]="filterTask">
                 </td>
             </tr>
-            <tr *ngFor="let task of tasks | filterTasks:filterTask" (click)="openModal(task)">
+            <tr *ngFor="let task of tasks | filterTasks:filterTask">
                 <td><strong class="text-muted">{{(""+task.description).substring(0,30)}}</strong></td>
                 <td><i class="text-muted">{{task.user?task.user.name:"**Not Assigned**"}}</i></td>
                 <td><i class="text-muted">{{(task.customer)? task.customer.name:"**Not Assigned**"}}</i></td>
                 <td><i class="text-muted">{{moment(task.nextDueDate).format("DD-MMMM-YYYY") }}</i></td>
+                <td>
+                    <button *ngIf="user.admin>0" class="btn btn-default" (click)="openModal(task)">Edit</button>
+                    <button *ngIf="user.admin==0" class="btn btn-default" (click)="completeTask(task)">Done</button>
             </tr>
         </tbody>
         <tfoot>
@@ -92,4 +96,78 @@
         </form>
     </div>
 
+</ng-template>
+
+
+
+<ng-template #templateCompleteTask>
+    <div class="modal-header">
+        <h4 class="modal-title pull-left">Task Complete</h4>
+        <button type="button" class="close pull-right" aria-label="Close" (click)="modalRef.hide()">
+                <span aria-hidden="true">&times;</span>
+            </button>
+    </div>
+    <form #completionForm="ngForm" class="modal-body">
+        <accordion closeOthers="true">
+            <accordion-group heading="Task Type" isDisabled="true" [isOpen]="openPaneIndex==0">
+                <label>Select Task Type
+                    <select class="form-control" #taskType="ngModel" name="taskType" required [(ngModel)]="completionInfo.taskType">
+                        <option disabled [value]="undefined">Task Type</option>
+                        <option [ngValue]="1">AMC</option>
+                        <option [ngValue]="2">Non Payable</option>
+                        <option [ngValue]="3">Payable</option>
+                    </select>
+                </label>
+                <div>
+                    <button [disabled]="!taskType.valid" class="pull-right btn btn-default" (click)="openPaneIndex = completionInfo.taskType == 3?1:2">Next</button>
+                </div>
+            </accordion-group>
+            <accordion-group *ngIf="completionInfo.taskType == 3" heading="Payment Info" isDisabled="true" [isOpen]="openPaneIndex==1">
+                <div>
+                    <label>Amount Payable
+                        <input type="number" name="amount" #amount="ngModel" required min="0" [(ngModel)]="completionInfo.amount" class="form-control">
+                    </label>
+                </div>
+                <div>
+                    <label>Paid ?
+                        <input type="checkbox" name="amountPaid" #amountPaid="ngModel" [(ngModel)]="completionInfo.paid" class="form-control">
+                    </label>
+                </div>
+                <div>
+                    <button class="btn btn-default pull-right" [disabled]="!amount.valid" (click)="openPaneIndex = 2">Next</button>
+                    <button class="btn btn-default pull-right" (click)="openPaneIndex = 0">Previous</button>
+                </div>
+            </accordion-group>
+            <accordion-group heading="Final Step" isDisabled="true" [isOpen]="openPaneIndex==2">
+                <h5 class="well well-default">Verify Details</h5>
+                <h4>Description: <strong>{{currentTask.description}}</strong></h4>
+
+                <h4>Customer Info: <strong>{{currentTask.customer.name}}</strong>
+                    <div>
+                        <i class="text-muted">{{currentTask.customer.address}}</i>
+                    </div>
+                </h4>
+                <h4>
+                    {{completionInfo.taskType ==1?'Payment Covered under AMC': (completionInfo.taskType ==2?'Task Was Non Payable':('Payment
+                    due for the task was :₹' + completionInfo.amount + ' and was '+(completionInfo.paid?'paid':'non paid')))}}
+                </h4>
+                <!-- if task was a project, then ask if it is complete or not?
+                if not when is the next visit required? -->
+                <div *ngIf="currentTask.type == 3">
+                    <hr>
+                    <label>Is Project Complete
+                        <input type="checkbox"  name="isProjectComplete" [(ngModel)]="completionInfo.completed">
+                    </label>
+                    <hr>
+                    <label *ngIf="!completionInfo.completed">Next Visit Required On
+                        <input type="date" class="form-control" name="nextVisitRequiredOn" [(ngModel)]="currentTask.nextDueDate">
+                    </label>
+                </div>
+                <div>
+                    <button class="btn btn-success pull-right">Finish</button>
+                    <button class="btn btn-default pull-right" (click)="openPaneIndex = completionInfo.taskType == 3?1:0">Previous</button>
+                </div>
+            </accordion-group>
+        </accordion>
+    </form>
 </ng-template>

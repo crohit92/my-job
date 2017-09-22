@@ -7,7 +7,9 @@ import { BsModalRef, BsModalService } from "ngx-bootstrap";
 import { User } from "../models/user.model";
 import { Account } from "../models/account.model";
 import { ToastrService } from "ngx-toastr";
-import { Utils } from "../helper/utils";
+import { Utils, UserType } from "../helper/utils";
+import { StorageService } from "../helper/storage.service";
+import { Constants } from "../helper/constants";
 const DATE_FORMAT = "DD-MMMM-YYYY";
 
 @Component({
@@ -16,22 +18,27 @@ const DATE_FORMAT = "DD-MMMM-YYYY";
 export class TasksComponent {
     tasks = new Array<Task>();
     currentTask: Task = {};
-
+    user: User;
     users: Account[];
     customers: Account[];
-    filterTask:string;
+    filterTask: string;
     taskTypes = TASK_TYPES;
     moment = moment;
     public modalRef: BsModalRef;
+    openPaneIndex = 0;
+    completionInfo:any = {};
     @ViewChild("template") template: TemplateRef<any>;
+    @ViewChild("templateCompleteTask") templateCompleteTask:TemplateRef<any>;
 
     constructor(
         private api: Api,
         private modalService: BsModalService,
         private alert: ToastrService,
-        private utils:Utils
+        private utils: Utils,
+        private storage: StorageService
     ) {
         this.utils.showMenu(true);
+        this.user = this.storage.get(Constants.USER);
         this.fetchTasks();
 
         this.api.sendRequest({
@@ -51,7 +58,13 @@ export class TasksComponent {
     }
 
     fetchTasks() {
-        this.api.sendRequest({ endpoint: ApiRoutes.FETCH_ALL_TASKS, method: 'get' })
+        this.api.sendRequest({
+            endpoint: ApiRoutes.FETCH_ALL_TASKS,
+            method: 'get',
+            queryParams: this.user.admin == 0 ? {
+                userId: this.user.id
+            } : {}
+        })
             .subscribe(res => {
                 let tasks = res as Task[];
                 (tasks as Task[]).forEach(t => {
@@ -68,6 +81,10 @@ export class TasksComponent {
         this.modalRef = this.modalService.show(this.template);
     }
 
+    completeTask(task){
+        this.currentTask = { ...task };
+        this.modalRef = this.modalService.show(this.templateCompleteTask);
+    }
     sortTasksByNextDueDate() {
         let $this = this;
         this.tasks.sort((a, b) => { return (moment(a.nextDueDate) as moment.Moment).diff((moment(b.nextDueDate) as moment.Moment)) });
@@ -143,8 +160,8 @@ export class TasksComponent {
                 '': task.id
             }
         }).subscribe(() => {
-           this.tasks = this.tasks.filter(t=>t.id!=task.id);
-           this.modalRef.hide();
+            this.tasks = this.tasks.filter(t => t.id != task.id);
+            this.modalRef.hide();
         })
     }
     // setCurrentTask(task: Task) {

@@ -6,7 +6,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
 import { AppComponent } from './app.component';
-import { TypeaheadModule, ModalModule, PopoverModule } from 'ngx-bootstrap';
+import { TypeaheadModule, ModalModule, PopoverModule, AccordionModule } from 'ngx-bootstrap';
 import { NgProgressModule } from 'ngx-progressbar';
 import { ToastrModule } from 'ngx-toastr';
 import 'hammerjs';
@@ -49,6 +49,7 @@ import { Utils } from "./helper/utils";
     TypeaheadModule.forRoot(),
     PopoverModule.forRoot(),
     ModalModule.forRoot(),
+    AccordionModule.forRoot()
   ],
   providers: [Api,
     Utils,

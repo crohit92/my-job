@@ -22,7 +22,8 @@ export class AppComponent implements OnDestroy {
     this.menuVisibilitySubscription = utils.subscribeMenuVisibitityEvents.subscribe((displayState) => {
       this.showMenu = displayState;
     });
-    this.userType = this.storage.get(Constants.USER).admin;
+    let user = this.storage.get(Constants.USER);
+    this.userType = user?user.admin:0;
     this.userLoginSubscription = utils.subscribeLoginEvents.subscribe((userType) => {
       this.userType = userType;
     })
