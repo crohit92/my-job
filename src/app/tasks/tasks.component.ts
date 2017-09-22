@@ -164,6 +164,22 @@ export class TasksComponent {
             this.modalRef.hide();
         })
     }
+
+    taskCompleted(task:Task,completionInfo:any){
+        let routeParams = {};
+        routeParams[task.id]="completed";
+        this.api.sendRequest({
+            endpoint:ApiRoutes.COMPLETE_TASK,
+            routeParams:routeParams,
+            method:'post',
+            body:{
+                task:task,
+                completionInfo:completionInfo
+            }
+        }).subscribe(taskCompleted=>{
+            
+        })
+    }
     // setCurrentTask(task: Task) {
     //     this.currentTask = task
     // }

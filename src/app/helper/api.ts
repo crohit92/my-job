@@ -36,6 +36,7 @@ export const ApiRoutes = {
     CREATE_TASK: 'tasks',
     CREATE_TRANSACTION: 'transactions',
     LOGIN: 'accounts/login',
+    COMPLETE_TASK: 'tasks',
 
     DELETE_ACCOUNT: 'accounts',
     DELETE_TASK: 'tasks',
