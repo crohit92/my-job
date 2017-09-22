@@ -39,6 +39,7 @@ export class TasksController {
     constructor(private db: Db) {
         this.router.get('/', this.fetchAll.bind(this));
         this.router.get('/:id', this.findOne.bind(this));
+        this.router.post('/:id/completed',this.completeTask.bind(this));
         this.router.post('/', this.createTask.bind(this));
         this.router.put('/:id', this.updateTask.bind(this));
         this.router.delete('/:id', this.deleteTask.bind(this));
@@ -46,7 +47,8 @@ export class TasksController {
 
     fetchAll(req: Request, res: Response) {
         let $this = this;
-        let filterByUser = req.query.userId ? [{ $match: { assignedToId: req.query.userId } }] : [];
+        let fetchIncompleteTasks = { completed: undefined };
+        let filterByUser = req.query.userId ? [{ $match: { ...fetchIncompleteTasks, ...{ assignedToId: req.query.userId } } }] : [{ $match: { ...fetchIncompleteTasks } }];
 
         this.db.collection(TASKS).aggregate(
             [].concat(this.includeUserAndCustomer(), ...filterByUser)
@@ -135,6 +137,9 @@ export class TasksController {
     }
 
     completeTask(req: Request, res: Response) {
+        delete req.body.task._id;
+        delete req.body.task.user;
+        delete req.body.task.customer;
         let completion = req.body as Completion;
         /*
         1. All tasks need to be entered into the journal since we want to keep track of all activities
@@ -149,6 +154,7 @@ export class TasksController {
         let transactionsController = new TransactionsController(this.db);
         let transaction: Transaction = new Transaction();
         let task = completion.task;
+        delete task["_id"];
         let extra = completion.completionInfo;
         transaction.amount = completion.completionInfo.amount || 0;
         transaction.creditAccountId = "";
@@ -156,18 +162,30 @@ export class TasksController {
         transaction.debitAccountId = completion.task.customerId
         transaction.narration = this.getNarration(task, completion.completionInfo);
 
-        transactionsController.addTransaction(transaction).then(()=>{
+        transactionsController.addTransaction(transaction).then(() => {
             //first transaction has been made
-            if(extra.amount>0 && extra.paid){
-                transaction.date= new Date();
+            if (extra.amount > 0 && extra.paid) {
+                transaction.date = new Date();
                 transaction.debitAccountId = task.user.id;
                 transaction.creditAccountId = task.customer.id
-                transactionsController.addTransaction(transaction).then(()=>{
-                    
+                transactionsController.addTransaction(transaction).then(() => {
+                    task.completed = task.type == 3 ? extra.completed : true;
+                    this.db.collection(TASKS).updateOne({
+                        id: task.id
+                    },
+                        {
+                            $set: task
+                        })
+                        .then(() => {
+                            res.status(200).send();
+                        })
+                        .catch((err) => { res.status(500).send(err) });
+                }).catch((err) => {
+                    res.status(500).send(err);
                 })
             }
 
-        }).catch((err)=>{
+        }).catch((err) => {
             res.status(500).send(err);
         })
     }
@@ -183,11 +201,11 @@ export class TasksController {
                 narration += ` Query by ${task.customer.name} resolved by ${task.user.name} ` + extra.amount ? ` for which ${extra.amount} rs were ${extra.paid ? 'paid ' : 'not paid '} ` : `No money was paid`;
                 break;
             case 3://Payment
-                narration += ` Payment of rs ${extra.amount} was due from ${task.customer.name} and was ${extra.paid ? 'recived' + `by ${task.user.name}`  : 'not recived'}  `
+                narration += ` Payment of rs ${extra.amount} was due from ${task.customer.name} and was ${extra.paid ? 'recived' + `by ${task.user.name}` : 'not recived'}  `
                 break;
             case 4://Project
-                narration += ` Project visit done by ${task.user.name} `+(extra.amount?` for which ${extra.amount} rs were  ${extra.paid ? 'paid ' : 'not paid '}`:``)+
-                `${extra.completed ? 'Project is now Complete' : ('Next Visit is due on' + task.nextDueDate)}`
+                narration += ` Project visit done by ${task.user.name} ` + (extra.amount ? ` for which ${extra.amount} rs were  ${extra.paid ? 'paid ' : 'not paid '}` : ``) +
+                    `${extra.completed ? 'Project is now Complete' : ('Next Visit is due on' + task.nextDueDate)}`
         }
         narration += extra.amc ? " It was an AMC" : "";
         return narration;
