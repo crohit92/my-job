@@ -18,7 +18,11 @@ export class TasksController {
 
     fetchAll(req: Request, res: Response) {
         let $this = this;
-        this.db.collection(TASKS).aggregate(this.includeUserAndCustomer())
+        let filterByUser = req.query.userId?[{$match:{assignedToId:req.query.userId}}]:[];
+        
+        this.db.collection(TASKS).aggregate(
+            [].concat(this.includeUserAndCustomer(),...filterByUser)
+        )
             .toArray()
             .then((tasks: Task[]) => {
                 res.send(tasks);
