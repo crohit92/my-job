@@ -86,13 +86,7 @@ export class AccountsController {
                     }
                 },
                 {
-                    $unwind: { path: '$debits', preserveNullAndEmptyArrays: true }
-                },
-                {
-                    $unwind: { path: '$credits', preserveNullAndEmptyArrays: true }
-                },
-                {
-                    $project: {
+                    $project:{
                         id: '$id',
                         openingBalance: '$openingBalance',
                         natureOfOB: '$natureOfOB',
@@ -101,25 +95,8 @@ export class AccountsController {
                         group: {
                             $arrayElemAt: ['$group', 0]
                         },
-                        debits: '$debits',
-                        credits: '$credits',
-                    }
-                },
-                {
-                    $group: {
-                        _id: '$id',
-                        id: { $first: '$id' },
-                        name: { $first: '$name' },
-                        group: { $first: '$group' },
-                        openingBalance: { $first: '$openingBalance' },
-                        natureOfOB: { $first: '$natureOfOB' },
-                        groupId: { $first: '$groupId' },
-                        debit: {
-                            $sum: '$debits.amount'
-                        },
-                        credit: {
-                            $sum: '$credits.amount'
-                        }
+                        credits:'$credits',
+                        debits:'$debits'
                     }
                 },
                 {
@@ -131,20 +108,30 @@ export class AccountsController {
                     }
                 },
                 {
-                    $project: {
+                    $project:{
                         id: '$id',
                         openingBalance: '$openingBalance',
                         natureOfOB: '$natureOfOB',
                         name: '$name',
                         groupId: '$groupId',
-                        debit: '$debit',
-                        credit: '$credit',
-                        accountType: {
+                        group: '$group',
+                        accountType:{
                             $arrayElemAt: ['$accountType', 0]
-                        }
+                        },
+                        credits:'$credits',
+                        debits:'$debits'
                     }
                 }
+               
             ]).next().then((account: Account) => {
+                account.debit = 0;
+                account.debits.forEach(debit => {
+                    account.debit+=debit.amount
+                });
+                account.credit = 0;
+                account.credits.forEach(credit => {
+                    account.credit+=credit.amount
+                });
                 res.status(200).send(account);
             }).catch(err => {
                 res.status(400).send(err);

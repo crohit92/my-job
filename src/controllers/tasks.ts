@@ -39,9 +39,9 @@ export class TasksController {
     constructor(private db: Db) {
         this.router.get('/', this.fetchAll.bind(this));
         this.router.get('/:id', this.findOne.bind(this));
-        this.router.post('/:id/completed',this.completeTask.bind(this));
+        this.router.post('/:id/completed', this.completeTask.bind(this));
         this.router.post('/', this.createTask.bind(this));
-        this.router.put('/:id', this.updateTask.bind(this));
+        this.router.put('/:id', this.put.bind(this));
         this.router.delete('/:id', this.deleteTask.bind(this));
     }
 
@@ -95,15 +95,21 @@ export class TasksController {
             })
     }
 
-    updateTask(req: Request, res: Response) {
+    private updateTask(task) {
+        return this.db.collection(TASKS).updateOne({
+            id: task.id
+        },
+            {
+                $set: task
+            })
+    }
+    put(req: Request, res: Response) {
         delete req.body._id;
         let task: Task = req.body;
 
-        this.db.collection(TASKS)
-            .updateOne({ id: req.params.id }, { $set: task })
-            .then((data) => {
-                res.send(task);
-            })
+        this.updateTask(task).then((data) => {
+            res.send(task);
+        })
             .catch((err) => {
                 res.status(400).send(err);
             })
@@ -138,8 +144,6 @@ export class TasksController {
 
     completeTask(req: Request, res: Response) {
         delete req.body.task._id;
-        delete req.body.task.user;
-        delete req.body.task.customer;
         let completion = req.body as Completion;
         /*
         1. All tasks need to be entered into the journal since we want to keep track of all activities
@@ -154,60 +158,77 @@ export class TasksController {
         let transactionsController = new TransactionsController(this.db);
         let transaction: Transaction = new Transaction();
         let task = completion.task;
-        delete task["_id"];
         let extra = completion.completionInfo;
         transaction.amount = completion.completionInfo.amount || 0;
-        transaction.creditAccountId = "";
-        transaction.date = new Date();
-        transaction.debitAccountId = completion.task.customerId
-        transaction.narration = this.getNarration(task, completion.completionInfo);
-
-        transactionsController.addTransaction(transaction).then(() => {
-            //first transaction has been made
-            if (extra.amount > 0 && extra.paid) {
+        this.db.collection("accounts").findOne({
+            groupId: '14'
+        }).then((account: Account) => {
+            if (!account) {
+                res.status(500).send({ message: "No Account has been created under sales group" });
+                return;
+            }
+            else {
+                transaction.creditAccountId = account.id;
                 transaction.date = new Date();
-                transaction.debitAccountId = task.user.id;
-                transaction.creditAccountId = task.customer.id
+                transaction.debitAccountId = completion.task.customerId
+                transaction.narration = this.getNarration(task, completion.completionInfo);
+
                 transactionsController.addTransaction(transaction).then(() => {
-                    task.completed = task.type == 3 ? extra.completed : true;
-                    this.db.collection(TASKS).updateOne({
-                        id: task.id
-                    },
-                        {
-                            $set: task
+
+                    //first transaction has been made
+                    if (extra.amount > 0 && extra.paid) {
+                        transaction.date = new Date();
+                        transaction.debitAccountId = task.user.id;
+                        transaction.creditAccountId = task.customer.id
+                        delete transaction._id;
+                        transactionsController.addTransaction(transaction).then(() => {
+                            this.completeTaskByMarkingItCompleted(task, extra, res);
+                        }).catch((err) => {
+                            res.status(500).send(err);
                         })
-                        .then(() => {
-                            res.status(200).send();
-                        })
-                        .catch((err) => { res.status(500).send(err) });
+                    }
+                    else {
+                        this.completeTaskByMarkingItCompleted(task, extra, res)
+                    }
+
                 }).catch((err) => {
                     res.status(500).send(err);
                 })
             }
-
-        }).catch((err) => {
-            res.status(500).send(err);
         })
+
+
+    }
+
+    completeTaskByMarkingItCompleted(task, extra, res) {
+        task.completed = task.type == 3 ? extra.completed : true;
+        delete task.user;
+        delete task.customer;
+
+        this.updateTask(task).then(() => {
+            res.status(200).send();
+        }).catch((err) => { res.status(500).send(err) });
     }
 
     getNarration(task: Task, extra: { amc: boolean, paid: boolean, amount: number, completed?: boolean }) {
         extra.amount = extra.amount == undefined ? 0 : extra.amount;
-        let narration = "Being ";
-        switch (task.type) {
-            case 1://Complaint
-                narration += ` Complaint by ${task.customer.name} resolved by ${task.user.name} ` + extra.amount ? ` for which ${extra.amount} rs were ${extra.paid ? 'paid ' : 'not paid '} ` : `No money was paid`;
-                break;
-            case 2://Query
-                narration += ` Query by ${task.customer.name} resolved by ${task.user.name} ` + extra.amount ? ` for which ${extra.amount} rs were ${extra.paid ? 'paid ' : 'not paid '} ` : `No money was paid`;
-                break;
-            case 3://Payment
-                narration += ` Payment of rs ${extra.amount} was due from ${task.customer.name} and was ${extra.paid ? 'recived' + `by ${task.user.name}` : 'not recived'}  `
-                break;
-            case 4://Project
-                narration += ` Project visit done by ${task.user.name} ` + (extra.amount ? ` for which ${extra.amount} rs were  ${extra.paid ? 'paid ' : 'not paid '}` : ``) +
-                    `${extra.completed ? 'Project is now Complete' : ('Next Visit is due on' + task.nextDueDate)}`
+        let narration = ` "${task.user.name}" visited "${task.customer.name}" for "${task.description}"`;
+        if (extra.amount > 0 && extra.paid) {
+            narration += ` "${task.customer.name}" paid "${extra.amount}" rs`;
         }
-        narration += extra.amc ? " It was an AMC" : "";
+        else if (extra.amount > 0 && !extra.paid) {
+            narration += ` "${extra.amount}" was asked for but was not paid`;
+        }
+        if (extra.amc) {
+            narration += ` Visit was covered under AMC`
+        }
+        if(task.type == 3 && extra.completed){
+            narration+= ` Project is complete`;
+        }
+        else if(task.type == 3){
+            narration += ` Next visit Due on "${task.nextDueDate}"`;
+        }
+        
         return narration;
     }
 }

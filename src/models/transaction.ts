@@ -7,4 +7,5 @@ export class Transaction{
     dateUpdated:Date;
     narration:string;
     userId:string;
+    [key:string]:any
 }
