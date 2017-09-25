@@ -12,7 +12,7 @@ const account_types_1 = require("./controllers/account-types");
 const transactions_1 = require("./controllers/transactions");
 class Index {
     constructor() {
-        this.port = 8080;
+        this.port = 3000;
         this.app = express();
         this.configureMiddleware(this.app);
     }

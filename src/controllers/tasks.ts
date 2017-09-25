@@ -47,11 +47,16 @@ export class TasksController {
 
     fetchAll(req: Request, res: Response) {
         let $this = this;
-        let fetchIncompleteTasks = { completed: undefined };
-        let filterByUser = req.query.userId ? [{ $match: { ...fetchIncompleteTasks, ...{ assignedToId: req.query.userId } } }] : [{ $match: { ...fetchIncompleteTasks } }];
+        let filterByDueDate = req.query.dueDate ? [{$match:{ nextDueDate: req.query.dueDate }}] : [];
+        let filterCompletedTasks = filterByDueDate.length > 0 ? [] : [{$match:{ completed: undefined }}];
+        let filterByUser = req.query.userId ? [{ $match: { assignedToId: req.query.userId } }] : [];
 
         this.db.collection(TASKS).aggregate(
-            [].concat(this.includeUserAndCustomer(), ...filterByUser)
+            [].concat(
+                ...filterByUser,
+                ...filterByDueDate,
+                ...filterCompletedTasks,
+                 this.includeUserAndCustomer(), )
         )
             .toArray()
             .then((tasks: Task[]) => {
@@ -170,7 +175,7 @@ export class TasksController {
             else {
                 transaction.creditAccountId = account.id;
                 transaction.date = new Date();
-                transaction.dateString = `${transaction.date.getFullYear()}-${padStart((transaction.date.getMonth() + 1).toString(),2,"0")}-${padStart((transaction.date.getDate()).toString(),2,"0")}`
+                transaction.dateString = `${transaction.date.getFullYear()}-${padStart((transaction.date.getMonth() + 1).toString(), 2, "0")}-${padStart((transaction.date.getDate()).toString(), 2, "0")}`
                 transaction.debitAccountId = completion.task.customerId
                 transaction.narration = this.getNarration(task, completion.completionInfo);
 
@@ -235,40 +240,40 @@ export class TasksController {
 }
 
 const padStart = (string, maxLength, fillString) => {
-    
-      if (string == null || maxLength == null) {
+
+    if (string == null || maxLength == null) {
         return string;
-      }
-    
-      var result    = String(string);
-      var targetLen = typeof maxLength === 'number'
+    }
+
+    var result = String(string);
+    var targetLen = typeof maxLength === 'number'
         ? maxLength
         : parseInt(maxLength, 10);
-    
-      if (isNaN(targetLen) || !isFinite(targetLen)) {
+
+    if (isNaN(targetLen) || !isFinite(targetLen)) {
         return result;
-      }
-    
-    
-      var length = result.length;
-      if (length >= targetLen) {
+    }
+
+
+    var length = result.length;
+    if (length >= targetLen) {
         return result;
-      }
-    
-    
-      var fill = fillString == null ? '' : String(fillString);
-      if (fill === '') {
+    }
+
+
+    var fill = fillString == null ? '' : String(fillString);
+    if (fill === '') {
         fill = ' ';
-      }
-    
-    
-      var fillLen = targetLen - length;
-    
-      while (fill.length < fillLen) {
+    }
+
+
+    var fillLen = targetLen - length;
+
+    while (fill.length < fillLen) {
         fill += fill;
-      }
-    
-      var truncated = fill.length > fillLen ? fill.substr(0, fillLen) : fill;
-    
-      return truncated + result;
-    };
+    }
+
+    var truncated = fill.length > fillLen ? fill.substr(0, fillLen) : fill;
+
+    return truncated + result;
+};

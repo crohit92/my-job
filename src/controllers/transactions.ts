@@ -10,8 +10,9 @@ export class TransactionsController {
     private db: Db;
     constructor(db: Db) {
         this.db = db;
-
+        this.router.get("/users/:id", this.getByUser.bind(this))
         this.router.get('/', this.get.bind(this));
+        this.router.post("/users/:id", this.saveUserTransaction.bind(this))
         this.router.post('/', this.post.bind(this));
         this.router.put('/:id', this.put.bind(this));
     }
@@ -60,6 +61,18 @@ export class TransactionsController {
             }
         ]).toArray().then(trans => res.send(trans))
             .catch(err => res.status(500).send(err));
+    }
+
+    getByUser(req: Request, res: Response) {
+        this.db.collection(TRANSACTIONS).find({
+            userId: req.params.id,
+            $and: [
+                { date: { $gte: new Date(req.query.fromDate) } },
+                { date: { $lte: new Date(req.query.toDate) } }
+            ]
+        }).toArray().then(transactions => {
+            res.send(transactions);
+        }).catch(err => res.status(500).send(err));
     }
 
     private getFilter(query: any): any {
@@ -133,10 +146,10 @@ export class TransactionsController {
             case 3://filter by  narration
                 let matchExp = new RegExp(`.*${query.text}.*`);
                 innerFilter = {
-                        narration: {
-                            $in: [matchExp]
-                        }
+                    narration: {
+                        $in: [matchExp]
                     }
+                }
                 break;
             default:
                 break;
@@ -158,7 +171,37 @@ export class TransactionsController {
         this.addTransaction(trans).then(() => res.send(trans)).catch(err => res.status(500).send(err));
     }
 
-    addTransaction(trans:Transaction){
+    private saveUserTransaction(req: Request, res: Response) {
+        let trans: Transaction = req.body;
+        this.db.collection("accounts").findOne({
+            groupId: "3"
+        }).then(creditAccount => {
+            if (!creditAccount) {
+                res.status(500).send({ message: "No Account under Group Cash in Hand" });
+                return;
+            }
+            else {
+                this.db.collection("accounts").findOne({
+                    groupId: "18"
+                }).then(debitAccount => {
+                    if (!debitAccount) {
+                        res.status(500).send({ message: "No Account under Group User Expenses" });
+                        return;
+                    }
+                    else {
+                        trans.debitAccountId = debitAccount.id;
+                        trans.creditAccountId = creditAccount.id;
+                        trans.date = new Date();
+                        this.db.collection(TRANSACTIONS).insertOne(trans).then(() => {
+                            res.send(trans);
+                        }).catch(err => res.status(500).send(err));
+                    }
+                })
+            }
+        })
+    }
+
+    addTransaction(trans: Transaction) {
         trans.id = (new Date()).valueOf().toString();
         trans.date = new Date(trans.date);
         return this.db.collection(TRANSACTIONS).insertOne(trans);

@@ -13,7 +13,7 @@ import { TransactionsController } from "./controllers/transactions";
 
 export class Index {
     public app: Express;
-    private port: number = 8080;
+    private port: number = 3000;
 
     constructor() {
         this.app = express();
