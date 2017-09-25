@@ -26,9 +26,9 @@ export class TasksComponent {
     moment = moment;
     public modalRef: BsModalRef;
     openPaneIndex = 0;
-    completionInfo:any = {};
+    completionInfo: any = {};
     @ViewChild("template") template: TemplateRef<any>;
-    @ViewChild("templateCompleteTask") templateCompleteTask:TemplateRef<any>;
+    @ViewChild("templateCompleteTask") templateCompleteTask: TemplateRef<any>;
 
     constructor(
         private api: Api,
@@ -81,13 +81,22 @@ export class TasksComponent {
         this.modalRef = this.modalService.show(this.template);
     }
 
-    completeTask(task){
+    completeTask(task) {
         this.currentTask = { ...task };
         this.modalRef = this.modalService.show(this.templateCompleteTask);
     }
+    
     sortTasksByNextDueDate() {
         let $this = this;
-        this.tasks.sort((a, b) => { return (moment(a.nextDueDate) as moment.Moment).diff((moment(b.nextDueDate) as moment.Moment)) });
+        this.tasks.sort((a, b) => {
+            let diff = (moment(a.nextDueDate) as moment.Moment).diff((moment(b.nextDueDate) as moment.Moment));
+            if (diff == 0) {
+                return a.sequence - b.sequence;
+            }
+            else {
+                return diff
+            }
+        });
     }
 
     matchById(obj1, obj2) {
@@ -165,18 +174,18 @@ export class TasksComponent {
         })
     }
 
-    taskCompleted(task:Task,completionInfo:any){
+    taskCompleted(task: Task, completionInfo: any) {
         let routeParams = {};
-        routeParams[task.id]="completed";
+        routeParams[task.id] = "completed";
         this.api.sendRequest({
-            endpoint:ApiRoutes.COMPLETE_TASK,
-            routeParams:routeParams,
-            method:'post',
-            body:{
-                task:task,
-                completionInfo:completionInfo
+            endpoint: ApiRoutes.COMPLETE_TASK,
+            routeParams: routeParams,
+            method: 'post',
+            body: {
+                task: task,
+                completionInfo: completionInfo
             }
-        }).subscribe(taskCompleted=>{
+        }).subscribe(taskCompleted => {
             this.modalRef.hide();
             this.fetchTasks();
         })

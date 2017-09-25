@@ -6,6 +6,7 @@
                 <th>Assigned To</th>
                 <th colspan="1">Customer</th>
                 <th>Due On</th>
+                <th>Sequence</th>
                 <th>Action</th>
             </tr>
         </thead>
@@ -22,7 +23,8 @@
                 <td><strong class="text-muted">{{(""+task.description).substring(0,30)}}</strong></td>
                 <td><i class="text-muted">{{task.user?task.user.name:"**Not Assigned**"}}</i></td>
                 <td><i class="text-muted">{{(task.customer)? task.customer.name:"**Not Assigned**"}}</i></td>
-                <td><i class="text-muted">{{moment(task.nextDueDate).format("DD-MMMM-YYYY") }}</i></td>
+                <td><i class="text-muted">{{task.nextDueDate |  date:'MMM,dd yyyy' }}</i></td>
+                <td><strong class="text-muted">{{task.sequence}}</strong></td>
                 <td>
                     <button *ngIf="user.admin>0" class="btn btn-default" (click)="openModal(task)">Edit</button>
                     <button *ngIf="user.admin==0" class="btn btn-default" (click)="completeTask(task)">Done</button>
@@ -54,6 +56,9 @@
             <div class="form-group">
                 <label>Due On <input type="date" class="form-control" name="dueDate" required [(ngModel)]="currentTask.nextDueDate" placeholder="Task Due On"></label>
             </div>
+            <div class="form-group">
+                <label>Sequence<input type="number" class="form-control" name="sequence" required [(ngModel)]="currentTask.sequence" placeholder="Sequence number"></label>
+            </div>
 
             <div class="form-group">
                 <select class="form-control" name="taskType" required [(ngModel)]="currentTask.type">
@@ -63,6 +68,7 @@
             </div>
             <label>Select User
             <input  autocomplete="off" name="user"
+            (change)="currentTask.user = undefined"
             required
             (typeaheadOnSelect)="currentTask.user = $event.item"
             [(ngModel)]="currentTask.userName"
@@ -74,6 +80,7 @@
 
             <label>Select Customer
             <input  autocomplete="off" name="customer" 
+            (change)="currentTask.customer = undefined"
             required
             (typeaheadOnSelect)="currentTask.customer = $event.item"
             [(ngModel)]="currentTask.customerName"
@@ -85,7 +92,7 @@
 
 
             <div class="form-group">
-                <button [disabled]="!taskForm.valid" (click)="createOrUpdateTask(currentTask)" class="btn btn-primary">
+                <button [disabled]="!taskForm.valid || !currentTask.customer || !currentTask.user" (click)="createOrUpdateTask(currentTask)" class="btn btn-primary">
                     {{currentTask.id?'Update':'Save'}}
                 </button>
                 <button [disabled]="!currentTask.id" (click)="deleteTask(currentTask)" class="btn btn-danger">Delete</button>

@@ -26,7 +26,7 @@
           <td><strong class="text-muted">{{(""+task.description).substring(0,30)}}</strong></td>
           <td><i class="text-muted">{{task.user?task.user.name:"**Not Assigned**"}}</i></td>
           <td><i class="text-muted">{{(task.customer)? task.customer.name:"**Not Assigned**"}}</i></td>
-          <td><i class="text-muted">{{task.nextDueDate | date:yyyyMMMdd }}</i></td>
+          <td><i class="text-muted">{{task.nextDueDate | date:'MMM,dd yyyy' }}</i></td>
           
       </tr>
   </tbody>

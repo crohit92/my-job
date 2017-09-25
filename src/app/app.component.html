@@ -24,6 +24,7 @@
                         <ul class="nav navbar-nav" (click)="toggleMenu()">
                             <li *ngIf="userType == 2" routerLink="/accounts" routerLinkActive="active"><a>Accounts</a></li>
                             <li *ngIf="userType > 0" routerLink="/transactions" routerLinkActive="active"><a>Day Book</a></li>
+                            <li routerLink="/user-daybook" routerLinkActive="active"><a>Add Expenditure</a></li>
                             <li routerLink="/tasks" routerLinkActive="active"><a>Tasks</a></li>
                             <li *ngIf="userType > 0" routerLink="/completed-tasks" routerLinkActive="active"><a>See Tasks by date</a></li>
                             <li (click)="logout()"><a>Logout</a></li>

@@ -24,6 +24,7 @@ import { StorageService } from './helper/storage.service';
 import { NoopInterceptor } from "./helper/http-intercepter";
 import { Utils } from "./helper/utils";
 import { CompletedTasksComponent } from './completed-tasks/completed-tasks.component';
+import { UserDaybookComponent } from './user-daybook/user-daybook.component';
 
 @NgModule({
   declarations: [
@@ -36,7 +37,8 @@ import { CompletedTasksComponent } from './completed-tasks/completed-tasks.compo
     FilterAccounts,
     FilterTasks,
     LoginComponent,
-    CompletedTasksComponent
+    CompletedTasksComponent,
+    UserDaybookComponent
   ],
   imports: [
     BrowserModule,
