@@ -6,7 +6,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
 import { AppComponent } from './app.component';
-import { TypeaheadModule, ModalModule, PopoverModule, AccordionModule } from 'ngx-bootstrap';
+import { TypeaheadModule, ModalModule, PopoverModule, AccordionModule, BsDatepickerModule } from 'ngx-bootstrap';
 import { NgProgressModule } from 'ngx-progressbar';
 import { ToastrModule } from 'ngx-toastr';
 import 'hammerjs';
@@ -17,26 +17,26 @@ import { Api } from './helper/api';
 
 import { AccountsListComponent } from './accounts/accounts-list.component';
 import { TasksComponent } from './tasks/tasks.component';
-import { HomeComponent } from './home/home.component';
 import { TransationsListComponent } from './transactions/transactions-list.component';
 import { Filter, FilterTransactions, FilterAccounts, FilterTasks } from './loop-filter.pipe';
 import { LoginComponent } from './login/login.component';
 import { StorageService } from './helper/storage.service';
 import { NoopInterceptor } from "./helper/http-intercepter";
 import { Utils } from "./helper/utils";
+import { CompletedTasksComponent } from './completed-tasks/completed-tasks.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     AccountsListComponent,
     TasksComponent,
-    HomeComponent,
     TransationsListComponent,
     Filter,
     FilterTransactions,
     FilterAccounts,
     FilterTasks,
-    LoginComponent
+    LoginComponent,
+    CompletedTasksComponent
   ],
   imports: [
     BrowserModule,

@@ -34,12 +34,8 @@ export class LoginComponent implements OnInit {
       let user = response as User;
       this.storage.set(Constants.USER, user);
       this.utils.loginSuccess(user);
-      if(user.admin == 0){
+     
         this.router.navigate(['/tasks']);
-      }
-      else{
-        this.router.navigate(['/home']);
-      }
       
     }, (err => {
       this.alert.error("Invalid credentials", "Unauthorised");

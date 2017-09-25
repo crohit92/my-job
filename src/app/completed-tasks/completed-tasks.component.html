@@ -1,0 +1,39 @@
+<table class="table">
+  <thead>
+      <tr>
+          <th colspan="1">Task</th>
+          <th>Assigned To</th>
+          <th colspan="1">Customer</th>
+          <th>Due On</th>
+      </tr>
+      <tr>
+          <th colspan="2">Filter By Date</th>
+          <th colspan="2">
+                <input type="date"
+                (change)="fetchTasks()"
+                [(ngModel)]="dueDate"
+                >
+          </th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td colspan="4" *ngIf="!tasks || tasks.length==0">
+              No Records To Show
+          </td>
+      </tr>
+      <tr *ngFor="let task of tasks | filterTasks:filterTask" [ngClass]="{'bg-success':task.completed}">
+          <td><strong class="text-muted">{{(""+task.description).substring(0,30)}}</strong></td>
+          <td><i class="text-muted">{{task.user?task.user.name:"**Not Assigned**"}}</i></td>
+          <td><i class="text-muted">{{(task.customer)? task.customer.name:"**Not Assigned**"}}</i></td>
+          <td><i class="text-muted">{{task.nextDueDate | date:yyyyMMMdd }}</i></td>
+          
+      </tr>
+  </tbody>
+  <tfoot>
+      <tr>
+          <td>
+          </td>
+      </tr>
+  </tfoot>
+</table>

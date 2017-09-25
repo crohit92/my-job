@@ -7,7 +7,7 @@ import { HttpEvent } from "@angular/common/http";
 import { HttpErrorResponse } from "@angular/common/http";
 import { Observable } from "rxjs/Observable";
 //const apiBase = 'https://pacific-coast-70867.herokuapp.com/';
-const apiBase = 'http://localhost:8080/';
+const apiBase = 'http://localhost:3000/';
 
 export class Request {
     endpoint: string;
