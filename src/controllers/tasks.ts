@@ -4,11 +4,12 @@ import { Task } from '../models/task';
 import { UsersController } from './users';
 import { TransactionsController } from "./transactions";
 import { Transaction } from "../models/transaction";
+import { CallType } from '../models/call-type';
 
 const TASKS = "tasks";
 class Completion {
     task: Task;
-    completionInfo: { amc: boolean, amount: number, paid: boolean, completed?: boolean }
+    completionInfo: { paymentStatus: number, paid: number, completed?: boolean }
 };
 
 const tempPayload = {
@@ -26,10 +27,10 @@ const tempPayload = {
         "id": "1506055737359"
     },
     "completionInfo": {
-        "amc": true,
+        "paymentStatus": 0,//0 AMC, 1 Under Warrenty, 2 Payable
         "amount": 500,
-        "paid": true,
-        completed: true
+        "paid": 400,
+        completed: true //if project
     }
 }
 export class TasksController {
@@ -47,8 +48,8 @@ export class TasksController {
 
     fetchAll(req: Request, res: Response) {
         let $this = this;
-        let filterByDueDate = req.query.dueDate ? [{$match:{ nextDueDate: req.query.dueDate }}] : [];
-        let filterCompletedTasks = filterByDueDate.length > 0 ? [] : [{$match:{ completed: undefined }}];
+        let filterByDueDate = req.query.dueDate ? [{ $match: { nextDueDate: req.query.dueDate } }] : [];
+        let filterCompletedTasks = filterByDueDate.length > 0 ? [] : [{ $match: { completed: undefined } }];
         let filterByUser = req.query.userId ? [{ $match: { assignedToId: req.query.userId } }] : [];
 
         this.db.collection(TASKS).aggregate(
@@ -56,7 +57,7 @@ export class TasksController {
                 ...filterByUser,
                 ...filterByDueDate,
                 ...filterCompletedTasks,
-                 this.includeUserAndCustomer(), )
+                this.includeUserAndCustomer(), )
         )
             .toArray()
             .then((tasks: Task[]) => {
@@ -151,58 +152,72 @@ export class TasksController {
         delete req.body.task._id;
         let completion = req.body as Completion;
         /*
-        1. All tasks need to be entered into the journal since we want to keep track of all activities
-        2. For all tasks completed 
-        2.1. Customer   dr. to Services cr.
-        2.2. If amount > 0 and paid == true then User    dr. to Customer  cr.
-        3 If task.type !== 3 ie project then 3.1 else 3.2
-        3.1. Update task set completed to true
-        3.2. If completionInfo.taskType == 3
-        3.2.1 Update task-> set nextDueDate and completed
+        task type 0->Complaint, 1->Query, 2->Payment, 3->Project
+        payment status 0->AMC, 1->Warrenty, 2-> Payable
+
+        completion info{ 
+            paymentStatus: boolean, 
+            paid: number, 
+            completed?: boolean 
+        }
+
+        1. task type(0) & payment status(0|1|2)
+            a. Customer to Services by amount(0 if payment status = 0|1)
+            b. if payment status(2)
+	        	User to Customer by paid
+        2. task type(2)
+	        User to Customer by paid
         */
-        let transactionsController = new TransactionsController(this.db);
-        let transaction: Transaction = new Transaction();
         let task = completion.task;
         let extra = completion.completionInfo;
-        transaction.amount = completion.completionInfo.amount || 0;
-        this.db.collection("accounts").findOne({
-            groupId: '14'
-        }).then((account: Account) => {
-            if (!account) {
-                res.status(500).send({ message: "No Account has been created under sales group" });
-                return;
-            }
-            else {
-                transaction.creditAccountId = account.id;
-                transaction.date = new Date();
-                transaction.dateString = `${transaction.date.getFullYear()}-${padStart((transaction.date.getMonth() + 1).toString(), 2, "0")}-${padStart((transaction.date.getDate()).toString(), 2, "0")}`
-                transaction.debitAccountId = completion.task.customerId
-                transaction.narration = this.getNarration(task, completion.completionInfo);
 
-                transactionsController.addTransaction(transaction).then(() => {
-
-                    //first transaction has been made
-                    if (extra.amount > 0 && extra.paid) {
-                        transaction.date = new Date();
-                        transaction.debitAccountId = task.user.id;
-                        transaction.creditAccountId = task.customer.id
-                        delete transaction._id;
-                        transactionsController.addTransaction(transaction).then(() => {
+        if (task.type == 0 || task.type == 2) {
+            this.db.collection("accounts").findOne({
+                groupId: '14'
+            }).then((salesAccount: Account) => {
+                if (!salesAccount) {
+                    res.status(500).send({ message: "No Account has been created under sales group" });
+                    return;
+                }
+                else {
+                    let transactionsController = new TransactionsController(this.db);
+                    let transaction: Transaction = new Transaction();
+                    transaction.amount = extra.paymentStatus < 2 ? 0 : task.amount;
+                    transaction.creditAccountId = salesAccount.id;
+                    transaction.date = new Date();
+                    transaction.dateString = `${transaction.date.getFullYear()}-${padStart((transaction.date.getMonth() + 1).toString(), 2, "0")}-${padStart((transaction.date.getDate()).toString(), 2, "0")}`
+                    transaction.debitAccountId = completion.task.customerId
+                    transaction.narration = this.getNarration(task, completion.completionInfo);
+                    transactionsController.addTransaction(transaction).then(() => {
+                        if(task.type == CallType.Payment || extra.paymentStatus == 2){
+                            transaction.date = new Date();
+                            transaction.dateString = `${transaction.date.getFullYear()}-${padStart((transaction.date.getMonth() + 1).toString(), 2, "0")}-${padStart((transaction.date.getDate()).toString(), 2, "0")}`
+                            transaction.debitAccountId = task.user.id;
+                            transaction.creditAccountId = task.customer.id
+                            transaction.amount = extra.paid;
+                            delete transaction._id;
+                            transactionsController.addTransaction(transaction).then(() => {
+                                this.completeTaskByMarkingItCompleted(task, extra, res);
+                            }).catch((err) => {
+                                res.status(500).send(err);
+                            })
+                        }
+                        else{
                             this.completeTaskByMarkingItCompleted(task, extra, res);
-                        }).catch((err) => {
-                            res.status(500).send(err);
-                        })
-                    }
-                    else {
-                        this.completeTaskByMarkingItCompleted(task, extra, res)
-                    }
+                        }
 
-                }).catch((err) => {
-                    res.status(500).send(err);
-                })
-            }
-        })
+                    }).catch((err) => {
+                        res.status(500).send(err);
+                    })
 
+                }
+            }).catch((err) => {
+                res.status(500).send(err);
+            });
+        }
+        else {
+            this.completeTaskByMarkingItCompleted(task, extra, res)
+        }
 
     }
 
@@ -212,29 +227,40 @@ export class TasksController {
         delete task.customer;
 
         this.updateTask(task).then(() => {
-            res.status(200).send();
+            res.status(200).send({message:"Task Completed"});
         }).catch((err) => { res.status(500).send(err) });
     }
 
-    getNarration(task: Task, extra: { amc: boolean, paid: boolean, amount: number, completed?: boolean }) {
-        extra.amount = extra.amount == undefined ? 0 : extra.amount;
-        let narration = ` "${task.user.name}" visited "${task.customer.name}" for "${task.description}"`;
-        if (extra.amount > 0 && extra.paid) {
-            narration += ` "${task.customer.name}" paid "${extra.amount}" rs`;
+    getNarration(task: Task, extra: { paymentStatus: number, paid: number, completed?: boolean }) {
+        /*
+        task type 0->Complaint, 1->Query, 2->Payment, 3->Project
+        payment status 0->AMC, 1->Warrenty, 2-> Payable
+    
+        completion info{ 
+            paymentStatus: boolean, 
+            
+            paid: number, 
+            completed?: boolean 
         }
-        else if (extra.amount > 0 && !extra.paid) {
-            narration += ` "${extra.amount}" was asked for but was not paid`;
-        }
-        if (extra.amc) {
-            narration += ` Visit was covered under AMC`
-        }
-        if (task.type == 3 && extra.completed) {
-            narration += ` Project is complete`;
-        }
-        else if (task.type == 3) {
-            narration += ` Next visit Due on "${task.nextDueDate}"`;
-        }
+    
+        narration: <User> visited <Customer> for <Task.Type> narrated as <task.description>,
+        1. task type(0) & payment status(0|1)
+            narration: which was under < payment status>
+    
+        2. [task type(0) & payment status(2)] | [task type(2)]
+            narration: Total Amount Due was <amount>rs of which <paid>rs were paid
+    
+        */
 
+
+        let taskType = task.type == CallType.COMPLAINT ? "Complaint" : "Payment";
+        let narration = ` "${task.user.name}" visited "${task.customer.name}" for "${taskType}" narrated as "${task.description}"`;
+        if (task.type == CallType.COMPLAINT && extra.paymentStatus < 2) {
+            narration += `which was under ${extra.paymentStatus == 0 ? "AMC" : "Warrenty"}`;
+        }
+        else if ((task.type == CallType.COMPLAINT && extra.paymentStatus == 2) || task.type == CallType.Payment) {
+            narration += `Total Amount Due was ${task.amount} rs of which ${extra.paid} rs were paid`;
+        }
         return narration;
     }
 }

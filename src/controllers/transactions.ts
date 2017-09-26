@@ -173,30 +173,20 @@ export class TransactionsController {
 
     private saveUserTransaction(req: Request, res: Response) {
         let trans: Transaction = req.body;
+
         this.db.collection("accounts").findOne({
-            groupId: "3"
-        }).then(creditAccount => {
-            if (!creditAccount) {
-                res.status(500).send({ message: "No Account under Group Cash in Hand" });
+            groupId: "18"
+        }).then(debitAccount => {
+            if (!debitAccount) {
+                res.status(500).send({ message: "No Account under Group User Expenses" });
                 return;
             }
             else {
-                this.db.collection("accounts").findOne({
-                    groupId: "18"
-                }).then(debitAccount => {
-                    if (!debitAccount) {
-                        res.status(500).send({ message: "No Account under Group User Expenses" });
-                        return;
-                    }
-                    else {
-                        trans.debitAccountId = debitAccount.id;
-                        trans.creditAccountId = creditAccount.id;
-                        trans.date = new Date();
-                        this.db.collection(TRANSACTIONS).insertOne(trans).then(() => {
-                            res.send(trans);
-                        }).catch(err => res.status(500).send(err));
-                    }
-                })
+                trans.debitAccountId = debitAccount.id;
+                trans.date = new Date();
+                this.db.collection(TRANSACTIONS).insertOne(trans).then(() => {
+                    res.send(trans);
+                }).catch(err => res.status(500).send(err));
             }
         })
     }
