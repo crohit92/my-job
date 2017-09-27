@@ -187,6 +187,7 @@ export class TasksComponent {
             }
         }).subscribe(taskCompleted => {
             this.modalRef.hide();
+            this.completionInfo = {};
             this.fetchTasks();
         })
     }

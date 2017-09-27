@@ -11,6 +11,7 @@ import { Utils } from "../helper/utils";
 export class CompletedTasksComponent implements OnInit {
   dueDate:Date;
   tasks:Task[];
+  filterTask:string;
   constructor(
     private api:Api,
     private utils: Utils

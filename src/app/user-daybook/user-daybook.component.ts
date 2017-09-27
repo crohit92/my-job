@@ -59,7 +59,7 @@ export class UserDaybookComponent implements OnInit {
     trans.amount = this.transaction.amount;
     trans.userId = this.user.id;
     trans.narration = `${this.user.name} spent ${trans.amount} rs for ${this.transaction.narration}` ;
-
+    trans.creditAccountId = this.user.id;
     this.api.sendRequest({
       endpoint: "transactions/users",
       routeParams: {
@@ -68,6 +68,7 @@ export class UserDaybookComponent implements OnInit {
       method: "post",
       body: trans
     }).subscribe(() => {
+      this.modalRef.hide();
       this.alert.success("Transaction Saved");
     },
       (err) => {
