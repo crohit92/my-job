@@ -1,47 +1,46 @@
-<div class="col-sm-8 col-xs-12">
-    <table class="table table-hover">
-        <thead>
-            <tr>
-                <th colspan="1">Task</th>
-                <th>Assigned To</th>
-                <th colspan="1">Customer</th>
-                <th>Due On</th>
-                <th>Sequence</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td colspan="1">
-                    <button class="btn btn-primary" *ngIf="user.admin>0" (click)="openModal()">Add Task</button>
-                </td>
-                <td colspan="2">
-                    <input autocomplete="off" class="form-control" [(ngModel)]="filterTask">
-                </td>
-                <td>
-                    <button class="btn btn-default" (click)="fetchTasks()"><i class="glyphicon glyphicon-refresh"></i></button>
-                </td>
-            </tr>
-            <tr *ngFor="let task of tasks | filterTasks:filterTask">
-                <td><strong class="text-muted">{{(""+task.description).substring(0,30)}}</strong></td>
-                <td><i class="text-muted">{{task.user?task.user.name:"**Not Assigned**"}}</i></td>
-                <td><i class="text-muted">{{(task.customer)? task.customer.name:"**Not Assigned**"}}</i></td>
-                <td><i class="text-muted">{{task.nextDueDate |  date:'MMM,dd yyyy' }}</i></td>
-                <td><strong class="text-muted">{{task.sequence}}</strong></td>
-                <td>
-                    <button *ngIf="user.admin>0" class="btn btn-default" (click)="openModal(task)">Edit</button>
-                    <button *ngIf="user.admin==0" class="btn btn-default" (click)="completeTask(task)">Done</button>
-                </td>
-            </tr>
-        </tbody>
-        <tfoot>
-            <tr>
-                <td>
-                </td>
-            </tr>
-        </tfoot>
-    </table>
-</div>
+<!-- <div class="container-fluid">
+    <div class="row">
+        <div class="col-xs-12"> -->
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Task</th>
+                        <th>Assigned To</th>
+                        <th>Customer</th>
+                        <th>Due On</th>
+                        <th>Sequence</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="1">
+                            <button class="btn btn-primary" *ngIf="user.admin>0" (click)="openModal()">Add Task</button>
+                        </td>
+                        <td colspan="2">
+                            <input autocomplete="off" class="form-control" [(ngModel)]="filterTask">
+                        </td>
+                        <td>
+                            <button class="btn btn-default" (click)="fetchTasks()"><i class="glyphicon glyphicon-refresh"></i></button>
+                        </td>
+                    </tr>
+                    <tr *ngFor="let task of tasks | filterTasks:filterTask" (click)="openModal(task)">
+                        <td><strong class="text-muted">{{(""+task.description).substring(0,30)}}</strong></td>
+                        <td><i class="text-muted">{{task.user?task.user.name:"**Not Assigned**"}}</i></td>
+                        <td><i class="text-muted">{{(task.customer)? task.customer.name:"**Not Assigned**"}}</i></td>
+                        <td><i class="text-muted">{{task.nextDueDate |  date:'MMM,dd yyyy' }}</i></td>
+                        <td><strong class="text-muted">{{task.sequence}}</strong></td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        <!-- </div>
+    </div>
+</div> -->
 
 <ng-template #template>
     <div class="modal-header">
@@ -98,7 +97,8 @@
 
 
             <div class="form-group">
-                <button [disabled]="!taskForm.valid || !currentTask.customer || !currentTask.user" (click)="createOrUpdateTask(currentTask)" class="btn btn-primary">
+                <button [disabled]="!taskForm.valid || !currentTask.customer || !currentTask.user" (click)="createOrUpdateTask(currentTask)"
+                    class="btn btn-primary">
                     {{currentTask.id?'Update':'Save'}}
                 </button>
                 <button [disabled]="!currentTask.id" (click)="deleteTask(currentTask)" class="btn btn-danger">Delete</button>
@@ -141,7 +141,7 @@
                 <hr>
                 <div *ngIf="currentTask.type == 0">
                     <label>Select Payment Status
-                        <select required name="paymentStatus" [(ngModel)]="completionInfo.paymentStatus">
+                        <select class="form-control" required name="paymentStatus" [(ngModel)]="completionInfo.paymentStatus">
                             <option value="" disabled>Select One</option>
                             <option [ngValue]="0">AMC</option>
                             <option [ngValue]="1">Under Warrenty</option>
@@ -156,7 +156,7 @@
                 </div>
                 <div *ngIf="completionInfo.paymentStatus == 2 || currentTask.type == 2">
                     <label>Amount Received
-                        <input type="number" required name="amountPaid" #amountPaid="ngModel" [(ngModel)]="completionInfo.paid">
+                        <input type="number" class="form-control" required name="amountPaid" #amountPaid="ngModel" [(ngModel)]="completionInfo.paid">
                     </label>
                 </div>
                 <!-- if task was a project, then ask if it is complete or not?

@@ -5,3 +5,6 @@
 .padding{
     padding:1.5rem;
 }
+table tr td,table tr th {
+    word-break: break-all;
+}

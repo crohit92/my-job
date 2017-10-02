@@ -5,11 +5,16 @@ import { TransationsListComponent } from './transactions/transactions-list.compo
 import { LoginComponent } from "./login/login.component";
 import { CompletedTasksComponent } from "./completed-tasks/completed-tasks.component";
 import { UserDaybookComponent } from "./user-daybook/user-daybook.component";
+import { HomeComponent } from './home/home.component';
 export const ROUTES: Route[] = [
 
     {
         path: 'login',
         component: LoginComponent
+    },
+    {
+        path: 'home',
+        component: HomeComponent
     },
     {
         path: 'accounts',

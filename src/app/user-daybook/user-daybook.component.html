@@ -1,14 +1,13 @@
-<div class="container-fluid">
   <table class="table table-striped">
     <thead>
       <tr>
-        <th colspan="2">Filter Records by By Date Range</th>
+        <th>Filter Records by By Date Range</th>
         <th></th>
-        <th><button class="btn btn-default" (click)="openTransactionModal()"><i class="glyphicon glyphicon-plus"></i></button></th>
+        <th><button class="btn btn-primary" (click)="openTransactionModal()"><i class="glyphicon glyphicon-plus"></i></button></th>
       </tr>
       <tr>
-        <th><label>From <input type="date" [(ngModel)]="fromDate"></label></th>
-        <th><label>To <input type="date" [(ngModel)]="toDate"></label></th>
+        <th><label>From <input class="form-control" type="date" [(ngModel)]="fromDate"></label></th>
+        <th><label>To <input class="form-control" type="date" [(ngModel)]="toDate"></label></th>
         <th><button [disabled]="!fromDate || !toDate" class="btn btn-default" (click)="fetchTransactions()">
           <i class="glyphicon glyphicon-search"></i>
         </button>
@@ -27,7 +26,6 @@
       </tr>
     </tbody>
   </table>
-</div>
 
 <ng-template #template>
   <div class="modal-header">

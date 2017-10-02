@@ -17,12 +17,22 @@ export class LoginComponent implements OnInit {
     private router: Router,
     private alert: ToastrService,
     private storage: StorageService,
-    private utils:Utils
-  ) { 
+    private utils: Utils
+  ) {
     this.utils.showMenu(false);
   }
 
   ngOnInit() {
+    let user = this.storage.get(Constants.USER)
+    if (user) {
+      if (user.admin) {
+        this.router.navigate(["/home"]);
+      }
+      else {
+        this.router.navigate(["/tasks"]);
+      }
+
+    }
   }
 
   login() {
@@ -34,9 +44,17 @@ export class LoginComponent implements OnInit {
       let user = response as User;
       this.storage.set(Constants.USER, user);
       this.utils.loginSuccess(user);
-     
-        this.router.navigate(['/tasks']);
-      
+
+      if (user) {
+        if (user.admin) {
+          this.router.navigate(["/home"]);
+        }
+        else {
+          this.router.navigate(["/tasks"]);
+        }
+
+      }
+
     }, (err => {
       this.alert.error("Invalid credentials", "Unauthorised");
     }))
