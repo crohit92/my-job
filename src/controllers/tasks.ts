@@ -184,14 +184,16 @@ export class TasksController {
                     let transaction: Transaction = new Transaction();
                     transaction.amount = extra.paymentStatus < 2 ? 0 : task.amount;
                     transaction.creditAccountId = salesAccount.id;
-                    transaction.date = new Date();
-                    transaction.dateString = `${transaction.date.getFullYear()}-${padStart((transaction.date.getMonth() + 1).toString(), 2, "0")}-${padStart((transaction.date.getDate()).toString(), 2, "0")}`
+                    var today = new Date();
+                    transaction.dateString = `${today.getFullYear()}-${padStart((today.getMonth() + 1).toString(), 2, "0")}-${padStart((today.getDate()).toString(), 2, "0")}`
+                    transaction.date = transaction.dateString;
                     transaction.debitAccountId = completion.task.customerId
                     transaction.narration = this.getNarration(task, completion.completionInfo);
                     transactionsController.addTransaction(transaction).then(() => {
                         if(task.type == CallType.Payment || extra.paymentStatus == 2){
-                            transaction.date = new Date();
-                            transaction.dateString = `${transaction.date.getFullYear()}-${padStart((transaction.date.getMonth() + 1).toString(), 2, "0")}-${padStart((transaction.date.getDate()).toString(), 2, "0")}`
+                            var today = new Date();
+                            transaction.dateString = `${today.getFullYear()}-${padStart((today.getMonth() + 1).toString(), 2, "0")}-${padStart((today.getDate()).toString(), 2, "0")}`
+                            transaction.date = transaction.dateString;
                             transaction.debitAccountId = task.user.id;
                             transaction.creditAccountId = task.customer.id
                             transaction.amount = extra.paid;
@@ -223,6 +225,7 @@ export class TasksController {
 
     completeTaskByMarkingItCompleted(task, extra, res) {
         task.completed = task.type == 3 ? extra.completed : true;
+        task.assignedToId = task.type == 3 ?undefined:task.assignedToId;
         delete task.user;
         delete task.customer;
 
@@ -265,7 +268,7 @@ export class TasksController {
     }
 }
 
-const padStart = (string, maxLength, fillString) => {
+export const padStart = (string, maxLength, fillString) => {
 
     if (string == null || maxLength == null) {
         return string;

@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { Db, ObjectID, InsertOneWriteOpResult } from 'mongodb';
 import { Transaction } from '../models/transaction';
+import { padStart } from './tasks';
 const TRANSACTIONS = "transactions";
 
 export class TransactionsController {
@@ -168,7 +169,10 @@ export class TransactionsController {
         delete req.body.debit
         delete req.body.credit
         let trans: Transaction = req.body;
-        this.addTransaction(trans).then(() => res.send(trans)).catch(err => res.status(500).send(err));
+        this.addTransaction(trans)
+            .then(() => res.send(trans))
+            .catch(err => res.status(500)
+                .send(err));
     }
 
     private saveUserTransaction(req: Request, res: Response) {
@@ -183,7 +187,12 @@ export class TransactionsController {
             }
             else {
                 trans.debitAccountId = debitAccount.id;
-                trans.date = new Date();
+                trans.id = (new Date()).valueOf().toString();
+                //since on add expenditure screen there is no option for selecting date
+                //so add today's date
+                var today = new Date();
+                trans.dateString = `${today.getFullYear()}-${padStart((today.getMonth() + 1).toString(), 2, "0")}-${padStart((today.getDate()).toString(), 2, "0")}`
+                trans.date = new Date(trans.dateString);
                 this.db.collection(TRANSACTIONS).insertOne(trans).then(() => {
                     res.send(trans);
                 }).catch(err => res.status(500).send(err));
