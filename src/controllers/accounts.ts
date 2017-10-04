@@ -1,8 +1,12 @@
 import { Router, Request, Response } from 'express';
+import * as fs from 'fs';
 import { Db, ObjectID, InsertOneWriteOpResult } from 'mongodb';
 import { Account } from '../models/account';
 import { Group } from './../models/group';
 import { AccountType } from '../models/account-type';
+//import 'pdfmake';
+import * as Printer from 'pdfmake/src/printer';
+import { FONTS } from '../index';
 const ACCOUNTS = "accounts";
 const GROUPS = "groups";
 
@@ -16,13 +20,13 @@ export class AccountsController {
         this.router.get('/', this.get.bind(this));
         this.router.get('/:id', this.getById.bind(this));
         this.router.post('/login', this.login.bind(this));
+        this.router.post('/:id/makeStatement',this.makePdf.bind(this));
         this.router.post('/', this.post.bind(this));
         this.router.put('/:id', this.put.bind(this));
         this.router.delete('/:id', this.delete.bind(this))
     }
 
     private get(req: Request, res: Response) {
-
         let filter = req.query.hasOwnProperty('groupId') ? { groupId: req.query.groupId } : {};
         let pagination = [];
         if (req.query.hasOwnProperty('skip') && req.query.hasOwnProperty('limit')) {
@@ -86,7 +90,7 @@ export class AccountsController {
                     }
                 },
                 {
-                    $project:{
+                    $project: {
                         id: '$id',
                         openingBalance: '$openingBalance',
                         natureOfOB: '$natureOfOB',
@@ -95,8 +99,8 @@ export class AccountsController {
                         group: {
                             $arrayElemAt: ['$group', 0]
                         },
-                        credits:'$credits',
-                        debits:'$debits'
+                        credits: '$credits',
+                        debits: '$debits'
                     }
                 },
                 {
@@ -108,29 +112,30 @@ export class AccountsController {
                     }
                 },
                 {
-                    $project:{
+                    $project: {
                         id: '$id',
                         openingBalance: '$openingBalance',
                         natureOfOB: '$natureOfOB',
                         name: '$name',
                         groupId: '$groupId',
                         group: '$group',
-                        accountType:{
+                        accountType: {
                             $arrayElemAt: ['$accountType', 0]
                         },
-                        credits:'$credits',
-                        debits:'$debits'
+                        credits: '$credits',
+                        debits: '$debits'
                     }
                 }
-               
+
             ]).next().then((account: Account) => {
+                
                 account.debit = 0;
                 account.debits.forEach(debit => {
-                    account.debit+=debit.amount
+                    account.debit += debit.amount
                 });
                 account.credit = 0;
                 account.credits.forEach(credit => {
-                    account.credit+=credit.amount
+                    account.credit += credit.amount
                 });
                 res.status(200).send(account);
             }).catch(err => {
@@ -138,6 +143,16 @@ export class AccountsController {
             })
     }
 
+    private  makePdf(req:Request,res:Response) {
+        var docDefinition = req.body;
+        var accountId = req.params.id;
+       
+        var printer = new Printer(FONTS);
+        var pdfDoc = printer.createPdfKitDocument(docDefinition);
+        pdfDoc.pipe(fs.createWriteStream(`pdfs/${accountId}.pdf`));
+        pdfDoc.end();
+        res.status(200).send();
+    }
     private post(req: Request, res: Response) {
         req.body.id = (new Date()).valueOf().toString();
         let account = req.body;
@@ -188,15 +203,15 @@ export class AccountsController {
 
     private put(req: Request, res: Response) {
         delete req.body._id;
-        if(req.body.groupId == '17' && req.body.admin != 2) {
+        if (req.body.groupId == '17' && req.body.admin != 2) {
             this.db.collection(ACCOUNTS).find({
-                groupId:'17',
-                admin:2
-            }).toArray().then((accounts:Account[]) => {
-                if(accounts.length == 1 && accounts[0].id == req.body.id){
+                groupId: '17',
+                admin: 2
+            }).toArray().then((accounts: Account[]) => {
+                if (accounts.length == 1 && accounts[0].id == req.body.id) {
                     res.status(403).send({ message: "Cannot delete all super admins" });
                     return;
-                } 
+                }
             })
         }
         this.db.collection(ACCOUNTS)
@@ -214,4 +229,6 @@ export class AccountsController {
             .then(deleteResult => res.send())
             .catch(error => res.status(400).send(error));
     }
+
+   
 }

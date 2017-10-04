@@ -10,6 +10,14 @@ const tasks_1 = require("./controllers/tasks");
 const groups_1 = require("./controllers/groups");
 const account_types_1 = require("./controllers/account-types");
 const transactions_1 = require("./controllers/transactions");
+exports.FONTS = {
+    Roboto: {
+        normal: `${__dirname}/fonts/Roboto-Regular.ttf`,
+        bold: `${__dirname}/fonts/Roboto-Medium.ttf`,
+        italics: `${__dirname}/fonts/Roboto-Italic.ttf`,
+        bolditalics: `${__dirname}/fonts/Roboto-MediumItalic.ttf`
+    }
+};
 class Index {
     constructor() {
         this.port = 3000;
@@ -36,6 +44,7 @@ class Index {
             origin: '*'
         };
         app.use(cors());
+        app.use('/pdfs', express.static('pdfs'));
         //enable pre-flight
         app.options("*", cors(options));
     }

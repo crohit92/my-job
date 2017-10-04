@@ -178,26 +178,16 @@ export class TransactionsController {
     private saveUserTransaction(req: Request, res: Response) {
         let trans: Transaction = req.body;
 
-        this.db.collection("accounts").findOne({
-            groupId: "18"
-        }).then(debitAccount => {
-            if (!debitAccount) {
-                res.status(500).send({ message: "No Account under Group User Expenses" });
-                return;
-            }
-            else {
-                trans.debitAccountId = debitAccount.id;
-                trans.id = (new Date()).valueOf().toString();
-                //since on add expenditure screen there is no option for selecting date
-                //so add today's date
-                var today = new Date();
-                trans.dateString = `${today.getFullYear()}-${padStart((today.getMonth() + 1).toString(), 2, "0")}-${padStart((today.getDate()).toString(), 2, "0")}`
-                trans.date = new Date(trans.dateString);
-                this.db.collection(TRANSACTIONS).insertOne(trans).then(() => {
-                    res.send(trans);
-                }).catch(err => res.status(500).send(err));
-            }
-        })
+        trans.id = (new Date()).valueOf().toString();
+        //since on add expenditure screen there is no option for selecting date
+        //so add today's date
+        var today = new Date();
+        trans.dateString = `${today.getFullYear()}-${padStart((today.getMonth() + 1).toString(), 2, "0")}-${padStart((today.getDate()).toString(), 2, "0")}`
+        trans.date = new Date(trans.dateString);
+        this.db.collection(TRANSACTIONS).insertOne(trans).then(() => {
+            res.send(trans);
+        }).catch(err => res.status(500).send(err));
+
     }
 
     addTransaction(trans: Transaction) {

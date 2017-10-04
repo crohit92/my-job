@@ -1,4 +1,4 @@
-{ 
+{
   "name": "demo",
   "version": "1.0.0",
   "description": "",
@@ -23,6 +23,7 @@
     "httpntlm": "1.7.5",
     "mongodb": "^2.2.30",
     "node-fs": "^0.1.7",
+    "pdfmake": "^0.1.33",
     "ts-loader": "2.0.1",
     "ts-node": "1.2.1",
     "tslint": "^4.0.0",

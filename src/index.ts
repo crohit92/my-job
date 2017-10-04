@@ -11,6 +11,15 @@ import { GroupsController } from './controllers/groups';
 import { AccountTypesController } from './controllers/account-types';
 import { TransactionsController } from "./controllers/transactions";
 
+export const FONTS = {
+    Roboto: {
+        normal: `${__dirname}/fonts/Roboto-Regular.ttf`,
+        bold: `${__dirname}/fonts/Roboto-Medium.ttf`,
+        italics: `${__dirname}/fonts/Roboto-Italic.ttf`,
+        bolditalics: `${__dirname}/fonts/Roboto-MediumItalic.ttf`
+    }
+}
+
 export class Index {
     public app: Express;
     private port: number = 3000;
@@ -41,6 +50,7 @@ export class Index {
             origin: '*'
         }
         app.use(cors())
+        app.use('/pdfs', express.static('pdfs'))
         //enable pre-flight
         app.options("*", cors(options));
     } 
