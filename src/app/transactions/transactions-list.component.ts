@@ -201,4 +201,27 @@ export class TransationsListComponent {
         return accountBalance;
 
     }
+
+    share(){
+        let headers =  [ { text: 'Date', bold: true }, { text: 'Description', bold: true }, { text: 'Amount', bold: true } ];
+        var docDefinition = {
+            content:[
+                {
+                    table:{
+                        body : [
+                            headers,
+                            ["2017-10-02","Test","2500 rs"],
+                            ["2017-10-03","Test","3000 rs"],
+                        ]
+                    }
+                }
+            ]
+        }
+        this.api.sendRequest({
+            method:"post",
+            body:docDefinition,
+            endpoint:`accounts/${this.filter.accountId}/makeStatement`,
+
+        })
+    }
 }
