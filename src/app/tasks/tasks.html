@@ -147,12 +147,8 @@
                     if not when is the next visit required? -->
                     <div *ngIf="currentTask.type == 3">
                         <hr>
-                        <label>Is Project Complete
-                            <input type="checkbox"  name="isProjectComplete" [(ngModel)]="completionInfo.completed">
-                        </label>
-                        <hr>
                         <label *ngIf="!completionInfo.completed">Next Visit Required On
-                            <input type="date" required class="form-control" name="nextVisitRequiredOn" [(ngModel)]="currentTask.nextDueDate">
+                            <input type="date" required class="form-control" name="nextVisitRequiredOn" [(ngModel)]="completionInfo.nextDueDate">
                         </label>
                     </div>
                     <div>

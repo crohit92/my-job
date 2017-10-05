@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Utils } from '../helper/utils';
+import { StorageService } from '../helper/storage.service';
+import { Constants } from '../helper/constants';
 
 @Component({
   selector: 'app-home',
@@ -8,8 +10,12 @@ import { Utils } from '../helper/utils';
 })
 export class HomeComponent implements OnInit {
 
-  constructor(private utils:Utils) { 
+  userType:number;
+  
+  constructor(private utils: Utils, private storage: StorageService) {
     this.utils.showMenu(true)
+    let user = this.storage.get(Constants.USER);
+    this.userType = user?user.admin:0;
   }
 
   ngOnInit() {
