@@ -90,15 +90,19 @@ export class TasksController {
 
     createTask(req: Request, res: Response) {
         let task: Task = req.body;
+
+        this._createTask(task).then((response: InsertOneWriteOpResult) => {
+            res.send(task);
+        }).catch(err => {
+            res.status(400).send(err);
+        })
+    }
+
+    private _createTask(task: Task) {
         task.id = (new Date()).valueOf().toString();
-        this.db
+        return this.db
             .collection(TASKS)
             .insertOne(task)
-            .then((response: InsertOneWriteOpResult) => {
-                res.send(task);
-            }).catch(err => {
-                res.status(400).send(err);
-            })
     }
 
     private updateTask(task) {
@@ -154,24 +158,24 @@ export class TasksController {
         /*
         task type 0->Complaint, 1->Query, 2->Payment, 3->Project
         payment status 0->AMC, 1->Warrenty, 2-> Payable
-
+        
         completion info{ 
             paymentStatus: boolean, 
             paid: number, 
             completed?: boolean 
         }
-
+        
         1. task type(0) & payment status(0|1|2)
-            a. Customer to Services by amount(0 if payment status = 0|1)
-            b. if payment status(2)
-	        	User to Customer by paid
+        a. Customer to Services by amount(0 if payment status = 0|1)
+        b. if payment status(2)
+        User to Customer by paid
         2. task type(2)
-	        User to Customer by paid
+        User to Customer by paid
         */
         let task = completion.task;
         let extra = completion.completionInfo;
 
-        if (task.type == 0 || task.type == 2) {
+        if (task.type == CallType.COMPLAINT) {
             this.db.collection("accounts").findOne({
                 groupId: '14'
             }).then((salesAccount: Account) => {
@@ -190,21 +194,11 @@ export class TasksController {
                     transaction.debitAccountId = completion.task.customerId
                     transaction.narration = this.getNarration(task, completion.completionInfo);
                     transactionsController.addTransaction(transaction).then(() => {
-                        if(task.type == CallType.Payment || extra.paymentStatus == 2){
-                            var today = new Date();
-                            transaction.dateString = `${today.getFullYear()}-${padStart((today.getMonth() + 1).toString(), 2, "0")}-${padStart((today.getDate()).toString(), 2, "0")}`
-                            transaction.date = transaction.dateString;
-                            transaction.debitAccountId = task.user.id;
-                            transaction.creditAccountId = task.customer.id
-                            transaction.amount = extra.paid;
-                            delete transaction._id;
-                            transactionsController.addTransaction(transaction).then(() => {
-                                this.completeTaskByMarkingItCompleted(task, extra, res);
-                            }).catch((err) => {
-                                res.status(500).send(err);
-                            })
+                        //if payment was not covered under AMC or warrenty
+                        if (extra.paymentStatus == 2) {
+                            this.savePaymentReceivedByUser(task, completion, res)
                         }
-                        else{
+                        else {
                             this.completeTaskByMarkingItCompleted(task, extra, res);
                         }
 
@@ -217,20 +211,53 @@ export class TasksController {
                 res.status(500).send(err);
             });
         }
+        else if (task.type == CallType.Payment) {
+            this.savePaymentReceivedByUser(task, completion, res)
+        }
         else {
             this.completeTaskByMarkingItCompleted(task, extra, res)
         }
 
     }
 
-    completeTaskByMarkingItCompleted(task, extra, res) {
-        task.completed = task.type == 3 ? extra.completed : true;
-        task.assignedToId = task.type == 3 ?undefined:task.assignedToId;
+    private savePaymentReceivedByUser(task: Task, completion: Completion, res: Response) {
+        let transactionsController = new TransactionsController(this.db);
+        var today = new Date();
+        let transaction: Transaction = new Transaction();
+        transaction.narration = this.getNarration(task, completion.completionInfo);
+        transaction.dateString = `${today.getFullYear()}-${padStart((today.getMonth() + 1).toString(), 2, "0")}-${padStart((today.getDate()).toString(), 2, "0")}`
+        transaction.date = transaction.dateString;
+        transaction.debitAccountId = task.user.id;
+        transaction.creditAccountId = task.customer.id
+        transaction.amount = completion.completionInfo.paid;
+        transactionsController.addTransaction(transaction).then(() => {
+            this.completeTaskByMarkingItCompleted(task, completion.completionInfo, res);
+        }).catch((err) => {
+            res.status(500).send(err);
+        })
+    }
+
+    completeTaskByMarkingItCompleted(task: Task, extra, res) {
+        task.completed = true;
+        //task.assignedToId = task.type == 3 ? undefined : task.assignedToId;
+        //task.userName = undefined;
         delete task.user;
         delete task.customer;
 
         this.updateTask(task).then(() => {
-            res.status(200).send({message:"Task Completed"});
+            if (task.type == CallType.Project) {
+                let newTask = { ...{}, ...task };
+                newTask.assignedToId = undefined;
+                newTask.userName = undefined;
+                newTask.nextDueDate = extra.nextDueDate;
+                this._createTask(newTask).then((response) => {
+                    res.status(200).send({ message: "Task Completed" });
+                }).catch(err => res.status(500).send(err));
+            }
+            else {
+                res.status(200).send({ message: "Task Completed" });
+            }
+
         }).catch((err) => { res.status(500).send(err) });
     }
 
@@ -238,21 +265,21 @@ export class TasksController {
         /*
         task type 0->Complaint, 1->Query, 2->Payment, 3->Project
         payment status 0->AMC, 1->Warrenty, 2-> Payable
-    
+        
         completion info{ 
             paymentStatus: boolean, 
             
             paid: number, 
             completed?: boolean 
         }
-    
+        
         narration: <User> visited <Customer> for <Task.Type> narrated as <task.description>,
         1. task type(0) & payment status(0|1)
-            narration: which was under < payment status>
-    
+        narration: which was under < payment status>
+        
         2. [task type(0) & payment status(2)] | [task type(2)]
-            narration: Total Amount Due was <amount>rs of which <paid>rs were paid
-    
+        narration: Total Amount Due was <amount>rs of which <paid>rs were paid
+        
         */
 
 
