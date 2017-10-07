@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import { Db, ObjectID, InsertOneWriteOpResult } from 'mongodb';
 import { Account } from '../models/account';
 import { Group } from './../models/group';
+import { Transaction } from '../models/transaction';
 import { AccountType } from '../models/account-type';
 //import 'pdfmake';
 import * as Printer from 'pdfmake/src/printer';
@@ -20,7 +21,7 @@ export class AccountsController {
         this.router.get('/', this.get.bind(this));
         this.router.get('/:id', this.getById.bind(this));
         this.router.post('/login', this.login.bind(this));
-        this.router.post('/:id/makeStatement',this.makePdf.bind(this));
+        this.router.post('/:id/makeStatement', this.makePdf.bind(this));
         this.router.post('/', this.post.bind(this));
         this.router.put('/:id', this.put.bind(this));
         this.router.delete('/:id', this.delete.bind(this))
@@ -128,7 +129,7 @@ export class AccountsController {
                 }
 
             ]).next().then((account: Account) => {
-                
+
                 account.debit = 0;
                 account.debits.forEach(debit => {
                     account.debit += debit.amount
@@ -143,15 +144,89 @@ export class AccountsController {
             })
     }
 
-    private  makePdf(req:Request,res:Response) {
-        var docDefinition = req.body;
-        var accountId = req.params.id;
-       
+    private getDateString(date: Date) {
+        return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+    }
+
+    private pushToLedger(_transactions: Array<string[]>, transaction: Transaction, accountId: string) {
+        let addedToList = false;
+        for (var index = 0; index < _transactions.length; index++) {
+            var _transaction = _transactions[index];
+            if (transaction.debitAccountId == accountId) {
+                if (_transaction[0] == '') {
+                    _transaction[0] = this.getDateString(new Date(transaction.date));
+                    _transaction[1] = transaction.credit.name;
+                    _transaction[2] = transaction.amount + '';
+                    addedToList = true;
+                    break;
+                }
+            }
+            else {
+                if (_transaction[3] == '') {
+                    _transaction[3] = this.getDateString(new Date(transaction.date));
+                    _transaction[4] = transaction.debit.groupId == '17' ? 'Cash' : transaction.debit.name;
+                    _transaction[5] = transaction.amount + '';
+                    addedToList = true;
+                    break;
+                }
+            }
+
+        }
+        if (!addedToList) {
+            if (transaction.debitAccountId == accountId) {
+                _transactions.push([this.getDateString(new Date(transaction.date)), transaction.credit.name, transaction.amount, '', '', '']);
+            }
+            //if account is credited
+            else {
+                _transactions.push(['', '', '', this.getDateString(new Date(transaction.date)), transaction.debit.groupId == '17' ? 'Cash' : transaction.debit.name, transaction.amount]);
+            }
+
+        }
+    }
+
+    private makePdf(req: Request, res: Response) {
+        let totalDebit = 0;
+        let totalCredit = 0;
+        let accountInfo: {} = req.body.accountInfo;
+        let transactions: Transaction[] = req.body.transactions;
+        let _transactions: Array<string[]> = new Array<string[]>();
+        let accountId = req.params.id;
+        for (let index = 0; index < transactions.length; index++) {
+            let transaction = transactions[index];
+            if(transaction.debitAccountId == accountId){
+                totalDebit+=transaction.amount;
+            }
+            else{
+                totalCredit+=transaction.amount;
+            }
+            this.pushToLedger(_transactions, transaction, accountId);
+
+        }
+
+        let docDefinition = {
+            content: [
+                {
+                    table: {
+                        // headers are automatically repeated if the table spans over multiple pages
+                        // you can declare how many rows should be treated as headers
+                        headerRows: 2,
+                        widths: [85, '*', 85, 85, '*', 85],
+
+                        body: [
+                            [{ text: 'Thakur Ji Processing', colSpan: 6, alignment: 'center' },{},{},{},{},{}],
+                            ['Date', 'Particulars', 'Amount', 'Date', 'Particulars', 'Amount'],
+                            ..._transactions,
+                            ['','',totalDebit,'','',totalCredit]
+                        ]
+                    }
+                }
+            ]
+        };
         var printer = new Printer(FONTS);
         var pdfDoc = printer.createPdfKitDocument(docDefinition);
         pdfDoc.pipe(fs.createWriteStream(`pdfs/${accountId}.pdf`));
         pdfDoc.end();
-        res.status(200).send();
+        res.status(200).send({ message: "Pdf Generated Successfully" });
     }
     private post(req: Request, res: Response) {
         req.body.id = (new Date()).valueOf().toString();
@@ -230,5 +305,5 @@ export class AccountsController {
             .catch(error => res.status(400).send(error));
     }
 
-   
+
 }
