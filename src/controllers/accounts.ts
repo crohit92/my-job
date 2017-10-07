@@ -187,17 +187,20 @@ export class AccountsController {
     private makePdf(req: Request, res: Response) {
         let totalDebit = 0;
         let totalCredit = 0;
-        let accountInfo: {} = req.body.accountInfo;
+        let account: any;
+        let accountInfo: any = req.body.accountInfo;
         let transactions: Transaction[] = req.body.transactions;
         let _transactions: Array<string[]> = new Array<string[]>();
         let accountId = req.params.id;
         for (let index = 0; index < transactions.length; index++) {
             let transaction = transactions[index];
-            if(transaction.debitAccountId == accountId){
-                totalDebit+=transaction.amount;
+            if (transaction.debitAccountId == accountId) {
+                account = transaction.debit;
+                totalDebit += transaction.amount;
             }
-            else{
-                totalCredit+=transaction.amount;
+            else {
+                account = transaction.credit;
+                totalCredit += transaction.amount;
             }
             this.pushToLedger(_transactions, transaction, accountId);
 
@@ -213,10 +216,17 @@ export class AccountsController {
                         widths: [85, '*', 85, 85, '*', 85],
 
                         body: [
-                            [{ text: 'Thakur Ji Processing', colSpan: 6, alignment: 'center' },{},{},{},{},{}],
+                            [{ text: `${account.name}`, colSpan: 6, alignment: 'center' }, {}, {}, {}, {}, {}],
                             ['Date', 'Particulars', 'Amount', 'Date', 'Particulars', 'Amount'],
                             ..._transactions,
-                            ['','',totalDebit,'','',totalCredit]
+                            ['', '', totalDebit, '', '', totalCredit],
+                            ['', '', '', '', '', ''],
+                            [{ text: 'Balance', colSpan: 5 }, '', '', '', '', {
+                                text:
+                                (accountInfo.accountType.nature == 'dr' ?
+                                    `${accountInfo.debit - accountInfo.credit}` :
+                                    `${accountInfo.credit - accountInfo.debit}`)
+                            }]
                         ]
                     }
                 }
