@@ -9,6 +9,10 @@ table tr td,table tr th {
     word-break: break-all;
 }
 
+.p-0{
+    padding: 0;
+}
+
 .p-1{
     padding:0.25rem;
 }
@@ -74,6 +78,10 @@ table tr td,table tr th {
     padding-bottom: 1rem;
 }
 
+.m-0{
+    margin: 0;
+}
+
 .m-1{
     margin:0.25rem;
 }
@@ -137,4 +145,28 @@ table tr td,table tr th {
 }
 .mb-4{
     margin-bottom: 1rem;
+}
+
+li{
+    list-style: none;
+}
+
+input[type=checkbox] {
+    transform: scale(2);
+    -ms-transform: scale(2);
+    -webkit-transform: scale(2);
+    padding: 10px;
+    margin: 10px;
+}
+
+input[type=radio] {
+    transform: scale(2);
+    -ms-transform: scale(2);
+    -webkit-transform: scale(2);
+    padding: 10px;
+    margin: 10px;
+}
+
+.clearfix{
+    clear: both;
 }

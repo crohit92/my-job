@@ -2,12 +2,12 @@
   <div class="row mb-4">
     <div class="col-xs-12" *ngIf="userType == 2" routerLink="/accounts" routerLinkActive="active">
       <div class="well well-sm">
-        <strong>Accounts</strong>
+        <strong>Account Masters</strong>
       </div>
     </div>
     <div class="col-xs-12" *ngIf="userType > 0" routerLink="/transactions" routerLinkActive="active">
       <div class="well well-sm">
-        <strong>Transactions</strong>
+        <strong>Journal</strong>
       </div>
     </div>
     <div class="col-xs-12" routerLink="/user-daybook" routerLinkActive="active">
@@ -20,11 +20,11 @@
         <strong>Tasks</strong>
       </div>
     </div>
-    <div class="col-xs-12" *ngIf="userType > 0" routerLink="/completed-tasks" routerLinkActive="active">
+    <!-- <div class="col-xs-12" *ngIf="userType > 0" routerLink="/completed-tasks" routerLinkActive="active">
       <div class="well well-sm">
         <strong>Tasks by date</strong>
       </div>
-    </div>
+    </div> -->
     <div class="col-xs-12" (click)="logout()">
       <div class="well well-sm">
         <strong>Logout</strong>

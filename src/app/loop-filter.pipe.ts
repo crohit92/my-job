@@ -73,7 +73,7 @@ export class FilterTasks implements PipeTransform {
     return tasks.filter(a => {
       return (a.description.toLowerCase().indexOf(value.toLowerCase()) >= 0 ||
         a.customer.name.toLowerCase().indexOf(value.toLowerCase()) >= 0 ||
-        a.user.name.toLowerCase().indexOf(value.toLowerCase()) >= 0
+        (a.user ? a.user.name.toLowerCase().indexOf(value.toLowerCase()) >= 0 : false)
       );
     })
   }

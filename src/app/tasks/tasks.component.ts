@@ -10,6 +10,9 @@ import { ToastrService } from "ngx-toastr";
 import { Utils, UserType } from "../helper/utils";
 import { StorageService } from "../helper/storage.service";
 import { Constants } from "../helper/constants";
+import { CallType } from '../models/task-type.model';
+import { PaymentStatus } from '../models/payment-status';
+import { ProjectParameter } from '../models/project-parameter';
 const DATE_FORMAT = "DD-MMMM-YYYY";
 
 @Component({
@@ -27,6 +30,11 @@ export class TasksComponent {
     public modalRef: BsModalRef;
     openPaneIndex = 0;
     completionInfo: any = {};
+    callType = CallType;
+    paymentStatus = PaymentStatus;
+    projectParameters: ProjectParameter[];
+    dueDate: string;
+
     @ViewChild("template") template: TemplateRef<any>;
     @ViewChild("templateCompleteTask") templateCompleteTask: TemplateRef<any>;
 
@@ -55,15 +63,21 @@ export class TasksComponent {
             return c;
         })))
 
+        //fetch parameters for project
+        this.api.sendRequest({
+            endpoint: ApiRoutes.FETCH_ALL_PROJECT_PARAMETERS,
+            method: "get"
+        }).subscribe((parameters: ProjectParameter[]) => {
+            this.projectParameters = parameters;
+        })
+
     }
 
     fetchTasks() {
         this.api.sendRequest({
             endpoint: ApiRoutes.FETCH_ALL_TASKS,
             method: 'get',
-            queryParams: this.user.admin == 0 ? {
-                userId: this.user.id
-            } : {}
+            queryParams: { ...(this.dueDate ? { dueDate: this.dueDate } : {}), ...(this.user.admin == 0 ? { userId: this.user.id } : {}) }
         })
             .subscribe(res => {
                 let tasks = res as Task[];
@@ -79,21 +93,38 @@ export class TasksComponent {
     openModal(task: Task) {
         // *ngIf="user.admin>0"
         // *ngIf="user.admin==0"
-        if(this.user.admin>0){
+        if (this.user.admin > 0) {
             this.currentTask = task ? { ...task } : {};
             this.modalRef = this.modalService.show(this.template);
         }
-        else{
+        else {
             this.completeTask(task);
         }
-        
+
     }
 
     completeTask(task) {
+        //hide the modal if already open
+        this.modalRef ? this.modalRef.hide() : undefined;
+
         this.currentTask = { ...task };
+        //if user is admin, then he would like to see the data filles by normal user
+        //so we dont clear the parameters array
+        if (this.user.admin == 0) {
+            this.currentTask.parameters = [];
+            if (this.projectParameters) {
+                this.currentTask.parameters = [...this.projectParameters];
+            }
+        }
+        if (this.user.admin) {
+            //since user wants all information, so we nned to fill up the 
+            //the next due date aswell
+            this.completionInfo.nextDueDate = this.currentTask.nextDueDate;
+        }
+
         this.modalRef = this.modalService.show(this.templateCompleteTask);
     }
-    
+
     sortTasksByNextDueDate() {
         let $this = this;
         this.tasks.sort((a, b) => {
@@ -142,11 +173,11 @@ export class TasksComponent {
                 this.modalRef.hide();
                 this.tasks.push(res)
                 try {
-                    this.sortTasksByNextDueDate();    
+                    this.sortTasksByNextDueDate();
                 } catch (error) {
-                    
+
                 }
-                
+
             },
             err =>
                 this.alert.error("An Error Occured", "Error")
@@ -204,5 +235,5 @@ export class TasksComponent {
             this.fetchTasks();
         })
     }
-    
+
 }

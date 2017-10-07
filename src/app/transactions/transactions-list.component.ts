@@ -1,6 +1,6 @@
 import { Component, TemplateRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { Api, Request, ApiRoutes } from './../helper/api';
+import { Api, Request, ApiRoutes, apiBase } from './../helper/api';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs'
 import { BsModalService } from 'ngx-bootstrap/modal';
@@ -31,6 +31,7 @@ export class TransationsListComponent {
     currentTransaction: Transaction;
     filterByDate: boolean;
     filterType: number;
+    sharableAccountDetail:string;
     config = {
         animated: false,
         keyboard: true,
@@ -119,6 +120,8 @@ export class TransationsListComponent {
     }
 
     filterTransactions(filterType, filterByDate, filter) {
+        //clear the file path if any exists
+        this.sharableAccountDetail = undefined;
 
         let queryParams = filterByDate || filterType == 1 ? { from: this.filter.fromDate, to: this.filter.toDate } : {};
         if (filterType == 1) {
@@ -204,24 +207,29 @@ export class TransationsListComponent {
 
     share(){
         let headers =  [ { text: 'Date', bold: true }, { text: 'Description', bold: true }, { text: 'Amount', bold: true } ];
-        var docDefinition = {
-            content:[
-                {
-                    table:{
-                        body : [
-                            headers,
-                            ["2017-10-02","Test","2500 rs"],
-                            ["2017-10-03","Test","3000 rs"],
-                        ]
-                    }
-                }
-            ]
-        }
+        // var docDefinition = {
+        //     content:[
+        //         {
+        //             table:{
+        //                 body : [
+        //                     headers,
+        //                     ["2017-10-02","Test","2500 rs"],
+        //                     ["2017-10-03","Test","3000 rs"],
+        //                 ]
+        //             }
+        //         }
+        //     ]
+        // }
         this.api.sendRequest({
             method:"post",
-            body:docDefinition,
+            body:{
+                accountInfo:this.accountInfo,
+                transactions:this.transactions
+            },
             endpoint:`accounts/${this.filter.accountId}/makeStatement`,
 
+        }).subscribe((data)=>{
+            this.sharableAccountDetail = `${apiBase}pdfs/${this.filter.accountId}.pdf`;
         })
     }
 }

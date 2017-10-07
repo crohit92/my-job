@@ -7,7 +7,7 @@ import { HttpEvent } from "@angular/common/http";
 import { HttpErrorResponse } from "@angular/common/http";
 import { Observable } from "rxjs/Observable";
 //const apiBase = 'https://pacific-coast-70867.herokuapp.com/';
-const apiBase = 'http://localhost:3000/';
+export const apiBase = 'http://localhost:3000/';
 //const apiBase = 'http://34.230.30.149:3001/';
 
 export class Request {
@@ -25,6 +25,7 @@ export const ApiRoutes = {
     FETCH_ALL_TASKS: 'tasks',
     FETCH_ALL_CUSTOMERS: 'accounts?groupId=16',
     FETCH_ALL_TRANSACTIONS: 'transactions',
+    FETCH_ALL_PROJECT_PARAMETERS:'tasks/projectParameters',
 
     UPDATE_ACCOUNT: 'accounts',
     UPDATE_USER: 'users',
