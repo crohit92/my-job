@@ -18,4 +18,5 @@ export class Task {
     customer?: Account;
     customerName?:string;
     nextDueDate?: string;
+    [key:string]:any;
 }

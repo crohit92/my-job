@@ -5,39 +5,19 @@ import { UsersController } from './users';
 import { TransactionsController } from "./transactions";
 import { Transaction } from "../models/transaction";
 import { CallType } from '../models/call-type';
-
+const PROJECT_PROPERTIES = "projectProperties";
 const TASKS = "tasks";
 class Completion {
     task: Task;
-    completionInfo: { paymentStatus: number, paid: number, completed?: boolean }
+    completionInfo: { paymentStatus: number, paid: number, discountAmount: number }
 };
 
-const tempPayload = {
-    "task": {
-        "_id": "59c496393c63680b970d2d83",
-        "description": "Payment request",
-        "nextDueDate": "2017-09-22",
-        "type": 2,
-        "userName": "Vivek",
-        "user": { "_id": "59c495c93c63680b970d2d82", "admin": 0, "name": "Vivek", "groupId": "17", "openingBalance": 0, "natureOfOB": "dr", "mobile": "9217690006", "address": "622 Basant Avenue", "password": "1234", "id": "1506055625398" },
-        "customerName": "Rohit undefined",
-        "customer": { "_id": "59b042420f8b720004219f1b", "name": "Rohit", "groupId": "16", "openingBalance": 10000, "natureOfOB": "dr", "id": "1504723522679", "debit": 0, "credit": 6000, "accountType": { "_id": "59a9431f6bf43b1d18122a68", "id": "1", "name": "Assets", "nature": "dr" }, "balance": 4000 },
-        "assignedToId": "1506055625398",
-        "customerId": "1504723522679",
-        "id": "1506055737359"
-    },
-    "completionInfo": {
-        "paymentStatus": 0,//0 AMC, 1 Under Warrenty, 2 Payable
-        "amount": 500,
-        "paid": 400,
-        completed: true //if project
-    }
-}
 export class TasksController {
     public static route: string = `/${TASKS}`;
     public router: Router = Router();
     //private db: Db;
     constructor(private db: Db) {
+        this.router.get("/projectParameters", this.getProjectParameters.bind(this));
         this.router.get('/', this.fetchAll.bind(this));
         this.router.get('/:id', this.findOne.bind(this));
         this.router.post('/:id/completed', this.completeTask.bind(this));
@@ -46,10 +26,16 @@ export class TasksController {
         this.router.delete('/:id', this.deleteTask.bind(this));
     }
 
+    getProjectParameters(req: Request, res: Response) {
+        this.db.collection(PROJECT_PROPERTIES).find().toArray().then((data) => {
+            res.send(data);
+        }).catch((err) => res.status(500).send(err));
+    }
+
     fetchAll(req: Request, res: Response) {
         let $this = this;
         let filterByDueDate = req.query.dueDate ? [{ $match: { nextDueDate: req.query.dueDate } }] : [];
-        let filterCompletedTasks = filterByDueDate.length > 0 ? [] : [{ $match: { completed: undefined } }];
+        let filterCompletedTasks = filterByDueDate.length > 0 ? [] : [{ $match: { $or: [{ completed: undefined }, { completed: false }] } }];
         let filterByUser = req.query.userId ? [{ $match: { assignedToId: req.query.userId } }] : [];
 
         this.db.collection(TASKS).aggregate(
@@ -221,19 +207,41 @@ export class TasksController {
     }
 
     private savePaymentReceivedByUser(task: Task, completion: Completion, res: Response) {
-        let transactionsController = new TransactionsController(this.db);
-        var today = new Date();
-        let transaction: Transaction = new Transaction();
-        transaction.narration = this.getNarration(task, completion.completionInfo);
-        transaction.dateString = `${today.getFullYear()}-${padStart((today.getMonth() + 1).toString(), 2, "0")}-${padStart((today.getDate()).toString(), 2, "0")}`
-        transaction.date = transaction.dateString;
-        transaction.debitAccountId = task.user.id;
-        transaction.creditAccountId = task.customer.id
-        transaction.amount = completion.completionInfo.paid;
-        transactionsController.addTransaction(transaction).then(() => {
-            this.completeTaskByMarkingItCompleted(task, completion.completionInfo, res);
+        this.db.collection("accounts").findOne({
+            groupId: '19'
+        }).then((discountAccount: Account) => {
+            let transactionsController = new TransactionsController(this.db);
+            var today = new Date();
+            let transaction: Transaction = new Transaction();
+            transaction.narration = this.getNarration(task, completion.completionInfo);
+            transaction.dateString = `${today.getFullYear()}-${padStart((today.getMonth() + 1).toString(), 2, "0")}-${padStart((today.getDate()).toString(), 2, "0")}`
+            transaction.date = transaction.dateString;
+            transaction.debitAccountId = task.user.id;
+            transaction.creditAccountId = task.customer.id
+            transaction.amount = completion.completionInfo.paid;
+            transactionsController.addTransaction(transaction).then(() => {
+                //if discount ammount is greater than 0
+                //then add n new transaction for discount
+                if (completion.completionInfo.discountAmount) {
+                    let discountTransaction = { ...transaction };
+                    delete discountTransaction._id;
+                    discountTransaction.amount = completion.completionInfo.discountAmount;
+                    discountTransaction.debitAccountId = discountAccount.id;
+                    transactionsController.addTransaction(discountTransaction).then(() => {
+                        this.completeTaskByMarkingItCompleted(task, completion.completionInfo, res);
+                    }).catch((err) => {
+                        res.status(500).send({err:err,message:"Error Here"});
+                    })
+                }
+                else {
+                    this.completeTaskByMarkingItCompleted(task, completion.completionInfo, res);
+                }
+
+            }).catch((err) => {
+                res.status(500).send(err);
+            })
         }).catch((err) => {
-            res.status(500).send(err);
+            res.status(500).send({ message: "No Account exists under group Discounts and losses" });
         })
     }
 
@@ -246,10 +254,13 @@ export class TasksController {
 
         this.updateTask(task).then(() => {
             if (task.type == CallType.Project) {
-                let newTask = { ...{}, ...task };
+                let newTask: Task = { ...{}, ...task };
                 newTask.assignedToId = undefined;
                 newTask.userName = undefined;
+                newTask.completed = false;
+                newTask.id = (new Date()).valueOf().toString();
                 newTask.nextDueDate = extra.nextDueDate;
+                newTask.remarks = '';
                 this._createTask(newTask).then((response) => {
                     res.status(200).send({ message: "Task Completed" });
                 }).catch(err => res.status(500).send(err));
@@ -261,7 +272,7 @@ export class TasksController {
         }).catch((err) => { res.status(500).send(err) });
     }
 
-    getNarration(task: Task, extra: { paymentStatus: number, paid: number, completed?: boolean }) {
+    getNarration(task: Task, extra: { paymentStatus: number, paid: number, discountAmount: number }) {
         /*
         task type 0->Complaint, 1->Query, 2->Payment, 3->Project
         payment status 0->AMC, 1->Warrenty, 2-> Payable
@@ -284,12 +295,15 @@ export class TasksController {
 
 
         let taskType = task.type == CallType.COMPLAINT ? "Complaint" : "Payment";
-        let narration = ` "${task.user.name}" visited "${task.customer.name}" for "${taskType}" narrated as "${task.description}"`;
+        let narration = ` ${task.user.name} visited ${task.customer.name} for ${taskType} narrated as ${task.description} \n`;
         if (task.type == CallType.COMPLAINT && extra.paymentStatus < 2) {
-            narration += `which was under ${extra.paymentStatus == 0 ? "AMC" : "Warrenty"}`;
+            narration += ` which was under ${extra.paymentStatus == 0 ? "AMC" : "Warrenty"}`;
         }
         else if ((task.type == CallType.COMPLAINT && extra.paymentStatus == 2) || task.type == CallType.Payment) {
-            narration += `Total Amount Due was ${task.amount} rs of which ${extra.paid} rs were paid`;
+            narration += ` Total Amount Due was ${task.amount} rs of which ${extra.paid} rs were paid \n`;
+            if (extra.discountAmount) {
+                narration += ` discount of ${extra.discountAmount} rs was allowed`;
+            }
         }
         return narration;
     }
