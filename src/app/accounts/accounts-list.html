@@ -71,9 +71,9 @@
                     <label>Address<textarea required class="form-control" name="address" [(ngModel)]="selectedAccount.address"></textarea></label>
                 </div>
                 <div *ngIf="users.indexOf(selectedAccount.groupId)>=0" class="col-xs-12">
-                    <label>Normal User<input type="radio" [value]="0" [(ngModel)]="selectedAccount.admin" class="form-control" name="normalUser" checked></label>
-                    <label>Admin<input type="radio" [value]="1" [(ngModel)]="selectedAccount.admin" class="form-control" name="admin"></label>
-                    <label>Super Admin<input type="radio" [value]="2" [(ngModel)]="selectedAccount.admin" class="form-control" name="superAdmin"></label>
+                    <label>Normal User<input type="radio" [value]="0" [(ngModel)]="selectedAccount.admin"  name="normalUser" checked></label>
+                    <label>Admin<input type="radio" [value]="1" [(ngModel)]="selectedAccount.admin" name="admin"></label>
+                    <label>Super Admin<input type="radio" [value]="2" [(ngModel)]="selectedAccount.admin" name="superAdmin"></label>
                 </div>
                 <!-- Allowed Only for users group-->
                 <div *ngIf="users.indexOf(selectedAccount.groupId)>=0" class="col-xs-12">
