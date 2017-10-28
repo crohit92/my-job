@@ -6,6 +6,7 @@ import { LoginComponent } from "./login/login.component";
 import { CompletedTasksComponent } from "./completed-tasks/completed-tasks.component";
 import { UserDaybookComponent } from "./user-daybook/user-daybook.component";
 import { HomeComponent } from './home/home.component';
+import { UserGuard, AdminGuard } from './helper/authentication-guard';
 export const ROUTES: Route[] = [
 
     {
@@ -14,15 +15,19 @@ export const ROUTES: Route[] = [
     },
     {
         path: 'home',
-        component: HomeComponent
+        component: HomeComponent,
+        canActivate:[UserGuard]
     },
     {
         path: 'accounts',
-        component: AccountsListComponent
+        component: AccountsListComponent,
+        canActivate:[AdminGuard]
+
     },
     {
         path: 'tasks',
-        component: TasksComponent
+        component: TasksComponent,
+        canActivate:[UserGuard]
     },
     {
         path: 'completed-tasks',
@@ -30,11 +35,13 @@ export const ROUTES: Route[] = [
     },
     {
         path: 'transactions',
-        component: TransationsListComponent
+        component: TransationsListComponent,
+        canActivate:[AdminGuard]
     },
     {
         path: 'user-daybook',
-        component: UserDaybookComponent
+        component: UserDaybookComponent,
+        canActivate:[UserGuard]
     },
     {
         path: '',

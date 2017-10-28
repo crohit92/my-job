@@ -26,6 +26,7 @@ import { Utils } from "./helper/utils";
 import { CompletedTasksComponent } from './completed-tasks/completed-tasks.component';
 import { UserDaybookComponent } from './user-daybook/user-daybook.component';
 import { HomeComponent } from './home/home.component';
+import { UserGuard, AdminGuard } from './helper/authentication-guard';
 
 @NgModule({
   declarations: [
@@ -57,7 +58,10 @@ import { HomeComponent } from './home/home.component';
   ],
   providers: [Api,
     Utils,
-    StorageService,{
+    StorageService,
+    UserGuard,
+    AdminGuard,
+    {
       provide: HTTP_INTERCEPTORS,
       useClass: NoopInterceptor,
       multi: true,

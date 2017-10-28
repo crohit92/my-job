@@ -22,6 +22,7 @@
                     <!-- Collect the nav links, forms, and other content for toggling -->
                     <div *ngIf="menuVisible" class="navbar-collapse">
                         <ul class="nav navbar-nav" (click)="toggleMenu()">
+                            <li routerLink="home"><a>Home</a></li>
                             <li *ngIf="userType == 2" routerLink="/accounts" routerLinkActive="active"><a>Account Masters</a></li>
                             <li *ngIf="userType > 0" routerLink="/transactions" routerLinkActive="active"><a>Journal</a></li>
                             <li routerLink="/user-daybook" routerLinkActive="active"><a>Add Expenditure</a></li>

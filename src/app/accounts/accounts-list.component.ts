@@ -31,7 +31,7 @@ export class AccountsListComponent {
         private alert: ToastrService,
         private router: Router,
         private modalService: BsModalService,
-        private utils:Utils
+        private utils: Utils
     ) {
         this.utils.showMenu(true);
         this.fetchAccounts();
@@ -60,7 +60,9 @@ export class AccountsListComponent {
         this.api.sendRequest({
             endpoint: ApiRoutes.FETCH_ALL_GROUPS,
             method: 'get'
-        }).subscribe((res) => this.groups = res as Group[]);
+        }).subscribe(
+            (res) => { this.groups = res as Group[] },
+            (err) => { console.log(err) })
     }
 
     editAccount(account) {
@@ -93,10 +95,10 @@ export class AccountsListComponent {
                 }
             }).subscribe(() => {
                 this.modalRef.hide();
-                this.selectedAccount.group = [this.groups.find(g=>g.id == this.selectedAccount.groupId)];
+                this.selectedAccount.group = [this.groups.find(g => g.id == this.selectedAccount.groupId)];
                 this.onAccountUpdated(this.selectedAccount.id, this.selectedAccount);
             },
-        (err)=>this.alert.error(err.error.message,"Error"));
+                (err) => this.alert.error(err.error.message, "Error"));
         }
         else {
             this.api.sendRequest({
@@ -106,7 +108,7 @@ export class AccountsListComponent {
             }).subscribe((response) => {
                 this.modalRef.hide();
                 this.selectedAccount = response as Account;
-                this.selectedAccount.group = [this.groups.find(g=>g.id == this.selectedAccount.groupId)];
+                this.selectedAccount.group = [this.groups.find(g => g.id == this.selectedAccount.groupId)];
                 this.accounts.push(this.selectedAccount);
             },
                 (res) => {
@@ -126,7 +128,7 @@ export class AccountsListComponent {
         }).subscribe((response) => {
             this.modalRef.hide();
             this.accounts = this.accounts.filter(a => a.id != this.selectedAccount.id);
-        },(res) => {
+        }, (res) => {
             this.alert.error(res.error.message || "An Error Occured", "Error");
         })
     }
