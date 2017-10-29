@@ -5,6 +5,7 @@ import { UsersController } from './users';
 import { TransactionsController } from "./transactions";
 import { Transaction } from "../models/transaction";
 import { CallType } from '../models/call-type';
+import { PaymentStatus } from '../models/payment-status';
 const PROJECT_PROPERTIES = "projectProperties";
 const TASKS = "tasks";
 class Completion {
@@ -172,7 +173,7 @@ export class TasksController {
                 else {
                     let transactionsController = new TransactionsController(this.db);
                     let transaction: Transaction = new Transaction();
-                    transaction.amount = extra.paymentStatus < 2 ? 0 : task.amount;
+                    transaction.amount = extra.paymentStatus != PaymentStatus.PAYABLE ? 0 : task.amount;
                     transaction.creditAccountId = salesAccount.id;
                     var today = new Date();
                     transaction.dateString = `${today.getFullYear()}-${padStart((today.getMonth() + 1).toString(), 2, "0")}-${padStart((today.getDate()).toString(), 2, "0")}`
@@ -181,7 +182,7 @@ export class TasksController {
                     transaction.narration = this.getNarration(task, completion.completionInfo);
                     transactionsController.addTransaction(transaction).then(() => {
                         //if payment was not covered under AMC or warrenty
-                        if (extra.paymentStatus == 2) {
+                        if (extra.paymentStatus == PaymentStatus.PAYABLE) {
                             this.savePaymentReceivedByUser(task, completion, res)
                         }
                         else {
@@ -230,7 +231,7 @@ export class TasksController {
                     transactionsController.addTransaction(discountTransaction).then(() => {
                         this.completeTaskByMarkingItCompleted(task, completion.completionInfo, res);
                     }).catch((err) => {
-                        res.status(500).send({err:err,message:"Error Here"});
+                        res.status(500).send({ err: err, message: "Error Here" });
                     })
                 }
                 else {
@@ -263,7 +264,7 @@ export class TasksController {
                 newTask.remarks = '';
                 this._createTask(newTask).then((response) => {
                     res.status(200).send({ message: "Task Completed" });
-                }).catch(err => res.status(500).send(err));
+                }).catch(err => res.status(500).send(err));   
             }
             else {
                 res.status(200).send({ message: "Task Completed" });
@@ -296,10 +297,12 @@ export class TasksController {
 
         let taskType = task.type == CallType.COMPLAINT ? "Complaint" : "Payment";
         let narration = ` ${task.user.name} visited ${task.customer.name} for ${taskType} narrated as ${task.description} \n`;
-        if (task.type == CallType.COMPLAINT && extra.paymentStatus < 2) {
-            narration += ` which was under ${extra.paymentStatus == 0 ? "AMC" : "Warrenty"}`;
+        if (task.type == CallType.COMPLAINT && extra.paymentStatus != PaymentStatus.PAYABLE) {
+            narration += ` which was ` +
+            (extra.paymentStatus != PaymentStatus.NONPAYABLE ? (` under ${extra.paymentStatus == PaymentStatus.AMC ? "AMC" : "Warrenty"}`):
+            `non payable`);
         }
-        else if ((task.type == CallType.COMPLAINT && extra.paymentStatus == 2) || task.type == CallType.Payment) {
+        else if ((task.type == CallType.COMPLAINT && extra.paymentStatus == PaymentStatus.PAYABLE) || task.type == CallType.Payment) {
             narration += ` Total Amount Due was ${task.amount} rs of which ${extra.paid} rs were paid \n`;
             if (extra.discountAmount) {
                 narration += ` discount of ${extra.discountAmount} rs was allowed`;
