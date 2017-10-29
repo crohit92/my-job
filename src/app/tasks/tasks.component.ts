@@ -20,7 +20,8 @@ const DATE_FORMAT = "DD-MMMM-YYYY";
 })
 export class TasksComponent {
     tasks = new Array<Task>();
-    currentTask: Task = {};
+    currentTaskToComplete: Task = {};
+    taskToUpdate: Task = {};
     user: User;
     users: Account[];
     customers: Account[];
@@ -90,12 +91,11 @@ export class TasksComponent {
             }, err => console.log(err));
     }
 
-    openModal(task: Task) {
+    openModal(task: Task = undefined) {
         // *ngIf="user.admin>0"
         // *ngIf="user.admin==0"
         if (this.user.admin > 0) {
-            this.currentTask = task ? { ...task } : {};
-            this.modalRef = this.modalService.show(this.template);
+            this.editTask(task);
         }
         else {
             this.completeTask(task);
@@ -103,23 +103,27 @@ export class TasksComponent {
 
     }
 
+    editTask(task: Task) {
+        this.taskToUpdate = task ? { ...task } : {};
+        this.modalRef = this.modalService.show(this.template);
+    }
+
     completeTask(task) {
         //hide the modal if already open
         this.modalRef ? this.modalRef.hide() : undefined;
-
-        this.currentTask = { ...task };
-        //if user is admin, then he would like to see the data filles by normal user
-        //so we dont clear the parameters array
-        if (this.user.admin == 0) {
-            this.currentTask.parameters = [];
+        this.currentTaskToComplete = { ...task };
+        //If the task is not complete yet, then add the initial parameters 
+        //with default values
+        if (!this.currentTaskToComplete.completed) {
+            this.currentTaskToComplete.parameters = [];
             if (this.projectParameters) {
-                this.currentTask.parameters = [...this.projectParameters];
+                this.currentTaskToComplete.parameters = [...this.projectParameters];
             }
         }
-        if (this.user.admin) {
+        if (this.user.admin && this.currentTaskToComplete.completed) {
             //since user wants all information, so we nned to fill up the 
             //the next due date aswell
-            this.completionInfo.nextDueDate = this.currentTask.nextDueDate;
+            this.completionInfo.nextDueDate = this.currentTaskToComplete.nextDueDate;
         }
 
         this.modalRef = this.modalService.show(this.templateCompleteTask);

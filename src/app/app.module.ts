@@ -1,7 +1,7 @@
 import { BrowserModule } from '@angular/platform-browser';
-import {HTTP_INTERCEPTORS} from '@angular/common/http';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { NgModule } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
@@ -10,7 +10,6 @@ import { TypeaheadModule, ModalModule, PopoverModule, AccordionModule, BsDatepic
 import { NgProgressModule } from 'ngx-progressbar';
 import { ToastrModule } from 'ngx-toastr';
 import 'hammerjs';
-
 import { ROUTES } from './app.routes';
 
 import { Api } from './helper/api';
@@ -28,6 +27,8 @@ import { UserDaybookComponent } from './user-daybook/user-daybook.component';
 import { HomeComponent } from './home/home.component';
 import { UserGuard, AdminGuard } from './helper/authentication-guard';
 
+import { NgxSelectComponent } from './ngx-select/ngx-select-component';
+import { NgxSelectFilterOptions } from './ngx-select/ngx-filter';
 @NgModule({
   declarations: [
     AppComponent,
@@ -41,14 +42,19 @@ import { UserGuard, AdminGuard } from './helper/authentication-guard';
     LoginComponent,
     CompletedTasksComponent,
     UserDaybookComponent,
-    HomeComponent
+    HomeComponent,
+    NgxSelectComponent,
+    NgxSelectFilterOptions
   ],
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
+    MatAutocompleteModule,
+    MatInputModule,
     ToastrModule.forRoot(),
     HttpClientModule,
     FormsModule,
+    ReactiveFormsModule,
     RouterModule.forRoot(ROUTES),
     NgProgressModule,
     TypeaheadModule.forRoot(),

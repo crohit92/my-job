@@ -27,6 +27,10 @@ export class AppComponent implements OnDestroy {
     this.userLoginSubscription = utils.subscribeLoginEvents.subscribe((userType) => {
       this.userType = userType;
     })
+
+    document.onclick=()=>{
+      this.menuVisible = false;
+    }
   }
 
   ngOnDestroy() {
@@ -57,9 +61,11 @@ export class AppComponent implements OnDestroy {
     }
   }
 
-  toggleMenu() {
+  toggleMenu(event) {
     if (this.clientWidth < 768) {
       this.menuVisible = !this.menuVisible;
     }
+    event.preventDefault();
+    event.stopPropagation();
   }
 }

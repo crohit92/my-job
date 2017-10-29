@@ -1,7 +1,7 @@
 export const TASK_TYPES = [
     {
         value: 0,
-        text: "Complaint"
+        text: "Complaint/New Task"
     },
     {
         value: 1,

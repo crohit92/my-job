@@ -1,13 +1,15 @@
 <div class="container-fluid">
     <div class="row mb-4">
         <div class="col-xs-4">
-            <button class="btn btn-primary" *ngIf="user.admin>0" (click)="openModal()">Add Task</button>
+            <button class="btn btn-primary" *ngIf="user.admin>0" (click)="editTask()">Add Task</button>
         </div>
         <div class="col-xs-4">
             <input autocomplete="off" placeholder="Filter tasks" class="form-control" [(ngModel)]="filterTask">
         </div>
         <div class="col-xs-4">
-            <button class="btn btn-default" (click)="dueDate = undefined;filterTask=undefined;fetchTasks()"><i class="glyphicon glyphicon-refresh"></i></button>
+            <button class="btn btn-default" (click)="dueDate = undefined;filterTask=undefined;fetchTasks()">
+                <i class="glyphicon glyphicon-refresh"></i>
+            </button>
         </div>
     </div>
     <div class="row mb-4" *ngIf="user.admin>0">
@@ -16,7 +18,9 @@
             <input type="date" class="form-control" (change)="fetchTasks()" [(ngModel)]="dueDate">
         </div>
         <div class="col-xs-4">
-            <button class="btn btn-default" (click)="dueDate = undefined;fetchTasks()"><i class="glyphicon glyphicon-remove"></i></button>
+            <button class="btn btn-default" (click)="dueDate = undefined;fetchTasks()">
+                <i class="glyphicon glyphicon-remove"></i>
+            </button>
         </div>
     </div>
     <div class="row mb-4 p-2" *ngIf="tasks.length">
@@ -24,14 +28,38 @@
         <div class="col-xs-2">Assigned To</div>
         <div class="col-xs-2">Customer</div>
         <div class="col-xs-2">Due On</div>
-        <div class="col-xs-2">Sequence</div>
+        <div class="col-xs-1">
+            <i class="glyphicon glyphicon-list"></i>
+        </div>
+        <div class="col-xs-2">Action</div>
     </div>
-    <div class="row mb-4 p-2" [ngClass]="{'bg-success':task.completed,'bg-warning': (task.nextDueDate && moment().diff(moment(task.nextDueDate))<=0),'bg-danger':(task.nextDueDate && moment().diff(moment(task.nextDueDate))>0)}" *ngFor="let task of tasks | filterTasks:filterTask" (click)="openModal(task)">
-        <div class="col-xs-3"><strong class="text-muted">{{(""+task.description).substring(0,30)}}</strong></div>
-        <div class="col-xs-2"><i class="text-muted">{{task.user?task.user.name:"**Not Assigned**"}}</i></div>
-        <div class="col-xs-2"><i class="text-muted">{{(task.customer)? task.customer.name:"**Not Assigned**"}}</i></div>
-        <div class="col-xs-2"><i class="text-muted">{{task.nextDueDate |  date:'MMM,dd yyyy' }}</i></div>
-        <div class="col-xs-2"><strong class="text-muted">{{task.sequence}}</strong></div>
+    <div class="row mb-4 p-2" [ngClass]="{'bg-success':task.completed,'bg-warning': (task.nextDueDate && moment().diff(moment(task.nextDueDate))<=0),'bg-danger':(task.nextDueDate && moment().diff(moment(task.nextDueDate))>0)}"
+        *ngFor="let task of tasks | filterTasks:filterTask">
+        <div class="col-xs-3">
+            <strong class="text-muted">{{(""+task.description).substring(0,30)}}</strong>
+        </div>
+        <div class="col-xs-2">
+            <i class="text-muted">{{task.user?task.user.name:"**Not Assigned**"}}</i>
+        </div>
+        <div class="col-xs-2">
+            <i class="text-muted">{{(task.customer)? task.customer.name:"**Not Assigned**"}}</i>
+        </div>
+        <div class="col-xs-2">
+            <i class="text-muted">{{task.nextDueDate | date:'MMM,dd yyyy' }}</i>
+        </div>
+        <div class="col-xs-1">
+            <strong class="text-muted">{{task.sequence}}</strong>
+        </div>
+        <div class="col-xs-2">
+
+            <button *ngIf="user.admin > 0" class="btn btn-sm btn-default" (click)="editTask(task)">
+                <i class="glyphicon glyphicon-edit"></i>
+            </button>
+            <button *ngIf="!task.completed" class="btn btn-sm btn-default" (click)="completeTask(task)">
+                <i class="glyphicon glyphicon-ok"></i>
+            </button>
+
+        </div>
     </div>
     <div class="row" *ngIf="!tasks || tasks.length == 0">
         <div class="col-xs-12 text-center">
@@ -40,6 +68,7 @@
     </div>
 </div>
 
+<!-- Add/Edit tasks -->
 <ng-template #template>
     <div class="modal-header">
         <h4 class="modal-title pull-left">Add Task</h4>
@@ -49,70 +78,68 @@
     </div>
     <div class="modal-body">
         <form class="container-fluid well well-default" #taskForm="ngForm">
+            <label>Select Customer
+                <input autocomplete="off" name="customer" (change)="taskToUpdate.customer = undefined" required (typeaheadOnSelect)="taskToUpdate.customer = $event.item"
+                    [(ngModel)]="taskToUpdate.customerName" placeholder="Select Customer" [typeahead]="customers" typeaheadOptionField="name_mobile"
+                    class="form-control">
+            </label>
             <div class="form-group">
-                <textarea class="form-control" name="description" required [(ngModel)]="currentTask.description" placeholder="Description"></textarea>
+                <textarea class="form-control" name="description" required [(ngModel)]="taskToUpdate.description" placeholder="Description"></textarea>
             </div>
 
             <div class="form-group">
-                <label>Due On <input type="date" class="form-control" name="dueDate" required [(ngModel)]="currentTask.nextDueDate" placeholder="Task Due On"></label>
+                <label>Due On
+                    <input type="date" class="form-control" name="dueDate" required [(ngModel)]="taskToUpdate.nextDueDate" placeholder="Task Due On">
+                </label>
             </div>
+            <label>Select User
+                <input autocomplete="off" name="user" (change)="taskToUpdate.user = undefined" required (typeaheadOnSelect)="taskToUpdate.user = $event.item"
+                    [(ngModel)]="taskToUpdate.userName" placeholder="Assign Task To" typeaheadOptionField="name" [typeahead]="users"
+                    class="form-control">
+            </label>
             <div class="form-group">
-                <label>Sequence<input type="number" class="form-control" name="sequence" required [(ngModel)]="currentTask.sequence" placeholder="Sequence number"></label>
+                <label>Sequence
+                    <input type="number" class="form-control" name="sequence" required [(ngModel)]="taskToUpdate.sequence" placeholder="Sequence number">
+                </label>
             </div>
 
             <div class="form-group">
-                <select class="form-control" name="taskType" required [(ngModel)]="currentTask.type">
+                <select class="form-control" name="taskType" required [(ngModel)]="taskToUpdate.type">
                     <option value="undefined" disabled>Select Task Type</option>
                     <option [ngValue]="type.value" *ngFor="let type of taskTypes">{{type.text}}</option>
                 </select>
             </div>
-            <div *ngIf="currentTask.type==2">
-                <label>Amount <input class="form-control" required type="number" name="amount" [(ngModel)]="currentTask.amount"></label>
+            <div *ngIf="taskToUpdate.type == callType.PAYMENT">
+                <label>Amount
+                    <input class="form-control" required type="number" name="amount" [(ngModel)]="taskToUpdate.amount">
+                </label>
             </div>
-            <label>Select User
-                <input  autocomplete="off" name="user"
-                (change)="currentTask.user = undefined"
-                required
-                (typeaheadOnSelect)="currentTask.user = $event.item"
-                [(ngModel)]="currentTask.userName"
-                placeholder="Assign Task To"
-                typeaheadOptionField="name"
-                [typeahead]="users"
-                class="form-control">
-            </label>
-
-            <label>Select Customer
-                <input  autocomplete="off" name="customer" 
-                (change)="currentTask.customer = undefined"
-                required
-                (typeaheadOnSelect)="currentTask.customer = $event.item"
-                [(ngModel)]="currentTask.customerName"
-                placeholder="Select Customer"
-                [typeahead]="customers"
-                typeaheadOptionField="name_mobile"
-                class="form-control">
-            </label>
-
-
+            <div *ngIf="taskToUpdate.completed">
+                <div>
+                    <label>Remarks
+                        <textarea readonly class="form-control" type="text" name="remarks" [(ngModel)]="taskToUpdate.remarks"></textarea>
+                    </label>
+                </div>
+                <div *ngIf="taskToUpdate.type == callType.COMPLAINT">
+                    <label>Was the task complete? {{taskToUpdate.taskDone?'Yes':'No'}}</label>
+                </div>
+            </div>
             <div class="form-group">
-                <button *ngIf="!currentTask.completed" [disabled]="!taskForm.valid || !currentTask.customer" (click)="currentTask.userName=currentTask.user?currentTask.user.name:undefined;createOrUpdateTask(currentTask)"
+                <button *ngIf="!taskToUpdate.completed" [disabled]="!taskForm.valid || !taskToUpdate.customer" (click)="taskToUpdate.userName=taskToUpdate.user?taskToUpdate.user.name:undefined;createOrUpdateTask(taskToUpdate)"
                     class="btn btn-primary">
-                {{currentTask.id?'Update':'Save'}}
-            </button>
-            <button *ngIf="!currentTask.completed" [disabled]="!currentTask.id" (click)="deleteTask(currentTask)" class="btn btn-danger">Delete</button>
-            <button *ngIf="currentTask.type == callType.PROJECT && currentTask.completed" class="btn btn-warning" (click)="completeTask(currentTask)">Details</button>
-            <button (click)="modalRef.hide()" class="btn btn-default">Close</button>
-
-
-
+                    {{taskToUpdate.id?'Update':'Save'}}
+                </button>
+                <button *ngIf="!taskToUpdate.completed" [disabled]="!taskToUpdate.id" (click)="deleteTask(taskToUpdate)" class="btn btn-danger">Delete</button>
+                <button *ngIf="taskToUpdate.type == callType.PROJECT && taskToUpdate.completed" class="btn btn-warning" (click)="completeTask(taskToUpdate)">Details</button>
+                <button (click)="modalRef.hide()" class="btn btn-default">Close</button>
             </div>
         </form>
     </div>
 
 </ng-template>
+<!-- Add/Edit tasks End -->
 
-
-
+<!-- Complete Task -->
 <ng-template #templateCompleteTask>
     <div class="modal-header">
         <h4 class="modal-title pull-left">Task Complete</h4>
@@ -124,72 +151,100 @@
         <accordion closeOthers="true">
             <accordion-group heading="Step 1" isDisabled="true" [isOpen]="openPaneIndex==0">
                 <div class="well well-default">
-                    <h5>Description: <i class="text-muted">{{currentTask.description}}</i></h5>
+                    <h5>Description:
+                        <i class="text-muted">{{currentTaskToComplete.description}}</i>
+                    </h5>
                     <h5>Customer Details:
                         <h5>
-                            <strong>Name</strong>: <i class="text-muted">{{currentTask.customer.name}}</i>
+                            <strong>Name</strong>:
+                            <i class="text-muted">{{currentTaskToComplete.customer.name}}</i>
                         </h5>
                         <h5>
-                            <strong>Mobile</strong>: <i class="text-muted">{{currentTask.customer.mobile}}</i>
+                            <strong>Mobile</strong>:
+                            <i class="text-muted">{{currentTaskToComplete.customer.mobile}}</i>
                         </h5>
                         <h5>
-                            <strong>Address</strong>: <i class="text-muted">{{currentTask.customer.address}}</i>
+                            <strong>Address</strong>:
+                            <i class="text-muted">{{currentTaskToComplete.customer.address}}</i>
                         </h5>
                     </h5>
                 </div>
                 <hr>
-                <div *ngIf="currentTask.type == callType.COMPLAINT">
+                <div *ngIf="currentTaskToComplete.type == callType.COMPLAINT">
+                    <label>Is the Task Complete
+                        <select class="form-control" required name="taskComplete" [(ngModel)]="currentTaskToComplete.taskDone">
+                            <option value="" disabled>Select One</option>
+                            <option [ngValue]="true">Yes</option>
+                            <option [ngValue]="false">No</option>
+                        </select>
+                    </label>
+                </div>
+                <div *ngIf="currentTaskToComplete.type == callType.COMPLAINT">
                     <label>Select Payment Status
                         <select class="form-control" required name="paymentStatus" [(ngModel)]="completionInfo.paymentStatus">
                             <option value="" disabled>Select One</option>
                             <option [ngValue]="paymentStatus.AMC">AMC</option>
                             <option [ngValue]="paymentStatus.WARRENTY">Under Warrenty</option>
+                            <option [ngValue]="paymentStatus.NONPAYABLE">Non Payable</option>
                             <option [ngValue]="paymentStatus.PAYABLE">Payable</option>
                         </select>
                     </label>
                 </div>
-                <div *ngIf="completionInfo.paymentStatus == paymentStatus.PAYABLE || currentTask.type == callType.PAYMENT">
+                <div *ngIf="completionInfo.paymentStatus == paymentStatus.PAYABLE || currentTaskToComplete.type == callType.PAYMENT">
                     <label>Amount Payable
-                        <input required [disabled]="currentTask.type == callType.PAYMENT" autocomplete="off" type="number" name="amount" #amount="ngModel" required min="0" [(ngModel)]="currentTask.amount" class="form-control">
+                        <input required [disabled]="currentTaskToComplete.type == callType.PAYMENT" autocomplete="off" type="number" name="amount"
+                            #amount="ngModel" required min="0" [(ngModel)]="currentTaskToComplete.amount" class="form-control">
                     </label>
                 </div>
-                <div *ngIf="completionInfo.paymentStatus == paymentStatus.PAYABLE || currentTask.type == callType.PAYMENT">
+                <div *ngIf="completionInfo.paymentStatus == paymentStatus.PAYABLE || currentTaskToComplete.type == callType.PAYMENT">
                     <label>Amount Received
                         <input type="number" class="form-control" required name="amountPaid" #amountPaid="ngModel" [(ngModel)]="completionInfo.paid">
                     </label>
                 </div>
-                <div *ngIf="completionInfo.paymentStatus == paymentStatus.PAYABLE || currentTask.type == callType.PAYMENT">
+                <div *ngIf="completionInfo.paymentStatus == paymentStatus.PAYABLE || currentTaskToComplete.type == callType.PAYMENT">
                     <label>Discount Amount
                         <input type="number" class="form-control" required name="discountAmount" #discountAmount="ngModel" [(ngModel)]="completionInfo.discountAmount">
                     </label>
                 </div>
+
                 <!-- if task was a project, then ask if it is complete or not?
                     if not when is the next visit required? -->
-                <div *ngIf="currentTask.type == callType.PROJECT">
+                <div *ngIf="currentTaskToComplete.type == callType.PROJECT">
                     <hr>
                     <ul class="row p-0">
-                        <li *ngFor="let parameter of currentTask.parameters;" class="col-xs-4" [ngClass]="{'clearfix': $index%3==0}">
-                            <label><input type="checkbox" name="parameter_{{index}}" [checked]="parameter.value" (change)="parameter.value = !parameter.value"> {{parameter.text}}</label>
+                        <li *ngFor="let parameter of currentTaskToComplete.parameters;" class="col-xs-4" [ngClass]="{'clearfix': $index%3==0}">
+                            <div class="switch-box">
+                                <label class="switch">
+                                    <input type="checkbox" name="parameter_{{index}}" [checked]="parameter.value" (change)="parameter.value = !parameter.value">
+                                    <span class="slider round"></span>
+                                </label>
+                                <label> {{parameter.text}}</label>
+                            </div>
+                            <!-- <label>
+                                    <input type="checkbox"></label> -->
                         </li>
                     </ul>
                     <div class="row">
-                        <div class="col-xs-12">
-                            <label>Remarks
-                                <textarea [(ngModel)]="currentTask.remarks" class="form-control" name="remarks" ></textarea>
-                            </label>
-                        </div>
+
                         <div class="col-xs-12">
                             <label *ngIf="!completionInfo.completed">Next Visit Required On
-                                <input type="date" class="form-control" name="nextVisitRequiredOn" [(ngModel)]="completionInfo.nextDueDate">
+                                <input type="date" [disabled]="currentTaskToComplete.completed" class="form-control" name="nextVisitRequiredOn" [(ngModel)]="completionInfo.nextDueDate">
                             </label>
                         </div>
                     </div>
                 </div>
+
                 <div>
-                    <button  [disabled]="!completionForm.valid || user.admin>0" class="btn btn-success pull-right" (click)="taskCompleted(currentTask,completionInfo)">Finish</button>
+                    <label>Remarks
+                        <textarea [(ngModel)]="currentTaskToComplete.remarks" class="form-control" name="remarks"></textarea>
+                    </label>
+                </div>
+                <div>
+                    <button [disabled]="!completionForm.valid || currentTaskToComplete.completed" class="btn btn-success pull-right" (click)="taskCompleted(currentTaskToComplete,completionInfo)">Finish</button>
                 </div>
 
             </accordion-group>
         </accordion>
     </form>
 </ng-template>
+<!-- Complete task Ends -->

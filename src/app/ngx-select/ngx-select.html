@@ -1,0 +1,9 @@
+<div>
+    <input class="form-control" [placeholder]="placeholder" (click)="showOptions($event)" (window:click)="hideOptions($event)" [(ngModel)]="_displayValue">
+    <ul *ngIf="optionsVisible">
+        <li *ngFor="let option of options | filterOptions:displayProperty:_displayValue" (click)="itemClicked($event,option)">
+            <span *ngIf="displayProperty">{{option[displayProperty]}}</span>
+            <span *ngIf="!displayProperty">{{option}}</span>
+        </li>
+    </ul>
+</div>

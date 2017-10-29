@@ -1,4 +1,4 @@
-import { Component, TemplateRef, ViewChild } from '@angular/core';
+import { Component, TemplateRef, ViewChild, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Api, Request, ApiRoutes, apiBase } from './../helper/api';
 import { Observable } from 'rxjs/Observable';
@@ -9,6 +9,7 @@ import { BsModalRef } from 'ngx-bootstrap/modal/modal-options.class';
 import { Account } from '../../app/models/account.model';
 import { Transaction } from '../../app/models/transaction.model';
 import { Utils } from "../helper/utils";
+import { FormControl } from '@angular/forms';
 
 @Component({
     templateUrl: './transactions-list.html',
@@ -31,13 +32,19 @@ export class TransationsListComponent {
     currentTransaction: Transaction;
     filterByDate: boolean;
     filterType: number;
-    sharableAccountDetail:string;
+    sharableAccountDetail: string;
     config = {
         animated: false,
         keyboard: true,
         backdrop: true,
         ignoreBackdropClick: true
     };
+   
+    itemSelected(item){
+        console.log(item);
+        
+    }
+   
     @ViewChild("template") template: TemplateRef<any>;
     public modalRef: BsModalRef;
     filterText: string;
@@ -45,7 +52,7 @@ export class TransationsListComponent {
         private api: Api,
         private router: Router,
         private modalService: BsModalService,
-        private utils:Utils
+        private utils: Utils
     ) {
         this.utils.showMenu(true);
         this.fetchAccounts();
@@ -73,7 +80,7 @@ export class TransationsListComponent {
             method: 'get',
             queryParams: params
         }).subscribe((res) => {
-            this.transactions = res  as Transaction[];
+            this.transactions = res as Transaction[];
         });
     }
 
@@ -96,7 +103,7 @@ export class TransationsListComponent {
                 },
                 body: this.currentTransaction
             }).subscribe(() => {
-                this.filterTransactions(this.filterType,this.filterByDate,this.filter);
+                this.filterTransactions(this.filterType, this.filterByDate, this.filter);
                 this.modalRef.hide();
             });
         }
@@ -107,7 +114,7 @@ export class TransationsListComponent {
                 body: this.currentTransaction
             }).subscribe((response) => {
                 this.currentTransaction.id = (response as any).id;
-                this.filterTransactions(this.filterType,this.filterByDate,this.filter);
+                this.filterTransactions(this.filterType, this.filterByDate, this.filter);
                 this.modalRef.hide();
 
             });
@@ -117,6 +124,10 @@ export class TransationsListComponent {
 
     compareItems(item1, item2) {
         return item1 && item2 ? item1.id == item2.id : false;
+    }
+
+    displayFn(account: Account): string {
+        return account ? account.name : '';
     }
 
     filterTransactions(filterType, filterByDate, filter) {
@@ -169,7 +180,7 @@ export class TransationsListComponent {
                 '': accountId
             }
         }).subscribe((response) => {
-            let accountInfo = response ;
+            let accountInfo = response;
             this.calculateBalance(accountInfo);
             this.accountInfo = accountInfo;
         })
@@ -194,19 +205,19 @@ export class TransationsListComponent {
                 accountBalance += account.openingBalance;
             }
         }
-        if(account.accountType.nature == 'dr'){
-            account.balanceType = accountBalance<0?'cr':'dr';
+        if (account.accountType.nature == 'dr') {
+            account.balanceType = accountBalance < 0 ? 'cr' : 'dr';
         }
-        else{
-            account.balanceType = accountBalance<0?'dr':'cr';
+        else {
+            account.balanceType = accountBalance < 0 ? 'dr' : 'cr';
         }
         account.balance = Math.abs(accountBalance);
         return accountBalance;
 
     }
 
-    share(){
-        let headers =  [ { text: 'Date', bold: true }, { text: 'Description', bold: true }, { text: 'Amount', bold: true } ];
+    share() {
+        let headers = [{ text: 'Date', bold: true }, { text: 'Description', bold: true }, { text: 'Amount', bold: true }];
         // var docDefinition = {
         //     content:[
         //         {
@@ -221,14 +232,14 @@ export class TransationsListComponent {
         //     ]
         // }
         this.api.sendRequest({
-            method:"post",
-            body:{
-                accountInfo:this.accountInfo,
-                transactions:this.transactions
+            method: "post",
+            body: {
+                accountInfo: this.accountInfo,
+                transactions: this.transactions
             },
-            endpoint:`accounts/${this.filter.accountId}/makeStatement`,
+            endpoint: `accounts/${this.filter.accountId}/makeStatement`,
 
-        }).subscribe((data)=>{
+        }).subscribe((data) => {
             this.sharableAccountDetail = `${apiBase}pdfs/${this.filter.accountId}.pdf`;
         })
     }
