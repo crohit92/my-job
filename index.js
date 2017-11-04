@@ -10,6 +10,7 @@ const tasks_1 = require("./controllers/tasks");
 const groups_1 = require("./controllers/groups");
 const account_types_1 = require("./controllers/account-types");
 const transactions_1 = require("./controllers/transactions");
+const nobbas_controller_1 = require("./controllers/nobbas.controller");
 class Index {
     constructor() {
         this.port = 3000;
@@ -46,6 +47,7 @@ class Index {
         app.use(groups_1.GroupsController.route, new groups_1.GroupsController(db).router);
         app.use(account_types_1.AccountTypesController.route, new account_types_1.AccountTypesController(db).router);
         app.use(transactions_1.TransactionsController.route, new transactions_1.TransactionsController(db).router);
+        app.use(nobbas_controller_1.NobbasController.route, new nobbas_controller_1.NobbasController(db).router);
     }
 }
 exports.Index = Index;

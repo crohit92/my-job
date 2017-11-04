@@ -10,7 +10,7 @@ import { TasksController } from './controllers/tasks';
 import { GroupsController } from './controllers/groups';
 import { AccountTypesController } from './controllers/account-types';
 import { TransactionsController } from "./controllers/transactions";
-
+import { NobbasController } from './controllers/nobbas.controller';
 export class Index {
     public app: Express;
     private port: number = 3000;
@@ -52,6 +52,7 @@ export class Index {
         app.use(GroupsController.route, new GroupsController(db).router);
         app.use(AccountTypesController.route, new AccountTypesController(db).router);
         app.use(TransactionsController.route, new TransactionsController(db).router);
+        app.use(NobbasController.route, new NobbasController(db).router);
     } 
 }
 
