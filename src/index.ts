@@ -11,6 +11,16 @@ import { GroupsController } from './controllers/groups';
 import { AccountTypesController } from './controllers/account-types';
 import { TransactionsController } from "./controllers/transactions";
 import { NobbasController } from './controllers/nobbas.controller';
+
+export const FONTS = {
+    Roboto: {
+        normal: `${__dirname}/fonts/Roboto-Regular.ttf`,
+        bold: `${__dirname}/fonts/Roboto-Medium.ttf`,
+        italics: `${__dirname}/fonts/Roboto-Italic.ttf`,
+        bolditalics: `${__dirname}/fonts/Roboto-MediumItalic.ttf`
+    }
+}
+
 export class Index {
     public app: Express;
     private port: number = 3000;
@@ -41,6 +51,7 @@ export class Index {
             origin: '*'
         }
         app.use(cors())
+        app.use('/pdfs', express.static('pdfs'))
         //enable pre-flight
         app.options("*", cors(options));
     } 
@@ -58,7 +69,6 @@ export class Index {
 
 MongoClient.connect('mongodb://127.0.0.1:27017/myJob'/*'mongodb://heroku_04x92679:6fr8b9cda7phq058m5vlk5ecnj@ds123534.mlab.com:23534/heroku_04x92679'*/,
     (err, db) => {
-        //console.log(db);
-        
+        //console.log(db);        
         new Index().run(db);
     });

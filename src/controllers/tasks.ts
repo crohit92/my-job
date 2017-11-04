@@ -4,39 +4,21 @@ import { Task } from '../models/task';
 import { UsersController } from './users';
 import { TransactionsController } from "./transactions";
 import { Transaction } from "../models/transaction";
-
+import { CallType } from '../models/call-type';
+import { PaymentStatus } from '../models/payment-status';
+const PROJECT_PROPERTIES = "projectProperties";
 const TASKS = "tasks";
 class Completion {
     task: Task;
-    completionInfo: { amc: boolean, amount: number, paid: boolean, completed?: boolean }
+    completionInfo: { paymentStatus: number, paid: number, discountAmount: number }
 };
 
-const tempPayload = {
-    "task": {
-        "_id": "59c496393c63680b970d2d83",
-        "description": "Payment request",
-        "nextDueDate": "2017-09-22",
-        "type": 2,
-        "userName": "Vivek",
-        "user": { "_id": "59c495c93c63680b970d2d82", "admin": 0, "name": "Vivek", "groupId": "17", "openingBalance": 0, "natureOfOB": "dr", "mobile": "9217690006", "address": "622 Basant Avenue", "password": "1234", "id": "1506055625398" },
-        "customerName": "Rohit undefined",
-        "customer": { "_id": "59b042420f8b720004219f1b", "name": "Rohit", "groupId": "16", "openingBalance": 10000, "natureOfOB": "dr", "id": "1504723522679", "debit": 0, "credit": 6000, "accountType": { "_id": "59a9431f6bf43b1d18122a68", "id": "1", "name": "Assets", "nature": "dr" }, "balance": 4000 },
-        "assignedToId": "1506055625398",
-        "customerId": "1504723522679",
-        "id": "1506055737359"
-    },
-    "completionInfo": {
-        "amc": true,
-        "amount": 500,
-        "paid": true,
-        completed: true
-    }
-}
 export class TasksController {
     public static route: string = `/${TASKS}`;
     public router: Router = Router();
     //private db: Db;
     constructor(private db: Db) {
+        this.router.get("/projectParameters", this.getProjectParameters.bind(this));
         this.router.get('/', this.fetchAll.bind(this));
         this.router.get('/:id', this.findOne.bind(this));
         this.router.post('/:id/completed', this.completeTask.bind(this));
@@ -45,10 +27,16 @@ export class TasksController {
         this.router.delete('/:id', this.deleteTask.bind(this));
     }
 
+    getProjectParameters(req: Request, res: Response) {
+        this.db.collection(PROJECT_PROPERTIES).find().toArray().then((data) => {
+            res.send(data);
+        }).catch((err) => res.status(500).send(err));
+    }
+
     fetchAll(req: Request, res: Response) {
         let $this = this;
-        let filterByDueDate = req.query.dueDate ? [{$match:{ nextDueDate: req.query.dueDate }}] : [];
-        let filterCompletedTasks = filterByDueDate.length > 0 ? [] : [{$match:{ completed: undefined }}];
+        let filterByDueDate = req.query.dueDate ? [{ $match: { nextDueDate: req.query.dueDate } }] : [];
+        let filterCompletedTasks = filterByDueDate.length > 0 ? [] : [{ $match: { $or: [{ completed: undefined }, { completed: false }] } }];
         let filterByUser = req.query.userId ? [{ $match: { assignedToId: req.query.userId } }] : [];
 
         this.db.collection(TASKS).aggregate(
@@ -56,7 +44,7 @@ export class TasksController {
                 ...filterByUser,
                 ...filterByDueDate,
                 ...filterCompletedTasks,
-                 this.includeUserAndCustomer(), )
+                this.includeUserAndCustomer(), )
         )
             .toArray()
             .then((tasks: Task[]) => {
@@ -89,15 +77,19 @@ export class TasksController {
 
     createTask(req: Request, res: Response) {
         let task: Task = req.body;
+
+        this._createTask(task).then((response: InsertOneWriteOpResult) => {
+            res.send(task);
+        }).catch(err => {
+            res.status(400).send(err);
+        })
+    }
+
+    private _createTask(task: Task) {
         task.id = (new Date()).valueOf().toString();
-        this.db
+        return this.db
             .collection(TASKS)
             .insertOne(task)
-            .then((response: InsertOneWriteOpResult) => {
-                res.send(task);
-            }).catch(err => {
-                res.status(400).send(err);
-            })
     }
 
     private updateTask(task) {
@@ -151,95 +143,176 @@ export class TasksController {
         delete req.body.task._id;
         let completion = req.body as Completion;
         /*
-        1. All tasks need to be entered into the journal since we want to keep track of all activities
-        2. For all tasks completed 
-        2.1. Customer   dr. to Services cr.
-        2.2. If amount > 0 and paid == true then User    dr. to Customer  cr.
-        3 If task.type !== 3 ie project then 3.1 else 3.2
-        3.1. Update task set completed to true
-        3.2. If completionInfo.taskType == 3
-        3.2.1 Update task-> set nextDueDate and completed
+        task type 0->Complaint, 1->Query, 2->Payment, 3->Project
+        payment status 0->AMC, 1->Warrenty, 2-> Payable
+        
+        completion info{ 
+            paymentStatus: boolean, 
+            paid: number, 
+            completed?: boolean 
+        }
+        
+        1. task type(0) & payment status(0|1|2)
+        a. Customer to Services by amount(0 if payment status = 0|1)
+        b. if payment status(2)
+        User to Customer by paid
+        2. task type(2)
+        User to Customer by paid
         */
-        let transactionsController = new TransactionsController(this.db);
-        let transaction: Transaction = new Transaction();
         let task = completion.task;
         let extra = completion.completionInfo;
-        transaction.amount = completion.completionInfo.amount || 0;
-        this.db.collection("accounts").findOne({
-            groupId: '14'
-        }).then((account: Account) => {
-            if (!account) {
-                res.status(500).send({ message: "No Account has been created under sales group" });
-                return;
-            }
-            else {
-                transaction.creditAccountId = account.id;
-                transaction.date = new Date();
-                transaction.dateString = `${transaction.date.getFullYear()}-${padStart((transaction.date.getMonth() + 1).toString(), 2, "0")}-${padStart((transaction.date.getDate()).toString(), 2, "0")}`
-                transaction.debitAccountId = completion.task.customerId
-                transaction.narration = this.getNarration(task, completion.completionInfo);
 
-                transactionsController.addTransaction(transaction).then(() => {
-
-                    //first transaction has been made
-                    if (extra.amount > 0 && extra.paid) {
-                        transaction.date = new Date();
-                        transaction.debitAccountId = task.user.id;
-                        transaction.creditAccountId = task.customer.id
-                        delete transaction._id;
-                        transactionsController.addTransaction(transaction).then(() => {
+        if (task.type == CallType.COMPLAINT) {
+            this.db.collection("accounts").findOne({
+                groupId: '14'
+            }).then((salesAccount: Account) => {
+                if (!salesAccount) {
+                    res.status(500).send({ message: "No Account has been created under sales group" });
+                    return;
+                }
+                else {
+                    let transactionsController = new TransactionsController(this.db);
+                    let transaction: Transaction = new Transaction();
+                    transaction.amount = extra.paymentStatus != PaymentStatus.PAYABLE ? 0 : task.amount;
+                    transaction.creditAccountId = salesAccount.id;
+                    var today = new Date();
+                    transaction.dateString = `${today.getFullYear()}-${padStart((today.getMonth() + 1).toString(), 2, "0")}-${padStart((today.getDate()).toString(), 2, "0")}`
+                    transaction.date = transaction.dateString;
+                    transaction.debitAccountId = completion.task.customerId
+                    transaction.narration = this.getNarration(task, completion.completionInfo);
+                    transactionsController.addTransaction(transaction).then(() => {
+                        //if payment was not covered under AMC or warrenty
+                        if (extra.paymentStatus == PaymentStatus.PAYABLE) {
+                            this.savePaymentReceivedByUser(task, completion, res)
+                        }
+                        else {
                             this.completeTaskByMarkingItCompleted(task, extra, res);
-                        }).catch((err) => {
-                            res.status(500).send(err);
-                        })
-                    }
-                    else {
-                        this.completeTaskByMarkingItCompleted(task, extra, res)
-                    }
+                        }
 
-                }).catch((err) => {
-                    res.status(500).send(err);
-                })
-            }
-        })
+                    }).catch((err) => {
+                        res.status(500).send(err);
+                    })
 
+                }
+            }).catch((err) => {
+                res.status(500).send(err);
+            });
+        }
+        else if (task.type == CallType.Payment) {
+            this.savePaymentReceivedByUser(task, completion, res)
+        }
+        else {
+            this.completeTaskByMarkingItCompleted(task, extra, res)
+        }
 
     }
 
-    completeTaskByMarkingItCompleted(task, extra, res) {
-        task.completed = task.type == 3 ? extra.completed : true;
+    private savePaymentReceivedByUser(task: Task, completion: Completion, res: Response) {
+        this.db.collection("accounts").findOne({
+            groupId: '19'
+        }).then((discountAccount: Account) => {
+            let transactionsController = new TransactionsController(this.db);
+            var today = new Date();
+            let transaction: Transaction = new Transaction();
+            transaction.narration = this.getNarration(task, completion.completionInfo);
+            transaction.dateString = `${today.getFullYear()}-${padStart((today.getMonth() + 1).toString(), 2, "0")}-${padStart((today.getDate()).toString(), 2, "0")}`
+            transaction.date = transaction.dateString;
+            transaction.debitAccountId = task.user.id;
+            transaction.creditAccountId = task.customer.id
+            transaction.amount = completion.completionInfo.paid;
+            transactionsController.addTransaction(transaction).then(() => {
+                //if discount ammount is greater than 0
+                //then add n new transaction for discount
+                if (completion.completionInfo.discountAmount) {
+                    let discountTransaction = { ...transaction };
+                    delete discountTransaction._id;
+                    discountTransaction.amount = completion.completionInfo.discountAmount;
+                    discountTransaction.debitAccountId = discountAccount.id;
+                    transactionsController.addTransaction(discountTransaction).then(() => {
+                        this.completeTaskByMarkingItCompleted(task, completion.completionInfo, res);
+                    }).catch((err) => {
+                        res.status(500).send({ err: err, message: "Error Here" });
+                    })
+                }
+                else {
+                    this.completeTaskByMarkingItCompleted(task, completion.completionInfo, res);
+                }
+
+            }).catch((err) => {
+                res.status(500).send(err);
+            })
+        }).catch((err) => {
+            res.status(500).send({ message: "No Account exists under group Discounts and losses" });
+        })
+    }
+
+    completeTaskByMarkingItCompleted(task: Task, extra, res) {
+        task.completed = true;
+        //task.assignedToId = task.type == 3 ? undefined : task.assignedToId;
+        //task.userName = undefined;
         delete task.user;
         delete task.customer;
 
         this.updateTask(task).then(() => {
-            res.status(200).send();
+            if (task.type == CallType.Project) {
+                let newTask: Task = { ...{}, ...task };
+                newTask.assignedToId = undefined;
+                newTask.userName = undefined;
+                newTask.completed = false;
+                newTask.id = (new Date()).valueOf().toString();
+                newTask.nextDueDate = extra.nextDueDate;
+                newTask.remarks = '';
+                this._createTask(newTask).then((response) => {
+                    res.status(200).send({ message: "Task Completed" });
+                }).catch(err => res.status(500).send(err));   
+            }
+            else {
+                res.status(200).send({ message: "Task Completed" });
+            }
+
         }).catch((err) => { res.status(500).send(err) });
     }
 
-    getNarration(task: Task, extra: { amc: boolean, paid: boolean, amount: number, completed?: boolean }) {
-        extra.amount = extra.amount == undefined ? 0 : extra.amount;
-        let narration = ` "${task.user.name}" visited "${task.customer.name}" for "${task.description}"`;
-        if (extra.amount > 0 && extra.paid) {
-            narration += ` "${task.customer.name}" paid "${extra.amount}" rs`;
+    getNarration(task: Task, extra: { paymentStatus: number, paid: number, discountAmount: number }) {
+        /*
+        task type 0->Complaint, 1->Query, 2->Payment, 3->Project
+        payment status 0->AMC, 1->Warrenty, 2-> Payable
+        
+        completion info{ 
+            paymentStatus: boolean, 
+            
+            paid: number, 
+            completed?: boolean 
         }
-        else if (extra.amount > 0 && !extra.paid) {
-            narration += ` "${extra.amount}" was asked for but was not paid`;
-        }
-        if (extra.amc) {
-            narration += ` Visit was covered under AMC`
-        }
-        if (task.type == 3 && extra.completed) {
-            narration += ` Project is complete`;
-        }
-        else if (task.type == 3) {
-            narration += ` Next visit Due on "${task.nextDueDate}"`;
-        }
+        
+        narration: <User> visited <Customer> for <Task.Type> narrated as <task.description>,
+        1. task type(0) & payment status(0|1)
+        narration: which was under < payment status>
+        
+        2. [task type(0) & payment status(2)] | [task type(2)]
+        narration: Total Amount Due was <amount>rs of which <paid>rs were paid
+        
+        */
 
+
+        let taskType = task.type == CallType.COMPLAINT ? "Complaint" : "Payment";
+        let narration = ` ${task.user.name} visited ${task.customer.name} for ${taskType} narrated as ${task.description} \n`;
+        if (task.type == CallType.COMPLAINT && extra.paymentStatus != PaymentStatus.PAYABLE) {
+            narration += ` which was ` +
+            (extra.paymentStatus != PaymentStatus.NONPAYABLE ? (` under ${extra.paymentStatus == PaymentStatus.AMC ? "AMC" : "Warrenty"}`):
+            `non payable`);
+        }
+        else if ((task.type == CallType.COMPLAINT && extra.paymentStatus == PaymentStatus.PAYABLE) || task.type == CallType.Payment) {
+            narration += ` Total Amount Due was ${task.amount} rs of which ${extra.paid} rs were paid \n`;
+            if (extra.discountAmount) {
+                narration += ` discount of ${extra.discountAmount} rs was allowed`;
+            }
+        }
         return narration;
     }
 }
 
-const padStart = (string, maxLength, fillString) => {
+export const padStart = (string, maxLength, fillString) => {
 
     if (string == null || maxLength == null) {
         return string;

@@ -1,8 +1,13 @@
 import { Router, Request, Response } from 'express';
+import * as fs from 'fs';
 import { Db, ObjectID, InsertOneWriteOpResult } from 'mongodb';
 import { Account } from '../models/account';
 import { Group } from './../models/group';
+import { Transaction } from '../models/transaction';
 import { AccountType } from '../models/account-type';
+//import 'pdfmake';
+import * as Printer from 'pdfmake/src/printer';
+import { FONTS } from '../index';
 const ACCOUNTS = "accounts";
 const GROUPS = "groups";
 
@@ -16,13 +21,13 @@ export class AccountsController {
         this.router.get('/', this.get.bind(this));
         this.router.get('/:id', this.getById.bind(this));
         this.router.post('/login', this.login.bind(this));
+        this.router.post('/:id/makeStatement', this.makePdf.bind(this));
         this.router.post('/', this.post.bind(this));
         this.router.put('/:id', this.put.bind(this));
         this.router.delete('/:id', this.delete.bind(this))
     }
 
     private get(req: Request, res: Response) {
-
         let filter = req.query.hasOwnProperty('groupId') ? { groupId: req.query.groupId } : {};
         let pagination = [];
         if (req.query.hasOwnProperty('skip') && req.query.hasOwnProperty('limit')) {
@@ -86,7 +91,7 @@ export class AccountsController {
                     }
                 },
                 {
-                    $project:{
+                    $project: {
                         id: '$id',
                         openingBalance: '$openingBalance',
                         natureOfOB: '$natureOfOB',
@@ -95,8 +100,8 @@ export class AccountsController {
                         group: {
                             $arrayElemAt: ['$group', 0]
                         },
-                        credits:'$credits',
-                        debits:'$debits'
+                        credits: '$credits',
+                        debits: '$debits'
                     }
                 },
                 {
@@ -108,29 +113,30 @@ export class AccountsController {
                     }
                 },
                 {
-                    $project:{
+                    $project: {
                         id: '$id',
                         openingBalance: '$openingBalance',
                         natureOfOB: '$natureOfOB',
                         name: '$name',
                         groupId: '$groupId',
                         group: '$group',
-                        accountType:{
+                        accountType: {
                             $arrayElemAt: ['$accountType', 0]
                         },
-                        credits:'$credits',
-                        debits:'$debits'
+                        credits: '$credits',
+                        debits: '$debits'
                     }
                 }
-               
+
             ]).next().then((account: Account) => {
+
                 account.debit = 0;
                 account.debits.forEach(debit => {
-                    account.debit+=debit.amount
+                    account.debit += debit.amount
                 });
                 account.credit = 0;
                 account.credits.forEach(credit => {
-                    account.credit+=credit.amount
+                    account.credit += credit.amount
                 });
                 res.status(200).send(account);
             }).catch(err => {
@@ -138,6 +144,100 @@ export class AccountsController {
             })
     }
 
+    private getDateString(date: Date) {
+        return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+    }
+
+    private pushToLedger(_transactions: Array<string[]>, transaction: Transaction, accountId: string) {
+        let addedToList = false;
+        for (var index = 0; index < _transactions.length; index++) {
+            var _transaction = _transactions[index];
+            if (transaction.debitAccountId == accountId) {
+                if (_transaction[0] == '') {
+                    _transaction[0] = this.getDateString(new Date(transaction.date));
+                    _transaction[1] = transaction.credit.name;
+                    _transaction[2] = transaction.amount + '';
+                    addedToList = true;
+                    break;
+                }
+            }
+            else {
+                if (_transaction[3] == '') {
+                    _transaction[3] = this.getDateString(new Date(transaction.date));
+                    _transaction[4] = transaction.debit.groupId == '17' ? 'Cash' : transaction.debit.name;
+                    _transaction[5] = transaction.amount + '';
+                    addedToList = true;
+                    break;
+                }
+            }
+
+        }
+        if (!addedToList) {
+            if (transaction.debitAccountId == accountId) {
+                _transactions.push([this.getDateString(new Date(transaction.date)), transaction.credit.name, transaction.amount, '', '', '']);
+            }
+            //if account is credited
+            else {
+                _transactions.push(['', '', '', this.getDateString(new Date(transaction.date)), transaction.debit.groupId == '17' ? 'Cash' : transaction.debit.name, transaction.amount]);
+            }
+
+        }
+    }
+
+    private makePdf(req: Request, res: Response) {
+        let totalDebit = 0;
+        let totalCredit = 0;
+        let account: any;
+        let accountInfo: any = req.body.accountInfo;
+        let transactions: Transaction[] = req.body.transactions;
+        let _transactions: Array<string[]> = new Array<string[]>();
+        let accountId = req.params.id;
+        for (let index = 0; index < transactions.length; index++) {
+            let transaction = transactions[index];
+            if (transaction.debitAccountId == accountId) {
+                account = transaction.debit;
+                totalDebit += transaction.amount;
+            }
+            else {
+                account = transaction.credit;
+                totalCredit += transaction.amount;
+            }
+            this.pushToLedger(_transactions, transaction, accountId);
+
+        }
+
+        let docDefinition = {
+            content: [
+                {
+                    table: {
+                        // headers are automatically repeated if the table spans over multiple pages
+                        // you can declare how many rows should be treated as headers
+                        headerRows: 2,
+                        widths: [85, '*', 85, 85, '*', 85],
+
+                        body: [
+                            [{ text: `${account.name}`, colSpan: 6, alignment: 'center' }, {}, {}, {}, {}, {}],
+                            ['Date', 'Particulars', 'Amount', 'Date', 'Particulars', 'Amount'],
+                            ..._transactions,
+                            ['', '', totalDebit, '', '', totalCredit],
+                            ['', '', '', '', '', ''],
+                            [{ text: 'Balance', colSpan: 5 }, '', '', '', '', {
+                                text:
+                                (accountInfo.accountType.nature == 'dr' ?
+                                    `${accountInfo.debit - accountInfo.credit}` :
+                                    `${accountInfo.credit - accountInfo.debit}`)
+                            }]
+                        ]
+                    }
+                }
+            ]
+        };
+        var printer = new Printer(FONTS);
+        var pdfDoc = printer.createPdfKitDocument(docDefinition);
+        pdfDoc.pipe(fs.createWriteStream(`pdfs/${accountId}.pdf`));
+        pdfDoc.end();
+        res.status(200).send({ message: "Pdf Generated Successfully" });
+    }
     private post(req: Request, res: Response) {
         req.body.id = (new Date()).valueOf().toString();
         let account = req.body;
@@ -188,15 +288,15 @@ export class AccountsController {
 
     private put(req: Request, res: Response) {
         delete req.body._id;
-        if(req.body.groupId == '17' && req.body.admin != 2) {
+        if (req.body.groupId == '17' && req.body.admin != 2) {
             this.db.collection(ACCOUNTS).find({
-                groupId:'17',
-                admin:2
-            }).toArray().then((accounts:Account[]) => {
-                if(accounts.length == 1 && accounts[0].id == req.body.id){
+                groupId: '17',
+                admin: 2
+            }).toArray().then((accounts: Account[]) => {
+                if (accounts.length == 1 && accounts[0].id == req.body.id) {
                     res.status(403).send({ message: "Cannot delete all super admins" });
                     return;
-                } 
+                }
             })
         }
         this.db.collection(ACCOUNTS)
@@ -214,4 +314,6 @@ export class AccountsController {
             .then(deleteResult => res.send())
             .catch(error => res.status(400).send(error));
     }
+
+
 }
