@@ -5,7 +5,7 @@ import { PipeTransform, Pipe } from "@angular/core";
 })
 export class NgxSelectFilterOptions implements PipeTransform {
     transform(options: any[], displayProperty: string, filterText: string) {
-        if (!filterText) { return options; }
+        if (!filterText || filterText.length<2) { return []; }
         if(options.length>0){
             if (displayProperty) {
                 return options.filter(option => {
