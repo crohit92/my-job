@@ -49,8 +49,6 @@ import { NgxSelectFilterOptions } from './ngx-select/ngx-filter';
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
-    MatAutocompleteModule,
-    MatInputModule,
     ToastrModule.forRoot(),
     HttpClientModule,
     FormsModule,
