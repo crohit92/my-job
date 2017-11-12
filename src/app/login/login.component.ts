@@ -25,12 +25,8 @@ export class LoginComponent implements OnInit {
   ngOnInit() {
     let user = this.storage.get(Constants.USER)
     if (user) {
-      if (user.admin) {
-        this.router.navigate(["/home"]);
-      }
-      else {
-        this.router.navigate(["/tasks"]);
-      }
+      this.credentials = user;
+      this.login();
 
     }
   }
