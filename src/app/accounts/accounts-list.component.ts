@@ -21,6 +21,8 @@ export class AccountsListComponent {
     selectedAccount: Account;
     limit = 40;
     pageNumber = 1;
+    //used to show timeout while deleting a user
+    timer: number
     @ViewChild("template") template: TemplateRef<any>;
 
     debtors_cretitors_users = ['15', '16', '17']
@@ -66,6 +68,8 @@ export class AccountsListComponent {
     }
 
     editAccount(account) {
+        //reset the delete timer so that account is not accedintally deleted
+        this.timer = undefined;
         this.selectedAccount = { ...account };
         this.modalRef = this.modalService.show(this.template);
     }
@@ -119,18 +123,36 @@ export class AccountsListComponent {
     }
 
     deleteAccount() {
-        this.api.sendRequest({
-            endpoint: ApiRoutes.DELETE_ACCOUNT,
-            method: 'delete',
-            routeParams: {
-                "": this.selectedAccount.id
-            }
-        }).subscribe((response) => {
-            this.modalRef.hide();
-            this.accounts = this.accounts.filter(a => a.id != this.selectedAccount.id);
-        }, (res) => {
-            this.alert.error(res.error.message || "An Error Occured", "Error");
-        })
+        if (this.timer == undefined || this.timer == 0) {
+            this.api.sendRequest({
+                endpoint: ApiRoutes.DELETE_ACCOUNT,
+                method: 'delete',
+                routeParams: {
+                    "": this.selectedAccount.id
+                },
+                queryParams: {
+                    force: this.timer === 0 ? 1 : 0
+                }
+            }).subscribe((response) => {
+                this.timer = undefined;
+                this.modalRef.hide();
+                this.accounts = this.accounts.filter(a => a.id != this.selectedAccount.id);
+            }, (res) => {
+                this.alert.error(res.error.message || "An Error Occured", "Error");
+                if (res.error.message) {
+                    let count = 0;
+                    let interval = setInterval(() => {
+                        if (count == 3) {
+                            clearInterval(interval);
+                            this.timer = 0;
+                        }
+                        this.timer = 3 - count;
+                        count++;
+                    }, 1000)
+                }
+            })
+        }
+
     }
 
     compareItems(item1, item2) {
