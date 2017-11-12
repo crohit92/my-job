@@ -310,9 +310,50 @@ export class AccountsController {
     }
 
     private delete(req: Request, res: Response) {
-        this.db.collection(ACCOUNTS).deleteOne({ id: req.params.id })
-            .then(deleteResult => res.send())
+        let deleteUser = (accountId) => {
+            Promise.all([
+                this.db.collection(ACCOUNTS).deleteOne({ id: accountId }),
+                this.db.collection('transactions').deleteMany({ 
+                    $or: [
+                        { 
+                            debitAccountId: accountId 
+                        }, 
+                        { 
+                            creditAccountId: accountId 
+                        }
+                    ] 
+                }),
+                this.db.collection('tasks').deleteMany({ 
+                    $or: [
+                        { 
+                            assignedToId: accountId 
+                        }, 
+                        { 
+                            customerId: accountId 
+                        }
+                    ]
+                })
+            ]).then(deleteResult => res.send({deleted:true}))
             .catch(error => res.status(400).send(error));
+        }
+        if (req.query.force == 1) {
+            deleteUser(req.params.id)
+        }
+        else {
+            let userBeingUsed = false;
+            let promises = [
+                this.db.collection('transactions').findOne({ $or: [{ debitAccountId: req.params.id }, { creditAccountId: req.params.id }] }),
+                this.db.collection('tasks').findOne({ $or: [{ assignedToId: req.params.id }, { customerId: req.params.id }] })
+            ]
+            Promise.all(promises).then((userFound) => {
+                if (userFound[0] || userFound[1]) {
+                    res.status(500).send({message:'User is being used in transactions or tasks\nIf this user is deleted, all associated transactions and tasks will also be deleted\nDo you want to continue?'})
+                }
+                else {
+                    deleteUser(req.params.id)
+                }
+            })
+        }
     }
 
 
