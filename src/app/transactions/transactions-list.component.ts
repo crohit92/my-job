@@ -1,15 +1,15 @@
-import { Component, TemplateRef, ViewChild, OnInit } from '@angular/core';
+import { Component, TemplateRef, ViewChild, OnInit, AfterContentInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Api, Request, ApiRoutes, apiBase } from './../helper/api';
 import { Observable } from 'rxjs/Observable';
-import 'rxjs'
 import { BsModalService } from 'ngx-bootstrap/modal';
 import { BsModalRef } from 'ngx-bootstrap/modal/modal-options.class';
 
 import { Account } from '../../app/models/account.model';
 import { Transaction } from '../../app/models/transaction.model';
-import { Utils } from "../helper/utils";
+import { Utils } from '../helper/utils';
 import { FormControl } from '@angular/forms';
+import { NgxAsyncSelectComponent } from '../ngx-async-select/ngx-async-select.component';
 
 @Component({
     templateUrl: './transactions-list.html',
@@ -23,7 +23,7 @@ import { FormControl } from '@angular/forms';
         }
     `]
 })
-export class TransationsListComponent {
+export class TransationsListComponent{
 
     accounts: Account[];
     accountInfo: any;
@@ -39,13 +39,13 @@ export class TransationsListComponent {
         backdrop: true,
         ignoreBackdropClick: true
     };
-   
-    itemSelected(item){
+
+    itemSelected(item) {
         console.log(item);
-        
+
     }
-   
-    @ViewChild("template") template: TemplateRef<any>;
+
+    @ViewChild('template') template: TemplateRef<any>;
     public modalRef: BsModalRef;
     filterText: string;
     constructor(
@@ -55,7 +55,7 @@ export class TransationsListComponent {
         private utils: Utils
     ) {
         this.utils.showMenu(true);
-        this.fetchAccounts();
+        // this.fetchAccounts();
     }
 
     showBlankModal() {
@@ -67,12 +67,12 @@ export class TransationsListComponent {
         this.modalRef = this.modalService.show(this.template, this.config);
     }
 
-    fetchAccounts() {
-        this.api.sendRequest({
-            endpoint: ApiRoutes.FETCH_ALL_ACCOUNTS,
-            method: 'get'
-        }).subscribe((res) => this.accounts = res as Account[]);
-    }
+    // fetchAccounts() {
+    //     this.api.sendRequest({
+    //         endpoint: ApiRoutes.FETCH_ALL_ACCOUNTS,
+    //         method: 'get'
+    //     }).subscribe((res) => this.accounts = res as Account[]);
+    // }
 
     fetchTransactions(params) {
         this.api.sendRequest({
@@ -85,8 +85,8 @@ export class TransationsListComponent {
     }
 
     onTransactionUpdated(id: string, transaction: Transaction) {
-        let updatedTransactionIndex = this.transactions.findIndex(tr => tr.id == id);
-        if (updatedTransactionIndex != -1) {
+        const updatedTransactionIndex = this.transactions.findIndex(tr => tr.id === id);
+        if (updatedTransactionIndex !== -1) {
             this.transactions[updatedTransactionIndex] = { ...transaction };
         }
     }
@@ -224,15 +224,15 @@ export class TransationsListComponent {
         //             table:{
         //                 body : [
         //                     headers,
-        //                     ["2017-10-02","Test","2500 rs"],
-        //                     ["2017-10-03","Test","3000 rs"],
+        //                     ['2017-10-02','Test','2500 rs'],
+        //                     ['2017-10-03','Test','3000 rs'],
         //                 ]
         //             }
         //         }
         //     ]
         // }
         this.api.sendRequest({
-            method: "post",
+            method: 'post',
             body: {
                 accountInfo: this.accountInfo,
                 transactions: this.transactions

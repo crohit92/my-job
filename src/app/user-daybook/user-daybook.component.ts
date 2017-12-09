@@ -15,7 +15,7 @@ import { Utils } from "../helper/utils";
 })
 export class UserDaybookComponent implements OnInit {
   fromDate: string;
-  toDate: String;
+  toDate: string;
   transaction: Transaction;
   transactions: Transaction[];
   user: User;

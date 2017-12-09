@@ -2,7 +2,6 @@ import { Component, TemplateRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { Api, Request, ApiRoutes } from './../helper/api';
 import { Observable } from 'rxjs/Observable';
-import 'rxjs'
 import { BsModalService } from 'ngx-bootstrap/modal';
 import { BsModalRef } from 'ngx-bootstrap/modal/modal-options.class';
 
@@ -16,6 +15,7 @@ import { Utils } from "../helper/utils";
 })
 export class AccountsListComponent {
     filterAccounts: string;
+    fetchedAccounts: Account[] = [];
     accounts: Account[] = new Array<Account>();
     groups: Group[];
     selectedAccount: Account;
@@ -48,12 +48,36 @@ export class AccountsListComponent {
                 skip: (this.pageNumber - 1) * this.limit
             }
         }).subscribe((res) => {
-            let response = res as Account[];
+            const response = res as Account[];
             if (response.length) {
-                this.accounts = [...this.accounts, ...response];
+                this.fetchedAccounts = [...this.fetchedAccounts, ...response];
+                this.accounts = [...this.fetchedAccounts];
                 this.pageNumber += 1;
             }
         });
+    }
+
+    loadFilteredAccounts(ev: KeyboardEvent) {
+
+        if (ev.keyCode === 13) {
+            const filterString = (ev.target as HTMLInputElement).value;
+            if (filterString) {
+                this.api.sendRequest({
+                    endpoint: ApiRoutes.FETCH_ALL_ACCOUNTS,
+                    method: 'get',
+                    queryParams: {
+                        filter: filterString
+                    }
+                }).subscribe((res) => {
+                    const response = res as Account[];
+                    if (response.length) {
+                        this.accounts = response;
+                    }
+                });
+            } else {
+                this.accounts = this.fetchedAccounts;
+            }
+        } 
     }
 
     fetchGroups() {
@@ -61,8 +85,8 @@ export class AccountsListComponent {
             endpoint: ApiRoutes.FETCH_ALL_GROUPS,
             method: 'get'
         }).subscribe(
-            (res) => { this.groups = res as Group[] },
-            (err) => { console.log(err) })
+            (res) => { this.groups = res as Group[]; },
+            (err) => { console.log(err); });
     }
 
     editAccount(account) {
@@ -76,10 +100,10 @@ export class AccountsListComponent {
     }
 
     onAccountUpdated(id, account) {
-        let updatedAccountIndex = this.accounts.findIndex(ac => ac.id == id);
-        if (updatedAccountIndex != -1) {
+        const updatedAccountIndex = this.accounts.findIndex(ac => ac.id === id);
+        if (updatedAccountIndex !== -1) {
             this.accounts[updatedAccountIndex] = { ...account };
-            this.filterAccounts = "";
+            this.filterAccounts = '';
 
         }
     }

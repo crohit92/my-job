@@ -1,7 +1,13 @@
 <div class="container-fluid">
     <div class="row mb-4">
         <div class="col-xs-6">
-            <input autocomplete="off" [(ngModel)]="filterAccounts" placeholder="Filter Accounts" class="form-control">
+            <div class="input-group">
+                <input autocomplete="off" (keydown)="loadFilteredAccounts($event)" (input)="accounts = $event.target.value ? accounts : fetchedAccounts" placeholder="Filter Accounts"
+                    class="form-control" type="search">
+                <span class="input-group-addon" id="basic-addon1">
+                    <i class="glyphicon glyphicon-search"></i>
+                </span>
+            </div>
         </div>
         <div class="col-xs-6">
             <button class="btn btn-primary" (click)="showBlankModal()">Add Account</button>
@@ -13,11 +19,13 @@
         <div class="col-xs-3">Group</div>
         <div class="col-xs-3">Action</div>
     </div>
-    <div class="row  mb-4" *ngFor="let account of ((accounts) | filterAccounts: filterAccounts)">
+    <div class="row  mb-4" *ngFor="let account of (accounts)">
         <div class="col-xs-3">{{account.name}}</div>
         <div class="col-xs-3">{{account.openingBalance}} {{account.natureOfOB}}</div>
         <div class="col-xs-3" *ngIf="account.group">{{account.group[0].name}}</div>
-        <div class="col-xs-3"><input type="button" value="edit" (click)="editAccount(account)" class="btn btn-default"></div>
+        <div class="col-xs-3">
+            <input type="button" value="edit" (click)="editAccount(account)" class="btn btn-default">
+        </div>
     </div>
     <div class="row  mb-4">
         <div class="col-xs-12 text-center">
@@ -38,7 +46,7 @@
             <div class="row">
                 <div class="col-xs-12">
                     <label>Account Name
-                        <input  autocomplete="off" class="form-control" required placeholder="Account Name" name="accountName" [(ngModel)]="selectedAccount.name">
+                        <input autocomplete="off" class="form-control" required placeholder="Account Name" name="accountName" [(ngModel)]="selectedAccount.name">
                     </label>
                 </div>
                 <div class="col-xs-12">
@@ -51,7 +59,8 @@
                 </div>
                 <div class="col-xs-12">
                     <label>Opening Balance
-                        <input  autocomplete="off" class="form-control" name="openingBalance" placeholder="Opening Balance" required min="0" type="number" [(ngModel)]="selectedAccount.openingBalance">
+                        <input autocomplete="off" class="form-control" name="openingBalance" placeholder="Opening Balance" required min="0" type="number"
+                            [(ngModel)]="selectedAccount.openingBalance">
                     </label>
                 </div>
                 <div class="col-xs-12">
@@ -65,21 +74,33 @@
                 </div>
                 <!-- Allowed only for users, debtors and creditors -->
                 <div *ngIf="debtors_cretitors_users.indexOf(selectedAccount.groupId)>=0" class="col-xs-12">
-                    <label>Mobile<input  autocomplete="off"  required type="tel" class="form-control" name="mobile" [(ngModel)]="selectedAccount.mobile"></label>
+                    <label>Mobile
+                        <input autocomplete="off" required type="tel" class="form-control" name="mobile" [(ngModel)]="selectedAccount.mobile">
+                    </label>
                 </div>
                 <div *ngIf="debtors_cretitors_users.indexOf(selectedAccount.groupId)>=0" class="col-xs-12">
-                    <label>Address<textarea required class="form-control" name="address" [(ngModel)]="selectedAccount.address"></textarea></label>
+                    <label>Address
+                        <textarea required class="form-control" name="address" [(ngModel)]="selectedAccount.address"></textarea>
+                    </label>
                 </div>
                 <div *ngIf="users.indexOf(selectedAccount.groupId)>=0" class="col-xs-12">
-                    <label>Normal User<input type="radio" [value]="0" [(ngModel)]="selectedAccount.admin"  name="normalUser" checked></label>
-                    <label>Admin<input type="radio" [value]="1" [(ngModel)]="selectedAccount.admin" name="admin"></label>
-                    <label>Super Admin<input type="radio" [value]="2" [(ngModel)]="selectedAccount.admin" name="superAdmin"></label>
+                    <label>Normal User
+                        <input type="radio" [value]="0" [(ngModel)]="selectedAccount.admin" name="normalUser" checked>
+                    </label>
+                    <label>Admin
+                        <input type="radio" [value]="1" [(ngModel)]="selectedAccount.admin" name="admin">
+                    </label>
+                    <label>Super Admin
+                        <input type="radio" [value]="2" [(ngModel)]="selectedAccount.admin" name="superAdmin">
+                    </label>
                 </div>
                 <!-- Allowed Only for users group-->
                 <div *ngIf="users.indexOf(selectedAccount.groupId)>=0" class="col-xs-12">
-                    <label>Password<input  autocomplete="off"  type="text" required class="form-control" name="password" [(ngModel)]="selectedAccount.password"></label>
+                    <label>Password
+                        <input autocomplete="off" type="text" required class="form-control" name="password" [(ngModel)]="selectedAccount.password">
+                    </label>
                 </div>
-                
+
                 <div class="col-xs-12">
                     <button class="btn btn-primary" [disabled]="!accountForm.valid" (click)="createUpdateAccount()">{{selectedAccount.id?'Update':'Create'}}</button>
                     <button class="btn btn-danger" [disabled]="!selectedAccount.id" (click)="deleteAccount()">Delete</button>

@@ -49,7 +49,6 @@ export class TasksComponent {
         this.utils.showMenu(true);
         this.user = this.storage.get(Constants.USER);
         this.fetchTasks();
-
         this.api.sendRequest({
             endpoint: ApiRoutes.FETCH_ALL_USERS,
             method: "get"
