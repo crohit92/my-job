@@ -76,6 +76,7 @@ export class UserDaybookComponent implements OnInit {
       let trans = new Transaction();
       trans.amount = this.transaction.amount;
       trans.creditAccountId = this.user.id;
+      trans.debitAccountId = this.transaction.debitAccountId;
       trans.userId = this.user.id;
       //trans.date = `${today.getFullYear()}-${today.getMonth()+1}`
       trans.narration = `${this.user.name} spent ${trans.amount} rs for ${this.transaction.narration}` ;

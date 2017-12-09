@@ -2,12 +2,12 @@ import { Injectable } from '@angular/core';
 import { HttpEvent, HttpInterceptor, HttpHandler, HttpRequest } from '@angular/common/http';
 import { Observable } from "rxjs/Observable";
 import { HttpResponse, HttpErrorResponse } from "@angular/common/http";
-import { NgProgressService } from "ngx-progressbar";
+import { NgProgress } from "ngx-progressbar";
 
 @Injectable()
 export class NoopInterceptor implements HttpInterceptor {
     constructor(
-        public progressService: NgProgressService
+        public progressService: NgProgress
     ){
         
     }
