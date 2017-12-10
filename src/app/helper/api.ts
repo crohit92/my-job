@@ -1,15 +1,15 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { NgProgress } from 'ngx-progressbar';
-import { HttpRequest } from "@angular/common/http";
-import { HttpResponse } from "@angular/common/http";
-import { HttpEvent } from "@angular/common/http";
-import { HttpErrorResponse } from "@angular/common/http";
-import { Observable } from "rxjs/Observable";
+import { HttpRequest } from '@angular/common/http';
+import { HttpResponse } from '@angular/common/http';
+import { HttpEvent } from '@angular/common/http';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
-//const apiBase = 'https://pacific-coast-70867.herokuapp.com/';
-//export const apiBase = 'http://localhost:3000/';
-export const apiBase = 'http://34.230.30.149:3001/';
+// const apiBase = 'https://pacific-coast-70867.herokuapp.com/';
+export const apiBase = 'http://localhost:3000/';
+// export const apiBase = 'http://34.230.30.149:3001/';
 
 export class Request {
     apiBase?: string;

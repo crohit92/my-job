@@ -9,6 +9,9 @@ import { Account } from '../models/account.model';
 import { Group } from '../models/group.model';
 import { ToastrService } from "ngx-toastr";
 import { Utils } from "../helper/utils";
+import { User } from '../models/user.model';
+import { StorageService } from '../helper/storage.service';
+import { Constants } from '../helper/constants';
 
 @Component({
     templateUrl: './accounts-list.html'
@@ -27,17 +30,20 @@ export class AccountsListComponent {
 
     debtors_cretitors_users = ['15', '16', '17']
     users = ['17']
+    user: User;
     public modalRef: BsModalRef;
     constructor(
         private api: Api,
         private alert: ToastrService,
         private router: Router,
         private modalService: BsModalService,
-        private utils: Utils
+        private utils: Utils,
+        private storage: StorageService
     ) {
         this.utils.showMenu(true);
         this.fetchAccounts();
         this.fetchGroups();
+        this.user = this.storage.get(Constants.USER);
     }
 
     fetchAccounts() {
@@ -79,7 +85,7 @@ export class AccountsListComponent {
             } else {
                 this.accounts = this.fetchedAccounts;
             }
-        } 
+        }
     }
 
     fetchGroups() {
@@ -147,6 +153,10 @@ export class AccountsListComponent {
     }
 
     deleteAccount() {
+        if (this.user.id === this.selectedAccount.id) {
+            this.alert.error('Cannot delete your own account');
+            return;
+        }
         if (this.timer == undefined || this.timer == 0) {
             this.api.sendRequest({
                 endpoint: ApiRoutes.DELETE_ACCOUNT,

@@ -151,14 +151,14 @@ li{
     list-style: none;
 }
 
-
+/* 
 input[type=radio] {
     transform: scale(2);
     -ms-transform: scale(2);
     -webkit-transform: scale(2);
     padding: 10px;
     margin: 10px;
-}
+} */
 
 .clearfix{
     clear: both;

@@ -27,8 +27,6 @@ import { UserDaybookComponent } from './user-daybook/user-daybook.component';
 import { HomeComponent } from './home/home.component';
 import { UserGuard, AdminGuard } from './helper/authentication-guard';
 
-import { NgxSelectComponent } from './ngx-select/ngx-select-component';
-import { NgxSelectFilterOptions } from './ngx-select/ngx-filter';
 import { NgxAsyncSelectComponent } from './ngx-async-select/ngx-async-select.component';
 @NgModule({
   declarations: [

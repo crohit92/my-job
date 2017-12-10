@@ -81,13 +81,17 @@ export class NgxAsyncSelectComponent implements OnChanges {
         this.optionsVisible = true;
         if (ev) {
             ev.stopPropagation();
+            ev.preventDefault();
         }
 
     }
 
-    hideOptions(ev) {
+    hideOptions(ev: MouseEvent) {
         this.optionsVisible = false;
-        ev.stopPropagation();
+        if (ev) {
+            ev.stopPropagation();
+            ev.preventDefault();
+        }
     }
 
     itemClicked(ev, item) {

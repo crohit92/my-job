@@ -44,18 +44,16 @@
           <label>Amount Spent<input class="form-control" name="amount" required min="0" [(ngModel)]="transaction.amount" type="number"></label>
         </div>
         <div class="col-xs-12">
-          <label>Spent For
-            <select required name="spentFor" [(ngModel)]="transaction.debitAccountId" class="form-control">
-              
-              <option [ngValue]="undefined" disabled>Spent For</option>
-              <option *ngFor="let account of expenseAccounts" [ngValue]="account.id">{{account.name}}</option>
-            </select></label>
+            <label>Spent For
+                <ngx-async-select placeholder="Select Account" endpoint="accounts" [displayProperties]="['name']"
+                    qpKeyForFilter="filter" [queryParams]="{groupId:18}" (onSelect)="transaction.debitAccountId = ($event.id)"></ngx-async-select>
+            </label>
           </div>
           <div class="col-xs-12">
             <label>Description<textarea class="form-control" name="narration" required [(ngModel)]="transaction.narration" type="text"></textarea></label>
           </div>
           <div class="col-xs-12">
-            <button [disabled]="!addTransactionForm.valid" class="btn btn-primary pull-right" (click)="saveTransaction()">Save</button>
+            <button [disabled]="!addTransactionForm.valid || !transaction.debitAccountId" class="btn btn-primary pull-right" (click)="saveTransaction()">Save</button>
             <button class="btn btn-default pull-right" (click)="modalRef.hide()">Close</button>
           </div>
         </div>

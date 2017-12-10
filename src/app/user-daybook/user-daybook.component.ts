@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
 import { Transaction } from './../models/transaction.model';
-import {Account} from './../models/account.model';
+import { Account } from './../models/account.model';
 import { User } from './../models/user.model';
 import { Api, ApiRoutes } from './../helper/api';
 import { StorageService } from './../helper/storage.service';
@@ -27,73 +27,72 @@ export class UserDaybookComponent implements OnInit {
     private modalService: BsModalService,
     private alert: ToastrService,
     private utils: Utils) {
-      utils.showMenu(true);
-    }
-    
-    ngOnInit() {
-      this.user = this.storage.get(Constants.USER);
-      this.fetchExpenseAccounts();
-    }
-    
-    fetchExpenseAccounts(){
-      this.api.sendRequest({
-        endpoint: "accounts",
-        queryParams: {
-          "groupId": 18
-        },
-        method: "get"
-      }).subscribe((response:Account[]) => {
-        this.expenseAccounts = response;
-      },
-      (err) => {
-        this.alert.error(err.error.message || "An Error Occured", "Error");
-      })
-    }
-    
-    fetchTransactions() {
-      this.api.sendRequest({
-        endpoint: "transactions/users",
-        routeParams: {
-          "": this.user.id
-        },
-        queryParams: {
-          fromDate: this.fromDate,
-          toDate: this.toDate
-        },
-        method: "get",
-        
-      }).subscribe((transactions: Transaction[]) => {
-        this.transactions = transactions;
-      })
-    }
-    
-    openTransactionModal() {
-      this.transaction = new Transaction();
-      this.modalRef = this.modalService.show(this.template);
-    }
-    
-    saveTransaction() {
-      let trans = new Transaction();
-      trans.amount = this.transaction.amount;
-      trans.creditAccountId = this.user.id;
-      trans.debitAccountId = this.transaction.debitAccountId;
-      trans.userId = this.user.id;
-      //trans.date = `${today.getFullYear()}-${today.getMonth()+1}`
-      trans.narration = `${this.user.name} spent ${trans.amount} rs for ${this.transaction.narration}` ;
-      this.api.sendRequest({
-        endpoint: "transactions/users",
-        routeParams: {
-          "": this.user.id
-        },
-        method: "post",
-        body: trans
-      }).subscribe(() => {
-        this.modalRef.hide();
-        this.alert.success("Transaction Saved");
-      },
-      (err) => {
-        this.alert.error(err.error.message || "An Error Occured", "Error");
-      })
-    }
+    utils.showMenu(true);
   }
-  
+
+  ngOnInit() {
+    this.user = this.storage.get(Constants.USER);
+    // this.fetchExpenseAccounts();
+  }
+
+  // fetchExpenseAccounts(){
+  //   this.api.sendRequest({
+  //     endpoint: "accounts",
+  //     queryParams: {
+  //       "groupId": 18
+  //     },
+  //     method: "get"
+  //   }).subscribe((response:Account[]) => {
+  //     this.expenseAccounts = response;
+  //   },
+  //   (err) => {
+  //     this.alert.error(err.error.message || "An Error Occured", "Error");
+  //   })
+  // }
+
+  fetchTransactions() {
+    this.api.sendRequest({
+      endpoint: "transactions/users",
+      routeParams: {
+        "": this.user.id
+      },
+      queryParams: {
+        fromDate: this.fromDate,
+        toDate: this.toDate
+      },
+      method: "get",
+
+    }).subscribe((transactions: Transaction[]) => {
+      this.transactions = transactions;
+    })
+  }
+
+  openTransactionModal() {
+    this.transaction = new Transaction();
+    this.modalRef = this.modalService.show(this.template);
+  }
+
+  saveTransaction() {
+    let trans = new Transaction();
+    trans.amount = this.transaction.amount;
+    trans.creditAccountId = this.user.id;
+    trans.debitAccountId = this.transaction.debitAccountId;
+    trans.userId = this.user.id;
+    //trans.date = `${today.getFullYear()}-${today.getMonth()+1}`
+    trans.narration = `${this.user.name} spent ${trans.amount} rs for ${this.transaction.narration}`;
+    this.api.sendRequest({
+      endpoint: "transactions/users",
+      routeParams: {
+        "": this.user.id
+      },
+      method: "post",
+      body: trans
+    }).subscribe(() => {
+      this.modalRef.hide();
+      this.alert.success("Transaction Saved");
+    },
+      (err) => {
+        this.alert.error(err.error.message || "An Error Occured", "Error");
+      })
+  }
+}
