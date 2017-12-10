@@ -28,7 +28,10 @@ export class AccountsController {
     }
 
     private get(req: Request, res: Response) {
-        let filter = req.query.hasOwnProperty('groupId') ? { groupId: req.query.groupId } : {};
+        let filterString = req.query.filter;
+        const textFilter = { name: new RegExp(`.*${filterString}.*`, 'i') };
+        const groupFilter = { groupId: req.query.groupId };
+        let filter = req.query.hasOwnProperty('groupId') ? (filterString ? { ...textFilter, ...groupFilter } : groupFilter) : (filterString ? textFilter : {});
         let pagination = [];
         if (req.query.hasOwnProperty('skip') && req.query.hasOwnProperty('limit')) {
             pagination.push({ $skip: (+req.query.skip) })
@@ -48,7 +51,23 @@ export class AccountsController {
                         as: 'group'
                     }
                 },
+                {
+                    $project: {
+                        "address": "$address",
+                        "group": "$group",
+                        "groupId": "$groupId",
+                        "id": "$id",
+                        "mobile": "$mobile",
+                        "name": { "$toLower": "$name" },
+                        "natureOfOB": "$natureOfOB",
+                        "openingBalance": "$openingBalance"
+                    }
+                },
+                {
+                    $sort: { name: 1 }
+                },
                 ...pagination
+
             ]).toArray()
             .then((accounts: Account[]) => {
                 res.status(200).send(accounts);
@@ -223,9 +242,9 @@ export class AccountsController {
                             ['', '', '', '', '', ''],
                             [{ text: 'Balance', colSpan: 5 }, '', '', '', '', {
                                 text:
-                                (accountInfo.accountType.nature == 'dr' ?
-                                    `${accountInfo.debit - accountInfo.credit}` :
-                                    `${accountInfo.credit - accountInfo.debit}`)
+                                    (accountInfo.accountType.nature == 'dr' ?
+                                        `${accountInfo.debit - accountInfo.credit}` :
+                                        `${accountInfo.credit - accountInfo.debit}`)
                             }]
                         ]
                     }
@@ -250,32 +269,30 @@ export class AccountsController {
                 if (account) {
                     res.status(403).send({ message: "User with this mobile number already exists" });
                     return;
+                } else {
+                    this.db
+                        .collection(ACCOUNTS)
+                        .insertOne(req.body)
+                        .then((accnt: InsertOneWriteOpResult) => {
+                            res.send(account);
+                        }).catch(err => {
+                            res.status(400).send(err);
+                        })
                 }
             })
         }
 
-        this.db
-            .collection(ACCOUNTS)
-            .insertOne(req.body)
-            .then((accnt: InsertOneWriteOpResult) => {
-                res.send(account);
-            }).catch(err => {
-                res.status(400).send(err);
-            })
+
     }
 
     private login(req: Request, res: Response) {
         this.db.collection(ACCOUNTS).findOne({
             $and: [{
-                $or: [{
-                    mobile:
-                    { $eq: req.body.mobile.toLowerCase() }
-                }]
+                mobile: { $eq: req.body.mobile }
             },
             {
                 password: { $eq: req.body.password }
-            }
-            ]
+            }]
         }).then(user => {
             if (user) {
                 res.send(user)
@@ -313,47 +330,58 @@ export class AccountsController {
         let deleteUser = (accountId) => {
             Promise.all([
                 this.db.collection(ACCOUNTS).deleteOne({ id: accountId }),
-                this.db.collection('transactions').deleteMany({ 
+                this.db.collection('transactions').deleteMany({
                     $or: [
-                        { 
-                            debitAccountId: accountId 
-                        }, 
-                        { 
-                            creditAccountId: accountId 
+                        {
+                            debitAccountId: accountId
+                        },
+                        {
+                            creditAccountId: accountId
                         }
-                    ] 
+                    ]
                 }),
-                this.db.collection('tasks').deleteMany({ 
+                this.db.collection('tasks').deleteMany({
                     $or: [
-                        { 
-                            assignedToId: accountId 
-                        }, 
-                        { 
-                            customerId: accountId 
+                        {
+                            assignedToId: accountId
+                        },
+                        {
+                            customerId: accountId
                         }
                     ]
                 })
-            ]).then(deleteResult => res.send({deleted:true}))
-            .catch(error => res.status(400).send(error));
+            ]).then(deleteResult => res.send({ deleted: true }))
+                .catch(error => res.status(400).send(error));
         }
-        if (req.query.force == 1) {
-            deleteUser(req.params.id)
-        }
-        else {
-            let userBeingUsed = false;
-            let promises = [
-                this.db.collection('transactions').findOne({ $or: [{ debitAccountId: req.params.id }, { creditAccountId: req.params.id }] }),
-                this.db.collection('tasks').findOne({ $or: [{ assignedToId: req.params.id }, { customerId: req.params.id }] })
-            ]
-            Promise.all(promises).then((userFound) => {
-                if (userFound[0] || userFound[1]) {
-                    res.status(500).send({message:'User is being used in transactions or tasks\nIf this user is deleted, all associated transactions and tasks will also be deleted\nDo you want to continue?'})
-                }
-                else {
+        this.db.collection(ACCOUNTS).find({
+            groupId: '17',
+            admin: 2
+        }).toArray().then(accounts => {
+            if (accounts.length == 1 && accounts[0].id == req.params.id) {
+                res.status(500).send({ message: 'Cannot delete all super admin accounts' })
+            }
+            else {
+                if (req.query.force == '1') {
                     deleteUser(req.params.id)
                 }
-            })
-        }
+                else {
+                    let userBeingUsed = false;
+                    let promises = [
+                        this.db.collection('transactions').findOne({ $or: [{ debitAccountId: req.params.id }, { creditAccountId: req.params.id }] }),
+                        this.db.collection('tasks').findOne({ $or: [{ assignedToId: req.params.id }, { customerId: req.params.id }] })
+                    ]
+                    Promise.all(promises).then((userFound) => {
+                        if (userFound[0] || userFound[1]) {
+                            res.status(500).send({ message: 'User is being used in transactions or tasks\nIf this user is deleted, all associated transactions and tasks will also be deleted\nDo you want to continue?' })
+                        }
+                        else {
+                            deleteUser(req.params.id)
+                        }
+                    })
+                }
+            }
+        })
+
     }
 
 

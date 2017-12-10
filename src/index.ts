@@ -10,8 +10,8 @@ import { TasksController } from './controllers/tasks';
 import { GroupsController } from './controllers/groups';
 import { AccountTypesController } from './controllers/account-types';
 import { TransactionsController } from "./controllers/transactions";
-import { NobbasController } from './controllers/nobbas.controller';
 
+const appVersion = '1.0.0';
 export const FONTS = {
     Roboto: {
         normal: `${__dirname}/fonts/Roboto-Regular.ttf`,
@@ -27,6 +27,18 @@ export class Index {
 
     constructor() {
         this.app = express();
+        this.app.use(function (req, res, next) {
+            let mobileAppVersion = req.query.appVersion;
+            if (mobileAppVersion && mobileAppVersion == appVersion) {
+                next();
+            }
+            else {
+                next(`Mobile App version not compatible with this api
+                Api Version: ${appVersion}
+                Mobile App Version: ${mobileAppVersion}`
+            );
+            }
+        })
         this.configureMiddleware(this.app);
     }
 
@@ -54,7 +66,7 @@ export class Index {
         app.use('/pdfs', express.static('pdfs'))
         //enable pre-flight
         app.options("*", cors(options));
-    } 
+    }
 
     private configureRoutes(app: express.Router, db: Db) {
         app.use(AccountsController.route, new AccountsController(db).router);
@@ -63,7 +75,6 @@ export class Index {
         app.use(GroupsController.route, new GroupsController(db).router);
         app.use(AccountTypesController.route, new AccountTypesController(db).router);
         app.use(TransactionsController.route, new TransactionsController(db).router);
-        app.use(NobbasController.route, new NobbasController(db).router);
     } 
 }
 

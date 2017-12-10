@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "tsc -p ./src && concurrently \"tsc -w -p ./src\""
+    "start": "tsc -p ./src && concurrently \"tsc -w -p ./src\" \"nodemon index.js\""
   },
   "keywords": [
     "typescript"

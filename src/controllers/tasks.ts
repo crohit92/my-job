@@ -114,7 +114,7 @@ export class TasksController {
 
     deleteTask(req: Request, res: Response) {
         this.db.collection(TASKS).deleteOne({ id: req.params.id })
-            .then(deleteResult => res.send())
+            .then(deleteResult => res.send({ deleted: true }))
             .catch(error => res.status(400).send(error));
     }
 
@@ -264,7 +264,7 @@ export class TasksController {
                 newTask.remarks = '';
                 this._createTask(newTask).then((response) => {
                     res.status(200).send({ message: "Task Completed" });
-                }).catch(err => res.status(500).send(err));   
+                }).catch(err => res.status(500).send(err));
             }
             else {
                 res.status(200).send({ message: "Task Completed" });
@@ -299,8 +299,8 @@ export class TasksController {
         let narration = ` ${task.user.name} visited ${task.customer.name} for ${taskType} narrated as ${task.description} \n`;
         if (task.type == CallType.COMPLAINT && extra.paymentStatus != PaymentStatus.PAYABLE) {
             narration += ` which was ` +
-            (extra.paymentStatus != PaymentStatus.NONPAYABLE ? (` under ${extra.paymentStatus == PaymentStatus.AMC ? "AMC" : "Warrenty"}`):
-            `non payable`);
+                (extra.paymentStatus != PaymentStatus.NONPAYABLE ? (` under ${extra.paymentStatus == PaymentStatus.AMC ? "AMC" : "Warrenty"}`) :
+                    `non payable`);
         }
         else if ((task.type == CallType.COMPLAINT && extra.paymentStatus == PaymentStatus.PAYABLE) || task.type == CallType.Payment) {
             narration += ` Total Amount Due was ${task.amount} rs of which ${extra.paid} rs were paid \n`;
