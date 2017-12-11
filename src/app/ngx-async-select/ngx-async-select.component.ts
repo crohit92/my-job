@@ -51,7 +51,7 @@ export class NgxAsyncSelectComponent implements OnChanges {
 
 
 
-    private loadItems(ev: KeyboardEvent) {
+    loadItems(ev: KeyboardEvent) {
         if (ev.keyCode === 13) {
             const searchText = (ev.target as HTMLInputElement).value;
             if (searchText) {
