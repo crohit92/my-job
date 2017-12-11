@@ -178,13 +178,13 @@ export class TransactionsController {
     private saveUserTransaction(req: Request, res: Response) {
         let trans: Transaction = req.body;
 
-        trans.id = (new Date()).valueOf().toString();
+
         //since on add expenditure screen there is no option for selecting date
         //so add today's date
         var today = new Date();
         trans.dateString = `${today.getFullYear()}-${padStart((today.getMonth() + 1).toString(), 2, "0")}-${padStart((today.getDate()).toString(), 2, "0")}`
-        trans.date = new Date(trans.dateString);
-        this.db.collection(TRANSACTIONS).insertOne(trans).then(() => {
+        trans.date = trans.dateString;
+        this.addTransaction(trans).then(() => {
             res.send(trans);
         }).catch(err => res.status(500).send(err));
 
@@ -193,7 +193,22 @@ export class TransactionsController {
     addTransaction(trans: Transaction) {
         trans.id = (new Date()).valueOf().toString();
         trans.date = new Date(trans.date);
-        return this.db.collection(TRANSACTIONS).insertOne(trans);
+        return Promise.all(
+            [
+                this.db.collection('accounts').findOne({
+                    id: trans.debitAccountId
+                }),
+                this.db.collection('accounts').findOne({
+                    id: trans.creditAccountId
+                })
+            ]).then((accounts: Account[]) => {
+                if (accounts[0] && accounts[1]) {
+                    return this.db.collection(TRANSACTIONS).insertOne(trans);
+                } else {
+                    return Promise.reject({ message: `Either of the two accounts don't exist` });
+                }
+
+            })
     }
 
     private put(req: Request, res: Response) {

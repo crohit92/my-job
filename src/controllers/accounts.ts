@@ -29,7 +29,10 @@ export class AccountsController {
 
     private get(req: Request, res: Response) {
         let filterString = req.query.filter;
-        const textFilter = { name: new RegExp(`.*${filterString}.*`, 'i') };
+        const textFilter = { $or: [
+            { name: new RegExp(`.*${filterString}.*`, 'i') },
+            { mobile: new RegExp(`.*${filterString}.*`, 'i') },
+        ] };
         const groupFilter = { groupId: req.query.groupId };
         let filter = req.query.hasOwnProperty('groupId') ? (filterString ? { ...textFilter, ...groupFilter } : groupFilter) : (filterString ? textFilter : {});
         let pagination = [];
@@ -265,8 +268,8 @@ export class AccountsController {
             this.db.collection(ACCOUNTS).findOne({
                 groupId: '17',
                 mobile: account.mobile
-            }).then(account => {
-                if (account) {
+            }).then(existingAccount => {
+                if (existingAccount) {
                     res.status(403).send({ message: "User with this mobile number already exists" });
                     return;
                 } else {
