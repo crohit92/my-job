@@ -144,10 +144,9 @@ export class AccountsListComponent {
                 this.selectedAccount = response as Account;
                 this.selectedAccount.group = [this.groups.find(g => g.id == this.selectedAccount.groupId)];
                 this.accounts.push(this.selectedAccount);
-            },
-                (res) => {
-                    this.alert.error(res.error.message || "An Error Occured", "Error");
-                })
+            }, (res) => {
+                this.alert.error(res.error.message || "An Error Occured", "Error");
+            });
         }
 
     }

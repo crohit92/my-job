@@ -33,22 +33,22 @@
         </div>
         <div class="col-xs-2">Action</div>
     </div>
-    <div class="row mb-4 p-2" [ngClass]="{'bg-success':task.completed,'bg-warning': (task.nextDueDate && moment().diff(moment(task.nextDueDate))<=0),'bg-danger':(task.nextDueDate && moment().diff(moment(task.nextDueDate))>0)}"
+    <div class="row mb-4 p-2" [ngClass]="{'bg-success':task.completed,'bg-warning': (!task.completed && task.nextDueDate && moment(moment().format('YYYY-MM-DD')).diff(moment(task.nextDueDate))<0),'bg-primary':(!task.completed && task.nextDueDate &&  moment(moment().format('YYYY-MM-DD')).diff(moment(task.nextDueDate))==0),'bg-danger':(!task.completed && task.nextDueDate &&  moment(moment().format('YYYY-MM-DD')).diff(moment(task.nextDueDate))>0)}"
         *ngFor="let task of tasks | filterTasks:filterTask">
-        <div class="col-xs-3">
-            <strong class="text-muted">{{(""+task.description).substring(0,30)}}</strong>
+        <div class="col-xs-3 txt-white">
+            <strong>{{(""+task.description).substring(0,30)}}</strong>
         </div>
-        <div class="col-xs-2">
-            <i class="text-muted">{{task.user?task.user.name:"**Not Assigned**"}}</i>
+        <div class="col-xs-2 txt-white">
+            <i>{{task.user?task.user.name:"**Not Assigned**"}}</i>
         </div>
-        <div class="col-xs-2">
-            <i class="text-muted">{{(task.customer)? task.customer.name:"**Not Assigned**"}}</i>
+        <div class="col-xs-2 txt-white">
+            <i>{{(task.customer)? task.customer.name:"**Not Assigned**"}}</i>
         </div>
-        <div class="col-xs-2">
-            <i class="text-muted">{{task.nextDueDate | date:'MMM,dd yyyy' }}</i>
+        <div class="col-xs-2 txt-white">
+            <i>{{task.nextDueDate | date:'MMM,dd yyyy' }}</i>
         </div>
-        <div class="col-xs-1">
-            <strong class="text-muted">{{task.sequence}}</strong>
+        <div class="col-xs-1 txt-white">
+            <strong>{{task.sequence}}</strong>
         </div>
         <div class="col-xs-2">
 
@@ -79,10 +79,10 @@
     <div class="modal-body">
         <form class="container-fluid well well-default" #taskForm="ngForm">
             <label>Select Customer
-                <input autocomplete="off" name="customer" (change)="taskToUpdate.customer = undefined" required (typeaheadOnSelect)="taskToUpdate.customer = $event.item"
-                    [(ngModel)]="taskToUpdate.customerName" placeholder="Select Customer" [typeahead]="customers" typeaheadOptionField="name_mobile"
-                    class="form-control">
+                <ngx-async-select [initialSelectedItem]="taskToUpdate.customer" placeholder="Select Customer" endpoint="accounts" [displayProperties]="['name','mobile']"
+                    qpKeyForFilter="filter" [queryParams]="{groupId:16}" (onSelect)="taskToUpdate.customer = ($event)"></ngx-async-select>
             </label>
+
             <div class="form-group">
                 <textarea class="form-control" name="description" required [(ngModel)]="taskToUpdate.description" placeholder="Description"></textarea>
             </div>
@@ -93,10 +93,10 @@
                 </label>
             </div>
             <label>Select User
-                <input autocomplete="off" name="user" (change)="taskToUpdate.user = undefined" required (typeaheadOnSelect)="taskToUpdate.user = $event.item"
-                    [(ngModel)]="taskToUpdate.userName" placeholder="Assign Task To" typeaheadOptionField="name" [typeahead]="users"
-                    class="form-control">
+                <ngx-async-select [initialSelectedItem]="taskToUpdate.user" placeholder="Select User" endpoint="accounts" [displayProperties]="['name','mobile']"
+                    qpKeyForFilter="filter" [queryParams]="{groupId:17}" (onSelect)="taskToUpdate.user = ($event)"></ngx-async-select>
             </label>
+
             <div class="form-group">
                 <label>Sequence
                     <input type="number" class="form-control" name="sequence" required [(ngModel)]="taskToUpdate.sequence" placeholder="Sequence number">
@@ -125,7 +125,8 @@
                 </div>
             </div>
             <div class="form-group">
-                <button *ngIf="!taskToUpdate.completed" [disabled]="!taskForm.valid || !taskToUpdate.customer" (click)="taskToUpdate.userName=taskToUpdate.user?taskToUpdate.user.name:undefined;createOrUpdateTask(taskToUpdate)"
+                <button *ngIf="!taskToUpdate.completed" [disabled]="!taskForm.valid || !taskToUpdate.customer?.id || !taskToUpdate.user?.id"
+                    (click)="taskToUpdate.userName=taskToUpdate.user?taskToUpdate.user.name:undefined;createOrUpdateTask(taskToUpdate)"
                     class="btn btn-primary">
                     {{taskToUpdate.id?'Update':'Save'}}
                 </button>

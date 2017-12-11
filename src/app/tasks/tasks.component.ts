@@ -23,8 +23,6 @@ export class TasksComponent {
     currentTaskToComplete: Task = {};
     taskToUpdate: Task = {};
     user: User;
-    users: Account[];
-    customers: Account[];
     filterTask: string;
     taskTypes = TASK_TYPES;
     moment = moment;
@@ -45,23 +43,10 @@ export class TasksComponent {
         private alert: ToastrService,
         private utils: Utils,
         private storage: StorageService
-    ) {
+    ) { 
         this.utils.showMenu(true);
         this.user = this.storage.get(Constants.USER);
         this.fetchTasks();
-        this.api.sendRequest({
-            endpoint: ApiRoutes.FETCH_ALL_USERS,
-            method: "get"
-        }).subscribe((res => this.users = (res as Account[])))
-
-        //fetch customers
-        this.api.sendRequest({
-            endpoint: ApiRoutes.FETCH_ALL_CUSTOMERS,
-            method: "get"
-        }).subscribe((res => this.customers = (res as Account[]).map(c => {
-            c.name_mobile = c.name + " " + c.mobile
-            return c;
-        })))
 
         //fetch parameters for project
         this.api.sendRequest({

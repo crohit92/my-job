@@ -237,3 +237,20 @@ input:checked + .slider:before {
 .cdk-overlay-container{
     z-index: 9999;
 }
+
+.bg-danger{
+    background-color: #ce4a4a!important;
+}
+.txt-white{
+    color: #fff;
+}
+.bg-success{
+    background-color: #077b1a!important;
+}
+.bg-warning{
+    background-color: #869403!important;
+}
+.bg-primary {
+    
+    background-color: #337ab7!important;
+}
