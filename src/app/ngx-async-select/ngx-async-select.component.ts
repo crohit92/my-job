@@ -104,11 +104,14 @@ export class NgxAsyncSelectComponent implements OnChanges {
     showSelectedItem() {
         const getSelectedItemText = () => {
             let text = '';
-            for (const key of this.displayProperties) {
-                if (this.selectedItem.hasOwnProperty(key)) {
-                    text += `${this.selectedItem[key]} `;
+            if (this.selectedItem) {
+                for (const key of this.displayProperties) {
+                    if (this.selectedItem.hasOwnProperty(key)) {
+                        text += `${this.selectedItem[key]} `;
+                    }
                 }
             }
+
             return text;
         };
         (this.searchBar.nativeElement as HTMLInputElement).value = getSelectedItemText();
