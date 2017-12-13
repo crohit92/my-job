@@ -1,10 +1,10 @@
 <div>
     <div class="input-group">
-        <input type="search" class="form-control" #search (keydown)="loadItems($event)" [placeholder]="placeholder" (click)="showOptions($event)" (window:click)="hideOptions($event)">
+        <input type="search" class="form-control" #search (keydown)="loadItems($event)" (window:click)="hideOptions()" [placeholder]="placeholder">
         <span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span>
     </div>
     <ul *ngIf="optionsVisible">
-        <li *ngFor="let item of items" (click)="itemClicked($event,item)">
+        <li *ngFor="let item of items" (click)="itemClicked(item)">
             <span *ngFor="let prop of displayProperties">{{item[prop]}}&nbsp;</span>
         </li>
     </ul>

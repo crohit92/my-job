@@ -100,10 +100,12 @@ export class Api {
             finalUrl,
             {
                 body: request.body
-            }).map(res => {
-                this.localCache[finalUrl] = res;
-                return res;
             });
+            
+            // .map(res => {
+            //     this.localCache[finalUrl] = res;
+            //     return res;
+            // });
     }
 
 

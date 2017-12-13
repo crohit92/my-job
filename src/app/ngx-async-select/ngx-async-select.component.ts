@@ -1,4 +1,4 @@
-import { Component, OnChanges, SimpleChanges, Input, Output, EventEmitter, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnChanges, SimpleChanges, Input, Output, EventEmitter, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { Api } from '../helper/api';
 
 /**
@@ -23,6 +23,7 @@ import { Api } from '../helper/api';
     styleUrls: ['ngx-async-select.component.css']
 })
 export class NgxAsyncSelectComponent implements OnChanges {
+    
     @ViewChild('search') searchBar: ElementRef;
     @Input() placeholder: string;
     @Input() displayProperties: string[];
@@ -48,9 +49,6 @@ export class NgxAsyncSelectComponent implements OnChanges {
         }
     }
 
-
-
-
     loadItems(ev: KeyboardEvent) {
         if (ev.keyCode === 13) {
             const searchText = (ev.target as HTMLInputElement).value;
@@ -69,36 +67,30 @@ export class NgxAsyncSelectComponent implements OnChanges {
                 });
             }
         } else if (ev.keyCode === 8 || ev.keyCode === 127) {
+            this.optionsVisible = true;
             this.selectedItem = {};
             this.showSelectedItem();
             this.onSelect.emit(this.selectedItem);
+        } else{
+            this.optionsVisible = true;
         }
 
 
     }
 
-    showOptions(ev?) {
+    showOptions() {
         this.optionsVisible = true;
-        if (ev) {
-            ev.stopPropagation();
-            ev.preventDefault();
-        }
-
     }
 
-    hideOptions(ev: MouseEvent) {
+    hideOptions() {
         this.optionsVisible = false;
-        if (ev) {
-            ev.stopPropagation();
-            ev.preventDefault();
-        }
     }
 
-    itemClicked(ev, item) {
+    itemClicked(item) {
         this.selectedItem = item;
         this.showSelectedItem();
         this.onSelect.emit(item);
-        this.hideOptions(ev);
+        this.hideOptions();
     }
 
     showSelectedItem() {

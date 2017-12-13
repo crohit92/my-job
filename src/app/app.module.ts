@@ -22,7 +22,6 @@ import { LoginComponent } from './login/login.component';
 import { StorageService } from './helper/storage.service';
 import { NoopInterceptor } from './helper/http-intercepter';
 import { Utils } from './helper/utils';
-import { CompletedTasksComponent } from './completed-tasks/completed-tasks.component';
 import { UserDaybookComponent } from './user-daybook/user-daybook.component';
 import { HomeComponent } from './home/home.component';
 import { UserGuard, AdminGuard } from './helper/authentication-guard';
@@ -39,7 +38,6 @@ import { NgxAsyncSelectComponent } from './ngx-async-select/ngx-async-select.com
     FilterAccounts,
     FilterTasks,
     LoginComponent,
-    CompletedTasksComponent,
     UserDaybookComponent,
     HomeComponent,
     NgxAsyncSelectComponent
