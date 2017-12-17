@@ -3,12 +3,12 @@ import { Router } from '@angular/router';
 import { Api, Request, ApiRoutes } from './../helper/api';
 import { Observable } from 'rxjs/Observable';
 import { BsModalService } from 'ngx-bootstrap/modal';
-import { BsModalRef } from 'ngx-bootstrap/modal/modal-options.class';
+import { BsModalRef } from 'ngx-bootstrap/modal/bs-modal-ref.service';
 
 import { Account } from '../models/account.model';
 import { Group } from '../models/group.model';
-import { ToastrService } from "ngx-toastr";
-import { Utils } from "../helper/utils";
+import { ToastrService } from 'ngx-toastr';
+import { Utils } from '../helper/utils';
 import { User } from '../models/user.model';
 import { StorageService } from '../helper/storage.service';
 import { Constants } from '../helper/constants';
@@ -26,7 +26,7 @@ export class AccountsListComponent {
     pageNumber = 1;
     //used to show timeout while deleting a user
     timer: number
-    @ViewChild("template") template: TemplateRef<any>;
+    @ViewChild('template') template: TemplateRef<any>;
 
     debtors_cretitors_users = ['15', '16', '17']
     users = ['17']
@@ -132,7 +132,7 @@ export class AccountsListComponent {
                 this.selectedAccount.group = [this.groups.find(g => g.id == this.selectedAccount.groupId)];
                 this.onAccountUpdated(this.selectedAccount.id, this.selectedAccount);
             },
-                (err) => this.alert.error(err.error.message, "Error"));
+                (err) => this.alert.error(err.error.message, 'Error'));
         }
         else {
             this.api.sendRequest({
@@ -145,7 +145,7 @@ export class AccountsListComponent {
                 this.selectedAccount.group = [this.groups.find(g => g.id == this.selectedAccount.groupId)];
                 this.accounts.push(this.selectedAccount);
             }, (res) => {
-                this.alert.error(res.error.message || "An Error Occured", "Error");
+                this.alert.error(res.error.message || 'An Error Occured', 'Error');
             });
         }
 
@@ -161,7 +161,7 @@ export class AccountsListComponent {
                 endpoint: ApiRoutes.DELETE_ACCOUNT,
                 method: 'delete',
                 routeParams: {
-                    "": this.selectedAccount.id
+                    '': this.selectedAccount.id
                 },
                 queryParams: {
                     force: this.timer === 0 ? 1 : 0
@@ -171,7 +171,7 @@ export class AccountsListComponent {
                 this.modalRef.hide();
                 this.accounts = this.accounts.filter(a => a.id != this.selectedAccount.id);
             }, (res) => {
-                this.alert.error(res.error.message || "An Error Occured", "Error");
+                this.alert.error(res.error.message || 'An Error Occured', 'Error');
                 if (res.error.message) {
                     let count = 0;
                     let interval = setInterval(() => {

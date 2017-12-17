@@ -6,6 +6,8 @@ import { StorageService } from "../helper/storage.service";
 import { Constants } from '../helper/constants';
 import { User } from "../models/user.model";
 import { Utils } from "../helper/utils";
+import { Firebase } from '@ionic-native/firebase';
+
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
@@ -17,13 +19,14 @@ export class LoginComponent implements OnInit {
     private router: Router,
     private alert: ToastrService,
     private storage: StorageService,
-    private utils: Utils
+    private utils: Utils,
+    private firebase: Firebase
   ) {
     this.utils.showMenu(false);
   }
 
   ngOnInit() {
-    let user = this.storage.get(Constants.USER)
+    let user = this.storage.get(Constants.USER);
     if (user) {
       this.credentials = user;
       this.login();
@@ -41,6 +44,8 @@ export class LoginComponent implements OnInit {
       this.storage.set(Constants.USER, user);
       this.utils.loginSuccess(user);
 
+      this.initializeFirebase(user);
+
       if (user) {
         if (user.admin) {
           this.router.navigate(["/home"]);
@@ -54,5 +59,28 @@ export class LoginComponent implements OnInit {
     }, (err => {
       this.alert.error("Invalid credentials", "Unauthorised");
     }))
+  }
+
+  initializeFirebase(user: User) {
+    this.firebase.getToken().then(token => {
+      this.sendTokenToApi(token, user);
+    }).catch(error => { });
+    this.firebase.onTokenRefresh().subscribe(token => {
+      this.sendTokenToApi(token, user);
+    }, error => { });
+  }
+
+  sendTokenToApi(token, user: User) {
+    console.log('User Token:' + token);
+    this.api.sendRequest({
+      method: 'put',
+      body: {
+        token: token,
+        userId: user.id
+      },
+      endpoint: ApiRoutes.REFRESH_TOKEN
+
+    }).subscribe(() => {
+    });
   }
 }

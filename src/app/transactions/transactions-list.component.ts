@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { Api, Request, ApiRoutes, apiBase } from './../helper/api';
 import { Observable } from 'rxjs/Observable';
 import { BsModalService } from 'ngx-bootstrap/modal';
-import { BsModalRef } from 'ngx-bootstrap/modal/modal-options.class';
+import { BsModalRef } from 'ngx-bootstrap/modal/bs-modal-ref.service';
 
 import { Account } from '../../app/models/account.model';
 import { Transaction } from '../../app/models/transaction.model';

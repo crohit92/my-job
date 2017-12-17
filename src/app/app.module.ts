@@ -6,10 +6,9 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
 import { AppComponent } from './app.component';
-import { TypeaheadModule, ModalModule, PopoverModule, AccordionModule, BsDatepickerModule } from 'ngx-bootstrap';
-import { NgProgressModule } from 'ngx-progressbar';
+import { TypeaheadModule, ModalModule, PopoverModule, AccordionModule } from 'ngx-bootstrap';
+import { NgProgressModule } from '@ngx-progressbar/core';
 import { ToastrModule } from 'ngx-toastr';
-import 'hammerjs';
 import { ROUTES } from './app.routes';
 
 import { Api } from './helper/api';
@@ -27,6 +26,8 @@ import { HomeComponent } from './home/home.component';
 import { UserGuard, AdminGuard } from './helper/authentication-guard';
 
 import { NgxAsyncSelectComponent } from './ngx-async-select/ngx-async-select.component';
+
+import { Firebase } from '@ionic-native/firebase';
 @NgModule({
   declarations: [
     AppComponent,
@@ -50,13 +51,14 @@ import { NgxAsyncSelectComponent } from './ngx-async-select/ngx-async-select.com
     FormsModule,
     ReactiveFormsModule,
     RouterModule.forRoot(ROUTES),
-    NgProgressModule,
-    TypeaheadModule.forRoot(),
+    NgProgressModule.forRoot(),
     PopoverModule.forRoot(),
     ModalModule.forRoot(),
     AccordionModule.forRoot()
   ],
-  providers: [Api,
+  providers: [
+    Firebase,
+    Api,
     Utils,
     StorageService,
     UserGuard,

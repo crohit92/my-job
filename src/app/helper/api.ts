@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { NgProgress } from 'ngx-progressbar';
+import { NgProgress } from '@ngx-progressbar/core';
 import { HttpRequest } from '@angular/common/http';
 import { HttpResponse } from '@angular/common/http';
 import { HttpEvent } from '@angular/common/http';
@@ -8,8 +8,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
 // const apiBase = 'https://pacific-coast-70867.herokuapp.com/';
-// export const apiBase = 'http://localhost:3000/';
-export const apiBase = 'http://34.230.30.149:3001/';
+export const apiBase = 'http://192.168.178.23:3000/';
+// export const apiBase = 'http://34.230.30.149:3001/';
 
 export class Request {
     apiBase?: string;
@@ -40,6 +40,7 @@ export const ApiRoutes = {
     CREATE_TASK: 'tasks',
     CREATE_TRANSACTION: 'transactions',
     LOGIN: 'accounts/login',
+    REFRESH_TOKEN: 'accounts/refreshToken',
     COMPLETE_TASK: 'tasks',
 
     DELETE_ACCOUNT: 'accounts',
