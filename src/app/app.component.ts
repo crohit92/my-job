@@ -49,33 +49,10 @@ export class AppComponent implements OnDestroy {
   logout() {
     this.menuVisible = false;
     this.storage.clear();
-    this.router.navigate(['/login'])
+    this.router.navigate(['/login']);
   }
 
-  onResize(event) {
-    this.clientWidth = event.target.innerWidth;
-    if (this.clientWidth < 768) {
-      this.menuVisible = false;
-    }
-    else {
-      this.menuVisible = true;
-    }
-  }
 
-  onLoad(event) {
-    this.clientWidth = event.target.documentElement.clientWidth;
-    if (this.clientWidth >= 768) {
-      this.menuVisible = true;
-    }
-  }
-
-  toggleMenu(event) {
-    if (this.clientWidth < 768) {
-      this.menuVisible = !this.menuVisible;
-    }
-    event.preventDefault();
-    event.stopPropagation();
-  }
 
   subscribeNotifications() {
     const $this = this;
