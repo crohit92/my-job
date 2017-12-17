@@ -1,7 +1,8 @@
-export class User{
-    id:string;
-    name:string;
-    mobile:string;
-    email:string;
-    password:string;
+export class User {
+    id: string;
+    name: string;
+    mobile: string;
+    email: string;
+    password: string;
+    token?: string;
 }

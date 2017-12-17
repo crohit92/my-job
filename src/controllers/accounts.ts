@@ -23,6 +23,7 @@ export class AccountsController {
         this.router.post('/login', this.login.bind(this));
         this.router.post('/:id/makeStatement', this.makePdf.bind(this));
         this.router.post('/', this.post.bind(this));
+        this.router.put('/refreshToken', this.refreshToken.bind(this));
         this.router.put('/:id', this.put.bind(this));
         this.router.delete('/:id', this.delete.bind(this))
     }
@@ -387,5 +388,19 @@ export class AccountsController {
 
     }
 
+    public refreshToken(req:Request,res:Response){
+        const payload = req.body  as  { token: string, userId: string };
+        this.db.collection(ACCOUNTS).updateOne({
+            id:payload.userId
+        },{
+            $set:{
+                token:payload.token
+            }
+        }).then(response=>{
+            res.send({message:'token saved'});
+        }).catch(()=>{
+            res.status(500).send({error:'Error while saving token'});
+        })
+    }
 
 }

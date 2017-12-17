@@ -6,6 +6,8 @@ import { TransactionsController } from "./transactions";
 import { Transaction } from "../models/transaction";
 import { CallType } from '../models/call-type';
 import { PaymentStatus } from '../models/payment-status';
+import { pushToUser } from '../helpers/fcm-helper';
+import { User } from '../models/user';
 const PROJECT_PROPERTIES = "projectProperties";
 const TASKS = "tasks";
 class Completion {
@@ -79,12 +81,38 @@ export class TasksController {
         let task: Task = req.body;
 
         this._createTask(task).then((response: InsertOneWriteOpResult) => {
+            this.sendNotificationToUser(task)
             res.send(task);
+
         }).catch(err => {
             res.status(400).send(err);
         })
     }
 
+    private sendNotificationToUser(task: Task) {
+        return new Promise((resolve, reject) => {
+            this.db.collection('accounts').findOne({
+                id: task.assignedToId
+            }).then((user: User) => {
+                pushToUser(user, {
+                    collapse_key: 'io.virat.flowtech',
+                    data: {
+                        action: 'redirect',
+                        page: 'tasks'
+                    },
+                    notification: {
+                        title: 'Virat',
+                        body: 'You have a new Task'
+                    },
+                    to: user.token ? user.token : ''
+                }).then(notificationResponse => {
+                    resolve(notificationResponse);
+                }, error => {
+                    reject(error);
+                });
+            })
+        })
+    }
     private _createTask(task: Task) {
         task.id = (new Date()).valueOf().toString();
         return this.db
@@ -105,6 +133,7 @@ export class TasksController {
         let task: Task = req.body;
 
         this.updateTask(task).then((data) => {
+            this.sendNotificationToUser(task)
             res.send(task);
         })
             .catch((err) => {

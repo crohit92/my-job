@@ -20,6 +20,7 @@
     "cors": "^2.8.4",
     "express": "^4.15.2",
     "express-ntlm": "2.1.5",
+    "fcm-push": "^1.1.3",
     "httpntlm": "1.7.5",
     "mongodb": "^2.2.30",
     "node-fs": "^0.1.7",
