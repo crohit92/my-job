@@ -11,7 +11,7 @@ import { GroupsController } from './controllers/groups';
 import { AccountTypesController } from './controllers/account-types';
 import { TransactionsController } from "./controllers/transactions";
 
-const appVersion = '1.0.0';
+const appVersion = '1.0.1';
 export const FONTS = {
     Roboto: {
         normal: `${__dirname}/fonts/Roboto-Regular.ttf`,
