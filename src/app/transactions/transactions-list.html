@@ -79,9 +79,10 @@
             <td>{{transaction.credit.name}}</td>
             <td>{{transaction.amount}}</td>
             <td>
+                <button class="btn btn-default glyphicon glyphicon-share" (click)="shareTransaction(transaction)"></button>
                 <button class="btn btn-default glyphicon glyphicon-tag" popover="{{transaction.narration}}" popoverTitle="Narration" placement="left"
                     triggers="focus"></button>
-                <button class="btn btn-default" (click)="editTransaction(transaction)">Edit</button>
+                <button class="btn btn-default  glyphicon glyphicon-pencil" (click)="editTransaction(transaction)"></button>
             </td>
         </tr>
     </tbody>

@@ -48,7 +48,7 @@ export const ApiRoutes = {
     DELETE_USER: 'users',
 }
 
-const appVersion = '1.0.1';
+export const appVersion = '1.0.1';
 
 @Injectable()
 export class Api {

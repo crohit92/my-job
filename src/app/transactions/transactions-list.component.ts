@@ -1,6 +1,6 @@
 import { Component, TemplateRef, ViewChild, OnInit, AfterContentInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Api, Request, ApiRoutes, apiBase } from './../helper/api';
+import { Api, Request, ApiRoutes, apiBase, appVersion } from './../helper/api';
 import { Observable } from 'rxjs/Observable';
 import { BsModalService } from 'ngx-bootstrap/modal';
 import { BsModalRef } from 'ngx-bootstrap/modal/bs-modal-ref.service';
@@ -10,7 +10,8 @@ import { Transaction } from '../../app/models/transaction.model';
 import { Utils } from '../helper/utils';
 import { FormControl } from '@angular/forms';
 import { NgxAsyncSelectComponent } from '../ngx-async-select/ngx-async-select.component';
-
+import * as moment from 'moment';
+import { SocialSharing } from '@ionic-native/social-sharing';
 @Component({
     templateUrl: './transactions-list.html',
     styles: [`
@@ -23,7 +24,7 @@ import { NgxAsyncSelectComponent } from '../ngx-async-select/ngx-async-select.co
         }
     `]
 })
-export class TransationsListComponent{
+export class TransationsListComponent {
 
     accounts: Account[];
     accountInfo: any;
@@ -52,7 +53,8 @@ export class TransationsListComponent{
         private api: Api,
         private router: Router,
         private modalService: BsModalService,
-        private utils: Utils
+        private utils: Utils,
+        private socialSharing: SocialSharing
     ) {
         this.utils.showMenu(true);
         // this.fetchAccounts();
@@ -240,7 +242,24 @@ export class TransationsListComponent{
             endpoint: `accounts/${this.filter.accountId}/makeStatement`,
 
         }).subscribe((data) => {
-            this.sharableAccountDetail = `${apiBase}pdfs/${this.filter.accountId}.pdf`;
+            this.sharableAccountDetail = `${apiBase}pdfs/${this.filter.accountId}.pdf?appVersion=${appVersion}`;
         })
+    }
+
+    shareTransaction(transaction: Transaction) {
+        let debitAccountNameLength = transaction.debit.name.length;
+        let creditAccountNameLength = transaction.credit.name.length;
+        debitAccountNameLength = debitAccountNameLength > 'Account(Dr)'.length ? debitAccountNameLength : 12;
+        creditAccountNameLength = creditAccountNameLength > 'Account(Dr)'.length ? creditAccountNameLength : 12;
+        let message = '';
+        message = `
+        Date: ${moment(transaction.date).format('DD-MMM-YYYY')}
+        ${Utils.padLeft('', debitAccountNameLength + creditAccountNameLength + 8, '_')}
+        ${Utils.padRight('Account(Dr)', debitAccountNameLength)}        | Account(Cr)
+        ${Utils.padLeft('', debitAccountNameLength + creditAccountNameLength + 8, '_')}
+        ${Utils.padRight(transaction.debit.name, debitAccountNameLength)}        | ${transaction.credit.name}
+        ${Utils.padLeft('', debitAccountNameLength + creditAccountNameLength + 8, '_')}
+        ${transaction.narration}`;
+        this.socialSharing.share(message, 'Transaction');
     }
 }

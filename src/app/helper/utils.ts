@@ -12,6 +12,23 @@ export class Utils {
     private menuVisibilityEvents: Subject<boolean> = new Subject<boolean>();
     private loginEvents: Subject<UserType> = new Subject<UserType>();
 
+    static padLeft(text: string, length: number, padWith: string = ' ') {
+        let result = text;
+        while (result.length < length) {
+            result = (padWith ? padWith : ' ') + result;
+        }
+        return result;
+    }
+
+    static padRight(text: string, length: number, padWith: string = ' ') {
+        let result = text;
+        while (result.length < length) {
+            result = result + (padWith ? padWith : ' ');
+        }
+
+        return result;
+    }
+
     get subscribeMenuVisibitityEvents(): Observable<boolean> {
         return this.menuVisibilityEvents.asObservable();
     }
@@ -27,4 +44,6 @@ export class Utils {
     showMenu(displayState: boolean) {
         this.menuVisibilityEvents.next(displayState);
     }
+
+
 }

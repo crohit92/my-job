@@ -89,7 +89,7 @@ nav ul li a:hover {
         width: 48px;
         height: 48px;
         cursor: pointer;
-        z-index: 9999;
+        z-index: 2;
         border-radius: 50%;
     }
     .nav-open i {

@@ -28,6 +28,7 @@ import { UserGuard, AdminGuard } from './helper/authentication-guard';
 import { NgxAsyncSelectComponent } from './ngx-async-select/ngx-async-select.component';
 
 import { Firebase } from '@ionic-native/firebase';
+import { SocialSharing } from '@ionic-native/social-sharing';
 @NgModule({
   declarations: [
     AppComponent,
@@ -58,6 +59,7 @@ import { Firebase } from '@ionic-native/firebase';
   ],
   providers: [
     Firebase,
+    SocialSharing,
     Api,
     Utils,
     StorageService,
@@ -71,3 +73,4 @@ import { Firebase } from '@ionic-native/firebase';
   bootstrap: [AppComponent]
 })
 export class AppModule { }
+
