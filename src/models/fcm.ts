@@ -8,5 +8,6 @@ export class FCMMessage {
     notification: {
         title?: string;
         body: string;
+        sound?: string;
     }
 }

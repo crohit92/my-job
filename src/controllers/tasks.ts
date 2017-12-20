@@ -101,8 +101,9 @@ export class TasksController {
                         page: 'tasks'
                     },
                     notification: {
-                        title: 'Virat',
-                        body: 'You have a new Task'
+                        "title": "Virat",
+                        "body": "You have a new Task",
+                        "sound": "default"
                     },
                     to: user.token ? user.token : ''
                 }).then(notificationResponse => {
