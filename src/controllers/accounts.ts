@@ -30,10 +30,12 @@ export class AccountsController {
 
     private get(req: Request, res: Response) {
         let filterString = req.query.filter;
-        const textFilter = { $or: [
-            { name: new RegExp(`.*${filterString}.*`, 'i') },
-            { mobile: new RegExp(`.*${filterString}.*`, 'i') },
-        ] };
+        const textFilter = {
+            $or: [
+                { name: new RegExp(`.*${filterString}.*`, 'i') },
+                { mobile: new RegExp(`.*${filterString}.*`, 'i') },
+            ]
+        };
         const groupFilter = { groupId: req.query.groupId };
         let filter = req.query.hasOwnProperty('groupId') ? (filterString ? { ...textFilter, ...groupFilter } : groupFilter) : (filterString ? textFilter : {});
         let pagination = [];
@@ -284,6 +286,15 @@ export class AccountsController {
                         })
                 }
             })
+        } else {
+            this.db
+                .collection(ACCOUNTS)
+                .insertOne(req.body)
+                .then((accnt: InsertOneWriteOpResult) => {
+                    res.send(account);
+                }).catch(err => {
+                    res.status(400).send(err);
+                })
         }
 
 
@@ -388,19 +399,19 @@ export class AccountsController {
 
     }
 
-    public refreshToken(req:Request,res:Response){
-        const payload = req.body  as  { token: string, userId: string };
+    public refreshToken(req: Request, res: Response) {
+        const payload = req.body as { token: string, userId: string };
         this.db.collection(ACCOUNTS).updateOne({
-            id:payload.userId
-        },{
-            $set:{
-                token:payload.token
-            }
-        }).then(response=>{
-            res.send({message:'token saved'});
-        }).catch(()=>{
-            res.status(500).send({error:'Error while saving token'});
-        })
+            id: payload.userId
+        }, {
+                $set: {
+                    token: payload.token
+                }
+            }).then(response => {
+                res.send({ message: 'token saved' });
+            }).catch(() => {
+                res.status(500).send({ error: 'Error while saving token' });
+            })
     }
 
 }
